@@ -1,0 +1,326 @@
+.campo_labelSombra2017{
+  font-size:1.4em;
+  font-style: oblique;
+  /*text-shadow: 1px 1px 1px black; */
+  /*letter-spacing: 2px;*/ 
+  font-weight: bold;
+  color:#1c5a85;  
+}
+
+.tableCenter{left:0;right:0;margin-left:auto;margin-right:auto;}
+
+.tableDivProcurar{
+  border:1px solid #73879C;
+  height:35px;
+  padding-top:3px;
+  padding-right:5px;
+  border-radius: 6px 6px 0px 0px;
+}
+
+.tableDivProcurarReg{
+  float:left;
+  text-align:left;
+  font-size:16px; 
+  font-weight: bold;  
+}  
+.tableDivProcurarLabel{
+  float:left;
+  text-align:right;  
+  padding-top:0.7em;
+  font-size:1.6em; 
+  font-weight: bold; 
+  padding-right:1em;  
+} 
+
+.tableDivProcurarInput{
+  padding-top:0.2em;
+  float:right;
+}
+
+.tableDivProcurarInput input{
+  border:1px solid silver;
+  height:2.5em;
+  border-radius: 5px 5px 5px 5px;
+  padding-left:38px;
+  margin-right:3px;
+  padding-top:4px;
+  width:100%;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    box-shadow: 
+        inset 0 0 5px rgba(0,0,0,0.1),
+        inset 0 3px 2px rgba(0,0,0,0.1);
+    border-radius: 3px;
+    background: #f9f9f9;
+    color: #777;
+    -webkit-transition: color 0.3s ease-out;
+    -moz-transition: color 0.3s ease-out;
+    -ms-transition: color 0.3s ease-out;
+    -o-transition: color 0.3s ease-out;
+    transition: color 0.3s ease-out;
+      
+}
+
+.tableFechar{
+  display: block;
+  text-decoration: none;
+  border:1px solid #25729a; 
+  -webkit-border-radius: 3px; 
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  font-family: verdana;
+  padding: 13px 5px 13px 0;
+  text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+  text-align:left;
+  padding-left:2.5em;
+  color: #FFFFFF; 
+  background-color: #dd4b39;
+}
+
+.tableBotao { 
+    display: block;
+    text-decoration: none;
+    -webkit-border-radius: 3px; 
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    font-family: verdana;
+    padding: 2px 0 10px 0;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align:left;
+    padding-left:0.8em;    
+    /* Este para azul padrao */
+    background-color: #3c8dbc;
+    border:1px solid #25729a; 
+    color: #FFFFFF; 
+
+    /* Este para azul laranja
+    background-color: #F58634;
+    border:1px solid black; 
+    color: #FFFFFF; 
+    */
+}
+
+.tableBotaoCad { 
+    display: block;
+    text-decoration: none;
+    border:1px solid #006400; 
+    -webkit-border-radius: 3px; 
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    font-family: verdana;
+    padding: 2px 0 10px 0;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align:left;
+    padding-left:0.8em;
+    color: #FFFFFF; 
+    background-color: #3CB371;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #3CB371), color-stop(100%, #006400));
+    background-image: -webkit-linear-gradient(top, #3CB371, #006400);
+    background-image: -moz-linear-gradient(top, #3CB371, #006400);
+    background-image: -ms-linear-gradient(top, #3CB371, #006400);
+    background-image: -o-linear-gradient(top, #3CB371, #006400);
+    background-image: linear-gradient(top, #3CB371, #006400);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#3CB371, endColorstr=#006400);
+}
+/*
+* Mudo algumas configurações do botão quando for horizontal
+*/
+.botaoHorizontal{
+    padding: 8px 0 10px 0;  
+    padding-left:1.5em;  
+}
+.botaoForaTable{
+    padding: 8px 0 10px 0;  
+    padding-left:2.8em;  
+    margin-top:0px;
+    height:3.15em !important;
+}
+.tableBotao:hover{
+  /* Este padrao azul */
+  border:1px solid #1c5675;
+  background-color: #26759e;
+  /* Este padrao laranja
+  border:1px solid #1c5675;
+  background-color: #ffa600;
+  */
+  
+}
+
+.tableFrm {
+    width: 300px;
+    position: absolute;
+}
+  
+.tableFrm .frmSupDir,
+.tableFrm .frmSupEsq{
+    width: 65px;
+    height: 65px;
+    position: absolute;
+    top: -10px;
+    padding: 10px;
+    z-index: 2;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 2px rgba(0,0,0,0.1),
+        0 3px 2px rgba(0,0,0,0.1),
+        inset 0 -3px 2px rgba(0,0,0,0.2);
+}
+.tableFrm .frmSupDir{ right: -21px; }
+.tableFrm .frmSupEsq{ left: -30px; }
+.tableFrm .frmSupDir:after, 
+.tableFrm .frmSupEsq:after{
+    content: "";
+    width: 8px;
+    height: 10px;
+    position: absolute;
+    /* chanfro para baixa
+    top: -2px;
+    left: 30px;
+    */
+    top: 28px;
+    left: -7px;
+    border-top: 1px solid silver;
+    border-bottom: 1px solid silver;
+    background-color: white;
+    box-shadow: 0px 2px 0px 0px silver;
+}  
+
+
+.tableFrm button {
+    width: 100%;
+    height: 100%;
+    margin-top: -1px;
+    font-size: 1.4em;
+    line-height: 1.75;
+    color: white;
+    outline:none;
+    border: none;
+    border-radius: inherit;
+    background: -moz-linear-gradient(#52cfeb, #42A2BC);
+    background: -ms-linear-gradient(#52cfeb, #42A2BC);
+    background: -o-linear-gradient(#52cfeb, #42A2BC);
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#52cfeb), to(#42A2BC));
+    background: -webkit-linear-gradient(#52cfeb, #42A2BC);
+    background: linear-gradient(#52cfeb, #42A2BC);
+    box-shadow: 
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 1px 2px rgba(0,0,0,0.35),
+        inset 0 3px 2px rgba(255,255,255,0.2),
+        inset 0 -3px 2px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+/*
+.tableFrm .frmSupDir  button { background: #52cfeb; }
+.tableFrm .frmSupEsq  button { background: #eb5289; }
+*/
+.tableFrm .frmSupEsq  button { background: #eb5289; }
+.tableFrm .frmSupDir  button {
+    background-color: #3093c7;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #3093c7), color-stop(100%, #1c5a85));
+    background-image: -webkit-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -moz-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -ms-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -o-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: linear-gradient(top, #3093c7, #1c5a85);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#3093c7, endColorstr=#1c5a85);
+}
+
+
+.tableFrm .frmEsq:hover,    
+.tableFrm button[type=frmSupEsq]:focus{
+  color: #eb5289;
+  background: white;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+}
+.tableFrm .frmDir:hover,    
+.tableFrm button[type=frmSupDir]:focus{
+  color: #52cfeb;
+  background: white;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+}
+/*
+.icon-large:before {
+  vertical-align: top;
+  font-size: 2em;
+}
+*/
+/* Icones para botões direito */
+/*
+.faIL:before {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  text-decoration: inherit;
+  margin-top: -0.12em;
+}
+*/
+/* Icones para inputs */
+.faInp:before {
+  font-family: FontAwesome;
+  font-style: normal;   
+  display: inline-block;   
+  margin-top: -1.15em;
+  margin-left:0.4em;
+}
+.faInp:after{
+    content: "";
+    width: 1px;
+    height: 29px;
+    margin-top:-3em;
+    position: absolute;
+    border-left: 1px solid silver;
+    box-shadow: inner 1px 0px 0px 0px silver;      
+    margin-left: 0.5em;
+}  
+
+/* Icones para inputs */
+.faBtn:before {
+  vertical-align: top;
+  font-family: FontAwesome;
+  font-style: normal;   
+  display: inline-block;   
+  color:white;
+  margin-top: -1.3em;
+  margin-left:0.4em;
+}
+.faBtn:after{
+    content: "";
+    width: 1px;
+    height: 31px;
+    margin-top:-3.5em;
+    position: absolute;
+    border-left: 1px solid silver;
+    box-shadow: inner 1px 0px 0px 0px silver;      
+    margin-left: 0.5em;
+}
+/* Icones para legend */
+.faLeg:before {
+  width:1.5em;
+  vertical-align: top;
+  font-family: FontAwesome;
+  font-style: normal;   
+  display: inline-block;   
+  color:white;
+  margin-top: -0.1em;
+  margin-left:-0.8em;
+  margin-right:0.2em;
+}
+.faLeg:after{
+    content: "";
+    width: 1px;
+    height: 19px;
+    margin-top:-0.2em;
+    position: absolute;
+    border-left: 1px solid silver;
+    box-shadow: inner 1px 0px 0px 0px silver;      
+    margin-left: -0.4em;
+}  
+  
+  

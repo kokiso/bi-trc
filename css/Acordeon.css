@@ -1,0 +1,42 @@
+.acordeon {
+    background-color: #eee;
+    border-radius: 6px 6px 6px 6px;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    transition: 1.4s;
+    background-color:#3c8dbc;
+    border-bottom:1px solid white;
+}
+
+.acrdnAtivo, .acordeon:hover {
+    background-color: #25729a;
+}
+
+.acordeon:after {
+    content: '\002B';
+    color: white;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.acrdnAtivo:after {
+    content: "\2212";
+}
+
+.acrdnDiv {
+    padding: 0 18px;
+    /*background-color: white;*/
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+    /*border:1px solid #3c8dbc;*/
+    border-radius: 6px 6px 6px 6px;
+    /*border-top:none;*/
+}

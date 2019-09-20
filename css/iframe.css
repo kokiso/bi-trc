@@ -1,0 +1,11 @@
+@charset "UTF8";
+
+iframe#iframeCorpo {
+		width: 1280px;
+		height: 46em;		
+		border:none;
+}
+
+iframe#iframeCorpo::-webkit-scrollbar {
+	display: none;
+}
