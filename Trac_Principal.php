@@ -114,7 +114,7 @@
                 
                 <li class="treeview">
                   <a href="#">
-                    <i class="fa fa-users"></i> <span>Integrar Sistem Sat</span>
+                    <i class="fa fa-users"></i> <span>Integrar SistemSat</span>
                     <span class="pull-right-container">
                       <i class="fa fa-angle-left pull-right"></i>
                     </span>
