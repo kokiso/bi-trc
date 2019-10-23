@@ -1,5 +1,6 @@
 <?php
   session_start();
+
   if( isset($_POST["grdInfracaoTempo"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
@@ -63,6 +64,7 @@
 						$bwI=$expld[0];
 						$bwF=$expld[1];
           };
+          //$lote[0]->dtini = 201910;
           $sql="";
           $sql.="SELECT";
           $sql.="  MVM_POSICAO";
@@ -76,7 +78,8 @@
           $sql.="  ,MVM_VELOCIDADE";
           $sql.="  ,CONVERT(VARCHAR(23),MVM_DATAGPS,127) AS MVM_DATAGPS";
           $sql.="  ,MVM_HORAGPS";
-					$sql.="  ,MTR_RFID";
+          $sql.="  ,MTR_RFID";
+          $sql.="  ,MVM_ODOMETRO";
           $sql.="  FROM MOVIMENTO";
           $sql.="  LEFT OUTER JOIN EVENTO EVE ON MVM_CODEVE=EVE.EVE_CODIGO";
           $sql.="  LEFT OUTER JOIN VEICULO VCL ON MVM_PLACA=VCL.VCL_CODIGO";
@@ -85,15 +88,23 @@
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON MVM_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codusu;  
 					//if( $between==false ){	
 					//	$sql.=" WHERE ((MVM_ANOMES=".$lote[0]->dtini.") AND (MVM_CODEVE NOT IN(27,31,33,37,44,52,64,67,80,84,85)) AND  (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ".$frota.")";
-					//} else {						
-						$sql.=" WHERE ((MVM_POSICAO BETWEEN ".$bwI." AND ".$bwF.")"; 
-						$sql.="   AND (MVM_ANOMES=".$lote[0]->dtini.")"; 
+					//} else {					
+            $sql.="   WHERE 1 = 1"; 	
+						$sql.="   AND (MVM_POSICAO BETWEEN (select min(mvm_posicao) from movimento where mvm_anomes=".$lote[0]->dtini.") AND (select max(mvm_posicao) from movimento where mvm_anomes=".$lote[0]->dtini."))"; 
+            $sql.="   AND (MVM_ANOMES=".$lote[0]->dtini.")"; 
             $sql.="   AND (MVM_ENTRABI='S')"; 
 						$sql.="   AND (EVE_MOVIMENTO='S')";
 						$sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";   					
-						$sql.="   AND (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ".$frota.")";
-						$sql.=" ORDER BY MVM_CODVEI,CONVERT(VARCHAR(23),MVM_DATAGPS,127)";
-					//};
+            $sql.="   AND (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ".$frota;
+            $sql.="   AND ( MVM_CODEG IN ('EV', 'EVC', 'VN'))";
+            if($lote[0]->poloCodigo != "") {
+              $sql.="   AND ( UPPER(UNI.UNI_CODPOL) = UPPER('".$lote[0]->poloCodigo."')) AND (UNI.UNI_CODGRP = ".$lote[0]->poloGrupo.")";
+            }
+            if($lote[0]->unidadeCodigo != "") {
+              $sql.="   AND (UNI.UNI_CODIGO = ".$lote[0]->unidadeCodigo.")";
+            }
+            $sql.=" ORDER BY MVM_CODVEI,CONVERT(VARCHAR(23),MVM_DATAGPS,127)";
+          //};
           if( $retCls['retorno'] != "OK" ){
             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
           } else {
@@ -103,7 +114,7 @@
             $params   = array();
             $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
             $consulta = sqlsrv_query($_SESSION['conn'], $sql, $params, $options);
-						$normalizou  = false;
+            $normalizou  = false;
             while ($linha = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
               $placaAtu=$linha["MVM_PLACA"];
               //////////////////////////////////////////////
@@ -134,21 +145,26 @@
                     ,"TURNO"        =>  $linha["MVM_TURNO"]
                     ,"IDINI"        =>  $linha["MVM_POSICAO"]
                     ,"DTINI"        =>  $linha["MVM_DATAGPS"]
-					,"IDFIM"        =>  "**erro**"
+					          ,"IDFIM"        =>  "**erro**"
                     ,"DTFIM"        =>  $linha["MVM_DATAGPS"]
-					,"TEMPO"        =>  "**erro**"
+					          ,"TEMPO"        =>  "**erro**"
                     ,"VELOC"        =>  $linha["MVM_VELOCIDADE"]
 										,"CODEG"        =>  $linha["EVE_CODEG"]
                     ,"MAXIMAVELOC"  =>  $linha["MVM_VELOCIDADE"]
                     ,"MOTORISTA"    =>  $linha["MTR_NOME"]
                     ,"DESCALIBRADO" =>  $descalibrado
-										,"RFID"    			=>  $linha["MTR_RFID"]
+                    ,"RFID"    			=>  $linha["MTR_RFID"]
+                    ,"ODOMINI"      =>  $linha["MVM_ODOMETRO"]
+                    ,"ODOMFIM"      =>  $linha["MVM_ODOMETRO"]
+                    ,"DISTPERC"     =>  "**erro**"
                   ]);
                   $placaOld=$placaAtu;
 									$normalizou  = true;									
                 } else {
                   $arrRet[$linR]["DTFIM"]=$linha["MVM_DATAGPS"];  
+                  $arrRet[$linR]["ODOMFIM"]=$linha["MVM_ODOMETRO"];  
                   $arrRet[$linR]["TEMPO"]=diferenca($arrRet[$linR]["DTINI"],$arrRet[$linR]["DTFIM"]);
+                  $arrRet[$linR]["DISTPERC"]=number_format(($arrRet[$linR]["ODOMFIM"]-$arrRet[$linR]["ODOMINI"])*1000, 2, '.', '');
                   if( $linha["MVM_VELOCIDADE"]>$arrRet[$linR]["MAXIMAVELOC"] )
                     $arrRet[$linR]["MAXIMAVELOC"]=$linha["MVM_VELOCIDADE"];
 									/*
@@ -168,13 +184,19 @@
 								if($normalizou){
 									$arrRet[$linR]["IDFIM"]=$linha["MVM_POSICAO"];  
 									$arrRet[$linR]["DTFIM"]=$linha["MVM_DATAGPS"];
-									$arrRet[$linR]["TEMPO"]=diferenca($arrRet[$linR]["DTINI"],$arrRet[$linR]["DTFIM"]);
+                  $arrRet[$linR]["ODOMFIM"]=$linha["MVM_ODOMETRO"];  
+                  $arrRet[$linR]["TEMPO"]=diferenca($arrRet[$linR]["DTINI"],$arrRet[$linR]["DTFIM"]);
+                  $arrRet[$linR]["DISTPERC"]=number_format(($arrRet[$linR]["ODOMFIM"]-$arrRet[$linR]["ODOMINI"])*1000, 2, '.', '');
+                  if($arrRet[$linR]["DISTPERC"] < 0) {
+                    $arrRet[$linR]["DISTPERC"] = "**erro**";
+                  }
 									$placaOld="***9999"; 
 									$normalizou=false;									
 								};									
               } else {
                 if( $placaAtu==$placaOld  ){
                   if( $linha["MVM_VELOCIDADE"]>$arrRet[$linR]["MAXIMAVELOC"] )
+                    //echo $linha["MVM_POSICAO"].'-';
                     $arrRet[$linR]["MAXIMAVELOC"]=$linha["MVM_VELOCIDADE"];
                 };  
               };
@@ -218,6 +240,20 @@
                     $idfim="**erro**";  
                   };
                 };
+                
+                $query = "";
+                $query .= " select MAX(MVM_VELOCIDADE) as MVM_VELOCIDADE from MOVIMENTO ";
+                $query .= " where MVM_DATAGPS between '".$arrRet[$lin]["DTINI"]."' ";
+                $query .= " and '".$arrRet[$lin]["DTFIM"]."' and MVM_PLACA = '".$arrRet[$lin]["PLACA"]."' ";
+                
+                $params   = array();
+                $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
+                $consulta = sqlsrv_query($_SESSION['conn'], $query, $params, $options);
+                while ($veloc_maxima = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
+                  if($veloc_maxima["MVM_VELOCIDADE"] != null) {
+                    $arrRet[$lin]["MAXIMAVELOC"] = $veloc_maxima["MVM_VELOCIDADE"];
+                  }
+                }
 								//
                 array_push($arrJs,[
                   $arrRet[$lin]["PLACA"]
@@ -234,6 +270,7 @@
                   ,$arrRet[$lin]["DESCALIBRADO"]
 									,$arrRet[$lin]["CODEG"]
 									,$arrRet[$lin]["RFID"]
+									,$arrRet[$lin]["DISTPERC"]
                 ]);
               }  
               $lin++;
@@ -287,7 +324,7 @@
       };
     } catch(Exception $e ){
       $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]'; 
-    };    
+    };
     echo $retorno;
     exit;
   };  
@@ -315,7 +352,7 @@
         padding-top:5px;
         padding-left:3px;
         width:110em;
-        height:5.5em;
+        height:11em;
         border:1px solid silver;
         border-radius: 6px 6px 6px 6px;
       }
@@ -331,8 +368,8 @@
       "use strict";
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
-				comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
-        document.getElementById("cbIni").focus();
+				//comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
+        //document.getElementById("cbIni").focus();
         jsBi={
           "titulo":[
              {"id":0  ,"labelCol":"OPC"     
@@ -432,6 +469,13 @@
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
             ,{"id":14 ,"labelCol"       : "RFID"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "10em"
+                      ,"tamImp"         : "0"
+                      ,"excel"          : "S"
+                      ,"ordenaColuna"   : "S"
+                      ,"padrao":0}
+            ,{"id":15 ,"labelCol"       : "DISTPERC"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "0"
@@ -538,24 +582,86 @@
 				clsJs.add("frota"   	, document.getElementById("cbFrota").value  	);
 				clsJs.add("tempo"   	, document.getElementById("cbTempo").value  	);
 				clsJs.add("erro"    	, document.getElementById("cbErro").value   	);
-				clsJs.add("infracao"	, document.getElementById("cbInfracao").value	);
-				fd = new FormData();
-				fd.append("grdInfracaoTempo" , clsJs.fim());
-  			msg     = requestPedido("Trac_grdInfracaoTempo.php",fd); 
-				retPhp  = JSON.parse(msg);
-				if( retPhp[0].retorno == "OK" ){
-					//////////////////////////////////////////////////////////////////////////////////
-					// O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
-					// Campo obrigatório se existir rotina de manutenção na table devido Json       //
-					// Esta rotina não tem manutenção via classe clsTable2017                       //
-					// jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
-					//////////////////////////////////////////////////////////////////////////////////
-					jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
-					jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
-					objBi.ordenaJSon(jsBi.indiceTable,false);  
-					objBi.montarBody2017();
-				};  
+        clsJs.add("infracao"	, document.getElementById("cbInfracao").value	);
+
+        var cbPoloValue = document.getElementById("cbPolo").value;
+        var poloCodigo;
+        var poloGrupo;
+
+        if(cbPoloValue != "TODOS") {
+          poloCodigo = cbPoloValue.split('-')[0];
+          poloGrupo = cbPoloValue.split('-')[1];
+          clsJs.add("poloCodigo"	, poloCodigo);
+          clsJs.add("poloGrupo"	, poloGrupo);
+        } else {
+          clsJs.add("poloCodigo"	, '');
+          clsJs.add("poloGrupo"	, '');
+        }
+
+        var cbUnidadeValue = document.getElementById("cbUnidade").value;
+        var unidadeCodigo;
+
+        if(cbUnidadeValue != "TODOS") {
+          unidadeCodigo = cbUnidadeValue.split('-')[0];
+          clsJs.add("unidadeCodigo"	, unidadeCodigo);
+        } else {
+          clsJs.add("unidadeCodigo"	, '');
+        }
+
+        var obrigaUnidade = true;
+
+        if(jsPub[0].usr_cargo == 'ADM' || cbUnidadeValue != "TODOS") {
+          obrigaUnidade = false;
+        }
+
+        if(!obrigaUnidade) {
+          fd = new FormData();
+          fd.append("grdInfracaoTempo" , clsJs.fim());
+          msg     = requestPedido("Trac_grdInfracaoTempo.php",fd); 
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            //////////////////////////////////////////////////////////////////////////////////
+            // O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
+            // Campo obrigatório se existir rotina de manutenção na table devido Json       //
+            // Esta rotina não tem manutenção via classe clsTable2017                       //
+            // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
+            //////////////////////////////////////////////////////////////////////////////////
+            jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
+            jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
+            objBi.ordenaJSon(jsBi.indiceTable,false);  
+            objBi.montarBody2017();
+          };
+        } else {
+          gerarMensagemErro("catch",'É obrigatório escolher uma unidade.',"Atenção");
+        }
+  
       }; 
+
+      function montaUnidade() {
+        var cbPoloValue = document.getElementById("cbPolo").value;
+        var divUnidade = document.getElementById("divCbUnidade");
+        var poloCodigo;
+        var poloGrupo;
+
+        if(cbPoloValue != "TODOS") {
+          poloCodigo = cbPoloValue.split('-')[0];
+          poloGrupo = cbPoloValue.split('-')[1];
+
+          clsJs   = jsString("lote");
+          clsJs.add("poloCodigo"  	, poloCodigo                    );
+          clsJs.add("poloGrupo"  	, poloGrupo                       );
+        } else {
+          clsJs   = jsString("lote");
+          clsJs.add("poloCodigo"  	, ""                    );
+          clsJs.add("poloGrupo"  	, ""                       );
+        }
+
+        fd = new FormData();
+        fd.append("montaSelectUnidade" , clsJs.fim());
+        var selectUnidade = requestPedido("classPhp/comum/selectUnidade.class.php",fd);
+        document.getElementById('selectUnidadePHP').innerHTML = selectUnidade;
+        document.getElementById('cbUnidade').value="TODOS";
+      };
       ////////////////////////////////
       //          DETALHE           //
       ////////////////////////////////
@@ -870,12 +976,15 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-      <div class="campotexto campo10">      
+
+      <!--<div class="campotexto campo10">      
         <select class="campo_input_combo" id="cbIni">
         </select>
-        <label class="campo_label campo_required" for="cbFrota">MÊS</label>
-      </div>
-			
+        <label class="campo_label campo_required" for="cbIni">MÊS</label>
+      </div>-->
+
+      <?php include 'classPhp/comum/selectMes.class.php';?>
+      
       <div class="campotexto campo15">
         <select class="campo_input_combo" id="cbFrota">
           <option value="LP" selected="selected">Leve/Pesado</option>
@@ -906,15 +1015,21 @@
         </select>
         <label class="campo_label campo_required" for="cbErro">ERRO</label>
       </div>
-      <div id="divCbErro" class="campotexto campo10">
+      <div id="divCbErro" class="campotexto campo12">
         <select class="campo_input_combo" id="cbInfracao">
           <option value="TODOS" selected="selected">EV/EVC</option>
           <option value="EV">EV</option>
-					<option value="EVC">EVC</option>
+          <option value="EVC">EVC</option>
         </select>
-        <label class="campo_label campo_required" for="cbErro">Infração</label>
+        <label class="campo_label campo_required" for="cbInfracao">INFRAÇÃO</label>
       </div>
-			
+
+      <?php include 'classPhp/comum/selectPolo.class.php';?>
+
+      <div id="selectUnidadePHP">        
+        <?php include 'classPhp/comum/selectUnidade.class.php';?>
+      </div>
+      
       <div class="campo10" style="float:left;">            
         <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>
       </div>

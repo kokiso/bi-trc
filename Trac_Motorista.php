@@ -798,7 +798,7 @@
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo25" style="display: none">
                 <input class="campo_input_titulo" disabled id="edtUsuario" type="text" />
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>

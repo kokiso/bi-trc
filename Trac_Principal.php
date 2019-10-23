@@ -136,10 +136,24 @@
                     </span>
                   </a>
                   <ul class="treeview-menu">
-										<li><a href="#" onclick="window.open('Trac_BiDashBoard.php');"><i class="subMenuImagem fa fa-folder-o"></i>Dashboard</a></li>
+                    <li><a href="#" onclick="window.open('Trac_BiDashBoard.php');"><i class="subMenuImagem fa fa-folder-o"></i>Dashboard</a></li>
+                    <li><a href="#" onclick="ifAbrir('Trac_Grupo.php'       ,'jsPub[0].usr_d06','Grupos');"><i class="fa fa-circle-o"></i> Grupos</a></li>
+                    
                     <li><a href="#" onClick="window.open('Trac_grdInfracaoTempo.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Tempo/Infrações</a></li>
                   </ul>
                 </li> 
+                
+                <!--<li class="treeview">
+                  <a href="#">
+                    <i class="fa fa-users"></i> <span>Relatórios</span>
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                  <li><a href="#" onClick="window.open('classPhp/relatorios/relatorioTempoInfracao.php','iframeCorpo');"><i class="fa fa-circle-o"></i> Tempo/Infrações</a></li>
+                  </ul>
+                </li> -->
 							</ul>
 						</li>
 					</ul>
