@@ -48,6 +48,7 @@ BEGIN
   DECLARE @upCodUsrNew INTEGER;
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
+  DECLARE @consultarRelatorioNew VARCHAR(1);
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
@@ -79,6 +80,7 @@ BEGIN
          ,@usrApelidoNew = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')         
          ,@direitoNew    = UP.UP_D04
+         ,@consultarRelatorioNew    = UPPER(i.CONSULTAR_RELATORIO)
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.UP_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
@@ -118,13 +120,15 @@ BEGIN
       ,UP_D11,UP_D12,UP_D13,UP_D14,UP_D15,UP_D16,UP_D17,UP_D18,UP_D19,UP_D20
       ,UP_ATIVO
       ,UP_REG
-      ,UP_CODUSR) VALUES(
+      ,UP_CODUSR
+      ,CONSULTAR_RELATORIO) VALUES(
       @upNomeNew    -- UP_NOME
       ,@upD01New,@upD02New,@upD03New,@upD04New,@upD05New,@upD06New,@upD07New,@upD08New,@upD09New,@upD10New
       ,@upD11New,@upD12New,@upD13New,@upD14New,@upD15New,@upD16New,@upD17New,@upD18New,@upD19New,@upD20New
       ,@upAtivoNew   -- UP_ATIVO
       ,@upRegNew     -- UP_REG
       ,@upCodUsrNew  -- UP_CODUSR
+      ,@consultarRelatorioNew  -- CONSULTAR_RELATORIO
     );
     ---------------
     -- Gravando LOG
@@ -137,7 +141,8 @@ BEGIN
       ,UP_D11,UP_D12,UP_D13,UP_D14,UP_D15,UP_D16,UP_D17,UP_D18,UP_D19,UP_D20
       ,UP_ATIVO
       ,UP_REG
-      ,UP_CODUSR) VALUES(
+      ,UP_CODUSR
+      ,CONSULTAR_RELATORIO) VALUES(
       'I'                              -- UP_ACAO
       ,IDENT_CURRENT('USUARIOPERFIL')  -- UP_CODIGO
       ,@upNomeNew                      -- UP_NOME
@@ -146,6 +151,7 @@ BEGIN
       ,@upAtivoNew                     -- UP_ATIVO
       ,@upRegNew                       -- UP_REG
       ,@upCodUsrNew                    -- UP_CODUSR
+      ,@consultarRelatorioNew          -- CONSULTAR_RELATORIO
     );  
   END TRY
   BEGIN CATCH

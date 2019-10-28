@@ -37,6 +37,7 @@ BEGIN
   DECLARE @upCodUsrNew INTEGER;
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
+  DECLARE @consultarRelatorioNew VARCHAR(1);
   -------------------------------------------------------
   -- Buscando os campos NEW para checagem antes do insert
   -------------------------------------------------------
@@ -68,6 +69,7 @@ BEGIN
          ,@usrApelidoNew = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')
          ,@direitoNew    = UP.UP_D04
+         ,@consultarRelatorioNew    = UPPER(i.CONSULTAR_RELATORIO)
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.UP_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
@@ -112,6 +114,7 @@ BEGIN
   DECLARE @upAtivoOld VARCHAR(1);
   DECLARE @upRegOld VARCHAR(1);
   DECLARE @upCodUsrOld INTEGER;
+  DECLARE @consultarRelatorioOld VARCHAR(1);
   SELECT @upCodigoOld   = o.UP_CODIGO
          ,@upNomeOld    = o.UP_NOME
          ,@upD01Old     = o.UP_D01
@@ -139,6 +142,7 @@ BEGIN
          ,@upRegOld     = o.UP_REG
          ,@upCodUsrOld  = o.UP_CODUSR
          ,@upAtivoOld   = o.UP_ATIVO
+         ,@consultarRelatorioOld   = o.CONSULTAR_RELATORIO
     FROM USUARIOPERFIL o WHERE o.UP_CODIGO=@upCodigoNew;
   ---------------------------------------------------------------------
   -- Primary Key nao pode ser CREATEada
@@ -188,11 +192,12 @@ BEGIN
           ,UP_ATIVO  = @upAtivoNew
           ,UP_REG    = @upRegNew
           ,UP_CODUSR = @upCodUsrNew
+          ,CONSULTAR_RELATORIO = @consultarRelatorioNew
     WHERE UP_CODIGO  = @upCodigoNew;     
     ---------------
     -- Gravando LOG
     ---------------
-    IF( (@upNomeOld<>@upNomeNew) OR (@upAtivoOld<>@upAtivoNew) OR (@upRegOld<>@upRegNew)
+    IF( (@upNomeOld<>@upNomeNew) OR (@upAtivoOld<>@upAtivoNew) OR (@upRegOld<>@upRegNew) OR (@consultarRelatorioOld<>@consultarRelatorioNew)
      OR (@upD01Old<>@upD01New) OR (@upD02Old<>@upD02New) OR (@upD03Old<>@upD03New) OR (@upD04Old<>@upD04New) OR (@upD05Old<>@upD05New) 
      OR (@upD06Old<>@upD06New) OR (@upD07Old<>@upD07New) OR (@upD08Old<>@upD08New) OR (@upD09Old<>@upD09New) OR (@upD10Old<>@upD10New) 
      OR (@upD11Old<>@upD01New) OR (@upD12Old<>@upD02New) OR (@upD13Old<>@upD03New) OR (@upD14Old<>@upD04New) OR (@upD15Old<>@upD05New) 
@@ -205,7 +210,8 @@ BEGIN
         ,UP_D11,UP_D12,UP_D13,UP_D14,UP_D15,UP_D16,UP_D17,UP_D18,UP_D19,UP_D20
         ,UP_ATIVO
         ,UP_REG
-        ,UP_CODUSR) VALUES(
+        ,UP_CODUSR
+        ,CONSULTAR_RELATORIO) VALUES(
         'A'                      -- UP_ACAO
         ,@upCodigoNew            -- UP_CODIGO
         ,@upNomeNew              -- UP_NOME
@@ -214,6 +220,7 @@ BEGIN
         ,@upAtivoNew             -- UP_ATIVO
         ,@upRegNew               -- UP_REG
         ,@upCodUsrNew            -- UP_CODUSR
+        ,@consultarRelatorioNew  -- CONSULTAR_RELATORIO
       );
     END
   END TRY

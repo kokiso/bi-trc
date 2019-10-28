@@ -37,6 +37,7 @@ BEGIN
   DECLARE @upRegOld VARCHAR(1);
   DECLARE @upCodUsrOld INTEGER;
   DECLARE @usrApelidoOld VARCHAR(15);
+  DECLARE @consultarRelatorioOld VARCHAR(1);
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
@@ -67,6 +68,7 @@ BEGIN
          ,@upCodUsrOld  = d.UP_CODUSR         
          ,@usrApelidoOld = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@direitoOld    = UP.UP_D04
+         ,@consultarRelatorioOld = d.CONSULTAR_RELATORIO
     FROM deleted d
     LEFT OUTER JOIN USUARIO USR ON d.UP_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
@@ -107,7 +109,8 @@ BEGIN
       ,UP_D11,UP_D12,UP_D13,UP_D14,UP_D15,UP_D16,UP_D17,UP_D18,UP_D19,UP_D20
       ,UP_ATIVO
       ,UP_REG
-      ,UP_CODUSR) VALUES(
+      ,UP_CODUSR
+      ,CONSULTAR_RELATORIO) VALUES(
       'E'                      -- UP_ACAO
       ,@upCodigoOld            -- UP_CODIGO
       ,@upNomeOld              -- UP_NOME
@@ -116,6 +119,7 @@ BEGIN
       ,@upAtivoOld             -- UP_ATIVO
       ,@upRegOld               -- UP_REG
       ,@upCodUsrOld            -- UP_CODUSR
+      ,@consultarRelatorioOld  -- CONSULTAR_RELATORIO
     );  
   END TRY
   BEGIN CATCH
