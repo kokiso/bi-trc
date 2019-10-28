@@ -56,6 +56,7 @@
                     ,P.UP_D19
                     ,P.UP_D20
                     ,A.USR_CODCRG
+                    ,P.CONSULTAR_RELATORIO
              FROM USUARIO A
              LEFT OUTER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO 
             WHERE A.USR_CPF='".$lote[0]->usuario."'
@@ -71,13 +72,14 @@
         //////////////////////////////////////////////////////////////
         // se chegou aqui é por que a senha do usuário está correta //
         //////////////////////////////////////////////////////////////
-        $_SESSION["usr_codigo"]       = $retPhp[0]["USR_CODIGO"];
-        $_SESSION["usr_apelido"]      = $retPhp[0]["USR_APELIDO"];
-        $_SESSION["usr_cpf"]          = $retPhp[0]["USR_CPF"];
-        $_SESSION["usr_admpub"]       = $retPhp[0]["USR_ADMPUB"];        
-        $_SESSION["usr_email"]        = $retPhp[0]["USR_EMAIL"];
-        $_SESSION["usr_cargo"]        = $retPhp[0]["USR_CODCRG"];
-        $_SESSION["usr_grupos"]       = "(0)";                    // Qual(is) grupos(s) o usuario que esta se logando pode ver na tela de grupos e f10
+        $_SESSION["usr_codigo"]           = $retPhp[0]["USR_CODIGO"];
+        $_SESSION["usr_apelido"]          = $retPhp[0]["USR_APELIDO"];
+        $_SESSION["usr_cpf"]              = $retPhp[0]["USR_CPF"];
+        $_SESSION["usr_admpub"]           = $retPhp[0]["USR_ADMPUB"];        
+        $_SESSION["usr_email"]            = $retPhp[0]["USR_EMAIL"];
+        $_SESSION["usr_cargo"]            = $retPhp[0]["USR_CODCRG"];
+        $_SESSION["consultar_relatorio"]  = $retPhp[0]["CONSULTAR_RELATORIO"];
+        $_SESSION["usr_grupos"]           = "(0)";                    // Qual(is) grupos(s) o usuario que esta se logando pode ver na tela de grupos e f10
         ////////////////////////////////////////////////////////////////////////
         // PARAMETRO PARA SABER QUAL(IS) GRUPO(S) O USUARIO LOGADO PODE VER   //
         ////////////////////////////////////////////////////////////////////////
@@ -153,7 +155,8 @@
             ,"usr_grupos"          :"'.$_SESSION["usr_grupos"].'"   
             ,"navegador"           :"'.$navegador.'"    
             ,"DESUSU"              :"'.$retPhp[0]["USR_APELIDO"].'"
-            ,"usr_cargo"           :"'.$_SESSION["usr_cargo"].'"   
+            ,"usr_cargo"           :"'.$_SESSION["usr_cargo"].'" 
+            ,"consultar_relatorio":"'.$_SESSION["consultar_relatorio"].'"   
           }]';              
         $retorno='[{"retorno":"OK","dados":'.str_replace(array("\r","\n"),'',$str).',"erro":""}]';
       };

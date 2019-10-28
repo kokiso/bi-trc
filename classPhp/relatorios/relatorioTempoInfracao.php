@@ -1,6 +1,10 @@
 <?php
   session_start();
 
+  if($_SESSION['consultar_relatorio'] != "S") {
+    exit;
+  }
+
   if( isset($_POST["relatorioTempoInfracao"]) ){
     try{     
       require("../conectaSqlServer.class.php");

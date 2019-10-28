@@ -54,6 +54,7 @@
                        ,CASE WHEN A.UP_REG='P' THEN 'PUB' WHEN A.UP_REG='S' THEN 'SIS' ELSE 'ADM' END AS UP_REG
                        ,U.US_APELIDO
                        ,A.UP_CODUSR
+                       ,CASE WHEN A.CONSULTAR_RELATORIO='S' THEN 'PERMITIDO' ELSE 'NAO PERMITIDO' END AS CONSULTAR_USUARIO
                   FROM USUARIOPERFIL A
                   LEFT OUTER JOIN USUARIOSISTEMA U ON A.UP_CODUSR=U.US_CODIGO
                  WHERE (A.UP_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";                 
@@ -480,31 +481,33 @@
                 .",UP_D20"
                 .",UP_REG"
                 .",UP_CODUSR"
-                .",UP_ATIVO) VALUES("
-                ."'".$descricao."'"           // UP_NOME
-                .",".$d01                     // UP_D01
-                .",".$d02                     // UP_D02
-                .",".$d03                     // UP_D03
-                .",".$d04                     // UP_D04
-                .",".$d05                     // UP_D05
-                .",".$d06                     // UP_D06
-                .",".$d07                     // UP_D07
-                .",".$d08                     // UP_D08
-                .",".$d09                     // UP_D09
-                .",".$d10                     // UP_D10
-                .",".$d11                     // UP_D11
-                .",".$d12                     // UP_D12
-                .",".$d13                     // UP_D13
-                .",".$d14                     // UP_D14
-                .",".$d15                     // UP_D15
-                .",".$d16                     // UP_D16
-                .",".$d17                     // UP_D17
-                .",".$d18                     // UP_D18
-                .",".$d19                     // UP_D19
-                .",".$d20                     // UP_D20
-                .",'P'"                       // UP_REG
-                .",".$_SESSION["usr_codigo"]  // UP_CODUSR
-                .",'S'"                       // UP_ATIVO
+                .",UP_ATIVO"
+                .",CONSULTAR_RELATORIO) VALUES("
+                ."'".$descricao."'"             // UP_NOME
+                .",".$d01                       // UP_D01
+                .",".$d02                       // UP_D02
+                .",".$d03                       // UP_D03
+                .",".$d04                       // UP_D04
+                .",".$d05                       // UP_D05
+                .",".$d06                       // UP_D06
+                .",".$d07                       // UP_D07
+                .",".$d08                       // UP_D08
+                .",".$d09                       // UP_D09
+                .",".$d10                       // UP_D10
+                .",".$d11                       // UP_D11
+                .",".$d12                       // UP_D12
+                .",".$d13                       // UP_D13
+                .",".$d14                       // UP_D14
+                .",".$d15                       // UP_D15
+                .",".$d16                       // UP_D16
+                .",".$d17                       // UP_D17
+                .",".$d18                       // UP_D18
+                .",".$d19                       // UP_D19
+                .",".$d20                       // UP_D20
+                .",'P'"                         // UP_REG
+                .",".$_SESSION["usr_codigo"]    // UP_CODUSR
+                .",'S'"                         // UP_ATIVO
+                .",'".$CONSULTAR_RELATORIO."'"  // CONSULTAR_RELATORIO
               .")";
               array_push($arrUpdt,$sql);
             };
@@ -879,6 +882,12 @@
                         +"objUp.espiao();"
                         +"elTr.cells[0].childNodes[0].checked=false;"
                       ,"padrao":8}
+            ,{"id":28 ,"field"          : "CONSULTAR_RELATORIO"  
+                      ,"labelCol"       : "CONSULT. RELATÓRIO"   
+                      ,"obj"            : "cbConsultaRelatorio"
+                      ,"tamGrd"         : "10em"
+                      ,"tamImp"         : "10"
+                      ,"padrao":10}   
           ]
           ,
           "detalheRegistro":
@@ -910,6 +919,7 @@
           ,"tabelaBD"       : "VUSUARIOPERFIL"      // Nome da tabela no banco de dados  
           ,"tabelaBKP"      : "BKPUSUARIOPERFIL"    // Nome da tabela no banco de dados  
           ,"fieldAtivo"     : "UP_ATIVO"            // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
+          ,"fieldConsultarRelatorio"     : "CONSULTAR_RELATORIO"            // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
           ,"fieldReg"       : "UP_REG"              // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "UP_CODUSR"           // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"iFrame"         : "iframeCorpo"         // Se a table vai ficar dentro de uma tag iFrame
@@ -1363,6 +1373,13 @@
                   <option value="P">PUBLICO</option>               
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
+              </div>
+              <div class="campotexto campo20">
+                <select class="campo_input_combo" name="cbConsultaRelatorio" id="cbConsultaRelatorio">
+                  <option value="S">PERMITIDO</option>
+                  <option value="N" selected>NAO PERMITIDO</option>
+                </select>
+                <label class="campo_label campo_required" for="cbConsultaRelatorio">CONSULT. RELATÓRIO</label>
               </div>
               <div class="campotexto campo20">
                 <input class="campo_input_titulo" disabled name="edtUsuario" id="edtUsuario" type="text" />

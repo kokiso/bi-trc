@@ -3052,7 +3052,7 @@ function clsTable2017(obj) {
                     if (self.Js.titulo[lin].labelCol == "ATIVO") {
                         self.Js.titulo[lin].lblDetalhe = "ATIVO";
                         self.Js.titulo[lin].ajudaDetalhe = "Se o registro pode ser usado por cadastros complementares";
-                    };
+                    }
                     break;
                 case 3: // combobox sis
                     self.Js.titulo[lin].contido = (self.Js.titulo[lin].contido == undefined ? ['P', 'A'] : self.Js.titulo[lin].contido);
@@ -3135,6 +3135,25 @@ function clsTable2017(obj) {
                     self.Js.titulo[lin].excel = (self.Js.titulo[lin].excel == undefined ? "S" : self.Js.titulo[lin].excel);
                     self.Js.titulo[lin].ordenaColuna = (self.Js.titulo[lin].ordenaColuna == undefined ? "N" : self.Js.titulo[lin].ordenaColuna);
                     self.Js.titulo[lin].fieldType = (self.Js.titulo[lin].fieldType == undefined ? "str" : self.Js.titulo[lin].fieldType);
+                    break;
+                case 10: // combobox permitido/nao permitido         
+                    self.Js.titulo[lin].contido = (self.Js.titulo[lin].contido == undefined ? ['S', 'N'] : self.Js.titulo[lin].contido);
+                    self.Js.titulo[lin].copyGRD = (self.Js.titulo[lin].copyGRD == undefined ? [0, 20] : self.Js.titulo[lin].copyGRD);
+                    self.Js.titulo[lin].digitosMinMax = (self.Js.titulo[lin].digitosMinMax == undefined ? [1, 1] : self.Js.titulo[lin].digitosMinMax);
+                    self.Js.titulo[lin].fieldType = (self.Js.titulo[lin].fieldType == undefined ? "str" : self.Js.titulo[lin].fieldType);
+                    self.Js.titulo[lin].html = (self.Js.titulo[lin].html == undefined ? ['S', 25, 'S|N', 'PERMITIDO|NAO PERMITIDO'] : self.Js.titulo[lin].html);
+                    self.Js.titulo[lin].newRecord = (self.Js.titulo[lin].newRecord == undefined ? ['S', 'this', 'this'] : self.Js.titulo[lin].newRecord);
+                    self.Js.titulo[lin].tamGrd = (self.Js.titulo[lin].tamGrd == undefined ? "4em" : self.Js.titulo[lin].tamGrd);
+                    self.Js.titulo[lin].tamImp = (self.Js.titulo[lin].tamImp == undefined ? "15" : self.Js.titulo[lin].tamImp);
+                    self.Js.titulo[lin].tipo = (self.Js.titulo[lin].tipo == undefined ? "cb" : self.Js.titulo[lin].tipo);
+                    self.Js.titulo[lin].validar = (self.Js.titulo[lin].validar == undefined ? ['notnull'] : self.Js.titulo[lin].validar);
+                    ///////////////////////////////////////////                                                                                    
+                    // Complemento para detalhe do registrso //
+                    ///////////////////////////////////////////
+                    if (self.Js.titulo[lin].labelCol == "PERMITIDO") {
+                        self.Js.titulo[lin].lblDetalhe = "PERMITIDO";
+                        self.Js.titulo[lin].ajudaDetalhe = "Se o registro pode ser usado por cadastros complementares";
+                    }
                     break;
             };
             if (tagValida(self.Js.titulo[lin].field)) {

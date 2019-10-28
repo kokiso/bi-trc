@@ -1,3 +1,7 @@
+<?php
+    session_start();
+?>
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -36,6 +40,10 @@
           return false;
         }
       };
+
+      function temPermissao(permissao) {
+        console.log(eval(permissao));
+      }
       
       var jsPub      = JSON.parse(localStorage.getItem("lsPublico"));
       var contMsg    = 0;            // contador para mensagens
@@ -142,18 +150,19 @@
                     <li><a href="#" onClick="window.open('Trac_grdInfracaoTempo.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Tempo/Infrações</a></li>
                   </ul>
                 </li> 
-                
-                <!--<li class="treeview">
-                  <a href="#">
-                    <i class="fa fa-users"></i> <span>Relatórios</span>
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                  <li><a href="#" onClick="window.open('classPhp/relatorios/relatorioTempoInfracao.php','iframeCorpo');"><i class="fa fa-circle-o"></i> Tempo/Infrações</a></li>
-                  </ul>
-                </li> -->
+                <?php  if($_SESSION['consultar_relatorio'] == 'S') { ?>
+                  <li class="treeview">
+                    <a href="#">
+                      <i class="fa fa-users"></i> <span>Relatórios</span>
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+                    <ul class="treeview-menu">
+                    <li><a href="#" onClick="window.open('classPhp/relatorios/relatorioTempoInfracao.php','iframeCorpo');"><i class="fa fa-circle-o"></i> Tempo/Infrações</a></li>
+                    </ul>
+                  </li>
+                <?php } ?>
 							</ul>
 						</li>
 					</ul>
