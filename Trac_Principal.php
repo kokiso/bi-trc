@@ -145,8 +145,6 @@
                   </a>
                   <ul class="treeview-menu">
                     <li><a href="#" onclick="window.open('Trac_BiDashBoard.php');"><i class="subMenuImagem fa fa-folder-o"></i>Dashboard</a></li>
-                    <li><a href="#" onclick="ifAbrir('Trac_Grupo.php'       ,'jsPub[0].usr_d06','Grupos');"><i class="fa fa-circle-o"></i> Grupos</a></li>
-                    
                     <li><a href="#" onClick="window.open('Trac_grdInfracaoTempo.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Tempo/Infrações</a></li>
                   </ul>
                 </li> 
