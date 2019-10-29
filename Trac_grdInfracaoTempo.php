@@ -105,7 +105,6 @@
             }
             $sql.=" ORDER BY MVM_CODVEI,CONVERT(VARCHAR(23),MVM_DATAGPS,127)";
           //};
-          echo $sql;
           if( $retCls['retorno'] != "OK" ){
             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
           } else {
