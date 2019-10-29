@@ -1,12 +1,14 @@
 <?php
-    session_start();
+    if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+    }
 
     require_once(__DIR__."/../conectaSqlServer.class.php");
     require_once(__DIR__."/../validaJSon.class.php");    
 
     $classe   = new conectaBd();      
     $classe->conecta($_SESSION['login']);
-
 
     $sql="";
     $sql.=" SELECT ";
