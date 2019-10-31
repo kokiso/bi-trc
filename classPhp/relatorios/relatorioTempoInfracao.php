@@ -1,16 +1,14 @@
 <?php
   session_start();
 
-  if($_SESSION['consultar_relatorio'] != "S") {
-    exit;
-  }
-
-  if( isset($_POST["relatorioTempoInfracao"]) ){
+  if( isset($_POST["grdInfracaoTempo"]) ){
     try{     
       require("../conectaSqlServer.class.php");
-      require("../validaJSon.class.php"); 
+      require("../validaJSon.class.php");
       require("../removeAcento.class.php");
-      require("../selectRepetidoTrac.class.php");       			
+      require("../selectRepetidoTrac.class.php");
+      require("../persistencia/infracaoTempoPersistencia.php");
+
       
       function diferenca($parI,$parF){
         $dtI      = new DateTime($parI); 
@@ -19,12 +17,10 @@
         return $dteDiff->format("%H:%I:%S"); 
       };  
 
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJSon();
+
       $retorno  = "";
-      $retCls   = $vldr->validarJs($_POST["relatorioTempoInfracao"]);
-      ///////////////////////////////////////////////////////////////////////
-      // Variavel mostra que não foi feito apenas selects mas atualizou BD //
-      ///////////////////////////////////////////////////////////////////////
+      $retCls   = $vldr->validarJs($_POST["grdInfracaoTempo"]);
       $atuBd    = false;
       if($retCls["retorno"] != "OK"){
         $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
@@ -34,80 +30,8 @@
         $jsonObj  = $retCls["dados"];
         $lote     = $jsonObj->lote;
         $rotina   = $lote[0]->rotina;
-        $classe   = new conectaBd();
-        $classe->conecta($lote[0]->login);
         if( $rotina=="select" ){
-          /////////////////////////////////////////////////////
-          // EVENTOS IGNORADOS POR NAO INTERFERIR NA FORMULA //
-          // 027=VEICULO PARADO C/ LIG IGNICAO               //
-          // 031=BATERIA DO VEICULO VIOLADA                  //
-          // 033-BATERIA DO VEICULO DESVIOLADA               //
-          // 037-PARADO COM A IGNICAO LIGADA                 //
-          // 044-IGNICAO LIGADA                              //
-          // 052=IGNICAO DESLIGADA                           //
-          // 055=POSICAO TEMPORIZADA                         //
-          // 064=CONECTADO NA FONTE PRINCIPAL                //
-          // 066=CONECTADO NA BATERIA BACKUP                 //
-          // 067=DESCONECTADO DA BATERIA BACKUP              //
-          // 080=SENSOR DE FORCA G                           //
-          // 084=SENSOR DE JAMMING ATIVADO                   //
-          // 085=SENSOR DE JAMMING DESATIVADO                //
-          /////////////////////////////////////////////////////
-          switch( $lote[0]->frota ){
-            case "LP" : $frota=" AND (VCL.VCL_FROTA IN('L','P'))" ;break;
-            case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
-            case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
-          };
-          ///////////////////////////////////////////////////////////////
-          // Buscando um facilitador para indice devido tamanho da tabela
-          ///////////////////////////////////////////////////////////////  
-          $cSql   = new SelectRepetido();
-          $retSql = $cSql->qualSelect("intervalo",$lote[0]->dtini);
-          $expld = explode("|",$retSql);
-          if( $expld[0]>0 ){
-						$bwI=$expld[0];
-						$bwF=$expld[1];
-          };
-          $sql="";
-          $sql.="SELECT";
-          $sql.="  MVM_POSICAO";
-          $sql.="  ,MTR_NOME";
-          $sql.="  ,MVM_PLACA";
-          $sql.="  ,VCL.VCL_FROTA";
-          $sql.="  ,MVM_TURNO";
-          $sql.="  ,MVM_CODMTR";
-          $sql.="  ,MVM_CODEVE";
-          $sql.="  ,EVE_CODEG";
-          $sql.="  ,MVM_VELOCIDADE";
-          $sql.="  ,CONVERT(VARCHAR(23),MVM_DATAGPS,127) AS MVM_DATAGPS";
-          $sql.="  ,MVM_HORAGPS";
-          $sql.="  ,MTR_RFID";
-          $sql.="  ,MVM_ODOMETRO";
-          $sql.="  FROM MOVIMENTO";
-          $sql.="  LEFT OUTER JOIN EVENTO EVE ON MVM_CODEVE=EVE.EVE_CODIGO";
-          $sql.="  LEFT OUTER JOIN VEICULO VCL ON MVM_PLACA=VCL.VCL_CODIGO";
-          $sql.="  LEFT OUTER JOIN MOTORISTA MTR ON MVM_CODMTR=MTR.MTR_CODIGO";
-          $sql.="  LEFT OUTER JOIN UNIDADE UNI ON MVM_CODUNI=UNI.UNI_CODIGO";          
-          $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON MVM_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codusu;  
-					//if( $between==false ){	
-					//	$sql.=" WHERE ((MVM_ANOMES=".$lote[0]->dtini.") AND (MVM_CODEVE NOT IN(27,31,33,37,44,52,64,67,80,84,85)) AND  (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ".$frota.")";
-					//} else {					
-            $sql.="   WHERE 1 = 1"; 	
-						//$sql.="   AND (MVM_POSICAO BETWEEN ".$bwI." AND ".$bwF.")"; 
-            //$sql.="   AND (MVM_ANOMES=".$lote[0]->dtini.")"; 
-            $sql.="   AND (MVM_ENTRABI='S')"; 
-						$sql.="   AND (EVE_MOVIMENTO='S')";
-						$sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";   					
-            $sql.="   AND (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ".$frota;
-            if($lote[0]->poloCodigo != "") {
-              $sql.="   AND ( UPPER(UNI.UNI_CODPOL) = UPPER('".$lote[0]->poloCodigo."')) AND (UNI.UNI_CODGRP = ".$lote[0]->poloGrupo.")";
-            }
-            if($lote[0]->unidadeCodigo != "") {
-              $sql.="   AND (UNI.UNI_CODIGO = ".$lote[0]->unidadeCodigo.")";
-            }
-            $sql.=" ORDER BY MVM_CODVEI,CONVERT(VARCHAR(23),MVM_DATAGPS,127)";
-            //echo($sql);
-          //};
+
           if( $retCls['retorno'] != "OK" ){
             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
           } else {
@@ -116,19 +40,15 @@
             $placaAtu        = "***9999";
             $params   = array();
             $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
-            $consulta = sqlsrv_query($_SESSION['conn'], $sql, $params, $options);
+
+            $persistencia     = new infracaoTempoPersistencia();
+            $consulta = $persistencia->buscaInfracaoTempo($lote[0]->login);
             $normalizou  = false;
             while ($linha = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
               $placaAtu=$linha["MVM_PLACA"];
-              //////////////////////////////////////////////
-              // Para novo registro                       // 
-              //////////////////////////////////////////////
+
               if( ($linha["EVE_CODEG"]=="EV") or ($linha["EVE_CODEG"]=="EVC") ){
-                //////////////////////////////////////////////////////////////////////////////////
-                // Duas possibilidade                                                           //
-                // $placaAtu<>$placaOld = Inicio de infracao do veiculo                         //
-                // $placaAtu==$placaOld = O veiculo ja esta em modo de infracao e recebeu outra //
-                //////////////////////////////////////////////////////////////////////////////////
+
                 $descalibrado="NAO";
                 if( ($linha["VCL_FROTA"]=="L") and ($linha["EVE_CODEG"]=="EV") and ($linha["MVM_VELOCIDADE"]<=110) )
                   $descalibrado="SIM";  
@@ -170,16 +90,6 @@
                   $arrRet[$linR]["DISTPERC"]=number_format(($arrRet[$linR]["ODOMFIM"]-$arrRet[$linR]["ODOMINI"])*1000, 2, '.', '');
                   if( $linha["MVM_VELOCIDADE"]>$arrRet[$linR]["MAXIMAVELOC"] )
                     $arrRet[$linR]["MAXIMAVELOC"]=$linha["MVM_VELOCIDADE"];
-									/*
-                  //////////////////////////////////////////////////////////////////
-                  // Se o tempo for maior que 30min considerar erro-01ago2018(Pedro)
-                  //////////////////////////////////////////////////////////////////
-                  $min30=substr($arrRet[$linR]["TEMPO"],0,2);
-                  //if( ((int)(substr($arrRet[$linR]["TEMPO"],0,2))>0) or ((int)(substr($arrRet[$linR]["TEMPO"],3,2))>30) ){
-                  if( (int)$min30>0 ){  
-                    $arrRet[$linR]["TEMPO"]="**erro**";
-                  };
-									*/
                 };
               };
 
@@ -242,6 +152,22 @@
                     $idfim="**erro**";  
                   };
                 };
+                
+                $query = "";
+                $query .= " select MAX(MVM_VELOCIDADE) as MVM_VELOCIDADE from MOVIMENTO ";
+                $query .= " where MVM_DATAGPS between '".$arrRet[$lin]["DTINI"]."' ";
+                $query .= " and '".$arrRet[$lin]["DTFIM"]."' and MVM_PLACA = '".$arrRet[$lin]["PLACA"]."' ";
+                
+                /*$params   = array();
+                $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
+                $consulta = sqlsrv_query($_SESSION['conn'], $query, $params, $options);*/
+
+                $consulta = $persistencia->buscaVelocidadeMaxima($lote[0]->login, $arrRet[$lin]);
+                while ($veloc_maxima = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
+                  if($veloc_maxima["MVM_VELOCIDADE"] != null) {
+                    $arrRet[$lin]["MAXIMAVELOC"] = $veloc_maxima["MVM_VELOCIDADE"];
+                  }
+                }
 								//
                 array_push($arrJs,[
                   $arrRet[$lin]["PLACA"]
@@ -262,97 +188,22 @@
                 ]);
               }  
               $lin++;
-            };
-            
-            /*$arquivo = 'relatorio.xls';
-            $html = '';
-            $html .= '<table>';
-            $html .= '<tr>';
-            $html .= '<td colspan="15">Planilha</tr>';
-            $html .= '</tr>';
-            $html .= '<tr>';
-            $html .= '<td><b>PLACA</b></td>';
-            $html .= '<td><b>LP</b></td>';
-            $html .= '<td><b>T</b></td>';
-            $html .= '<td><b>IDINI</b></td>';
-            $html .= '<td><b>DTINI</b></td>';
-            $html .= '<td><b>IDFIM</b></td>';
-            $html .= '<td><b>DTFIM</b></td>';
-            $html .= '<td><b>TEMPO</b></td>';
-            $html .= '<td><b>VEL</b></td>';
-            $html .= '<td><b>MAX</b></td>';
-            $html .= '<td><b>MOTORISTA</b></td>';
-            $html .= '<td><b>DES</b></td>';
-            $html .= '<td><b>EVE</b></td>';
-            $html .= '<td><b>RFID</b></td>';
-            $html .= '<td><b>DISTPERC</b></td>';
-            $html .= '</tr>';
-            foreach ($arrJs as &$value) {
-              $html .= '<tr>';
-              foreach($value as &$param) {
-                $html .= '<td>'.$param.'</td>';
-              }
-              $html .= '</tr>';
+            };  
+            //echo(end($arrJs));
+            foreach ($arrJs as $value) {
+              //echo('placa '.$value[0].'\n');
             }
-            $html .= '</table>';
-
-            header ("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-            header ("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
-            header ("Cache-Control: no-cache, must-revalidate");
-            header ("Pragma: no-cache");
-            header ("Content-type: application/x-msexcel");
-            header ("Content-Disposition: attachment; filename=\"{$arquivo}\"" );
-            header ("Content-Description: PHP Generated Data" );
-
-            echo $html;
-            exit;*/
-
-            download_send_headers("tabela.csv");
-            echo array2csv($arrJs);
-            die();
-
+            $persistencia->insereHistoricoConsolidacao($lote[0]->login, end($arrJs));
             $retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
           };  
         };
       };
     } catch(Exception $e ){
       $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]'; 
-    };    
+    };
     echo $retorno;
     exit;
   };  
-
-  function array2csv(array &$array)
-  {
-    if (count($array) == 0) {
-      return null;
-    }
-    ob_start();
-    $df = fopen("php://output", 'w');
-    fputcsv($df, array_keys(reset($array)));
-    foreach ($array as $row) {
-        fputcsv($df, $row);
-    }
-    fclose($df);
-    return ob_get_clean();
-  }
-
-  function download_send_headers($filename) {
-    // disable caching
-    $now = gmdate("D, d M Y H:i:s");
-    header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-    header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
-    header("Last-Modified: {$now} GMT");
-
-    // force download  
-    header("Content-Type: application/force-download");
-    header("Content-Type: application/octet-stream");
-    header("Content-Type: application/download");
-
-    // disposition / encoding on response body
-    header("Content-Disposition: attachment;filename={$filename}");
-    header("Content-Transfer-Encoding: binary");
-  }
 ?>
 <!DOCTYPE html>
   <head>
@@ -393,8 +244,8 @@
       "use strict";
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
-				comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
-        document.getElementById("cbIni").focus();
+				//comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
+        //document.getElementById("cbIni").focus();
         jsBi={
           "titulo":[
              {"id":0  ,"labelCol":"OPC"     
@@ -633,24 +484,33 @@
           clsJs.add("unidadeCodigo"	, '');
         }
 
-        
+        var obrigaUnidade = true;
 
-				fd = new FormData();
-				fd.append("relatorioTempoInfracao" , clsJs.fim());
-  			msg     = requestPedido("relatorioTempoInfracao.php",fd); 
-        retPhp  = JSON.parse(msg);
-				if( retPhp[0].retorno == "OK" ){
-					//////////////////////////////////////////////////////////////////////////////////
-					// O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
-					// Campo obrigatório se existir rotina de manutenção na table devido Json       //
-					// Esta rotina não tem manutenção via classe clsTable2017                       //
-					// jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
-          //////////////////////////////////////////////////////////////////////////////////
-					jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
-					jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
-					objBi.ordenaJSon(jsBi.indiceTable,false);  
-					objBi.montarBody2017();
-				};  
+        if(jsPub[0].usr_cargo == 'ADM' || cbUnidadeValue != "TODOS") {
+          obrigaUnidade = false;
+        }
+
+        if(!obrigaUnidade) {
+          fd = new FormData();
+          fd.append("grdInfracaoTempo" , clsJs.fim());
+          msg     = requestPedido("relatorioTempoInfracao.php",fd); 
+          retPhp  = JSON.parse(msg);
+          if( retPhp[0].retorno == "OK" ){
+            //////////////////////////////////////////////////////////////////////////////////
+            // O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
+            // Campo obrigatório se existir rotina de manutenção na table devido Json       //
+            // Esta rotina não tem manutenção via classe clsTable2017                       //
+            // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
+            //////////////////////////////////////////////////////////////////////////////////
+            jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
+            jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
+            objBi.ordenaJSon(jsBi.indiceTable,false);  
+            objBi.montarBody2017();
+          };
+        } else {
+          gerarMensagemErro("catch",'É obrigatório escolher uma unidade.',"Atenção");
+        }
+  
       }; 
 
       function montaUnidade() {
@@ -674,7 +534,7 @@
 
         fd = new FormData();
         fd.append("montaSelectUnidade" , clsJs.fim());
-        var selectUnidade = requestPedido("../comum/selectUnidade.class.php",fd);
+        var selectUnidade = requestPedido("classPhp/comum/selectUnidade.class.php",fd);
         document.getElementById('selectUnidadePHP').innerHTML = selectUnidade;
         document.getElementById('cbUnidade').value="TODOS";
       };
@@ -701,8 +561,8 @@
           clsJs.add("idIni"   , pI        );
           clsJs.add("idFim"   , pF        );          
           fd          = new FormData();
-          fd.append("relatorioTempoInfracao" , clsJs.fim());          
-          var req = requestPedido("relatorioTempoInfracao.php",fd);
+          fd.append("grdInfracaoTempo" , clsJs.fim());          
+          var req = requestPedido("Trac_grdInfracaoTempo.php",fd);
           var ret = JSON.parse(req);
           if( ret[0].dados.length==0 ){
             gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
@@ -993,11 +853,13 @@
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
 
-      <div class="campotexto campo10">      
+      <!--<div class="campotexto campo10">      
         <select class="campo_input_combo" id="cbIni">
         </select>
-        <label class="campo_label campo_required" for="cbFrota">MÊS</label>
-      </div>
+        <label class="campo_label campo_required" for="cbIni">MÊS</label>
+      </div>-->
+
+      <?php include '../comum/selectMes.class.php';?>
       
       <div class="campotexto campo15">
         <select class="campo_input_combo" id="cbFrota">
@@ -1037,6 +899,7 @@
         </select>
         <label class="campo_label campo_required" for="cbInfracao">INFRAÇÃO</label>
       </div>
+
       <?php include '../comum/selectPolo.class.php';?>
 
       <div id="selectUnidadePHP">        
