@@ -66,7 +66,7 @@
           };
           
           $sql="";
-          $sql.="SELECT";
+          $sql.="SELECT TOP 10000";
           $sql.="  MVM_POSICAO";
           $sql.="  ,MTR_NOME";
           $sql.="  ,MVM_PLACA";
@@ -85,7 +85,8 @@
           $sql.="  LEFT OUTER JOIN VEICULO VCL ON MVM_PLACA=VCL.VCL_CODIGO";
           $sql.="  LEFT OUTER JOIN MOTORISTA MTR ON MVM_CODMTR=MTR.MTR_CODIGO";
           $sql.="  LEFT OUTER JOIN UNIDADE UNI ON MVM_CODUNI=UNI.UNI_CODIGO";          
-          $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON MVM_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codusu;  
+          //$sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON MVM_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codusu;  
+          //$sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON MVM_CODUNI=UU.UU_CODUNI";  
 					//if( $between==false ){	
 					//	$sql.=" WHERE ((MVM_ANOMES=".$lote[0]->dtini.") AND (MVM_CODEVE NOT IN(27,31,33,37,44,52,64,67,80,84,85)) AND  (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ".$frota.")";
 					//} else {					
@@ -94,7 +95,7 @@
             $sql.="   AND (MVM_ANOMES=".$lote[0]->dtini.")"; 
             $sql.="   AND (MVM_ENTRABI='S')"; 
 						$sql.="   AND (EVE_MOVIMENTO='S')";
-						$sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";   					
+						//$sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";   					
             $sql.="   AND (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ".$frota;
             $sql.="   AND ( MVM_CODEG IN ('EV', 'EVC', 'VN'))";
             if($lote[0]->poloCodigo != "") {
