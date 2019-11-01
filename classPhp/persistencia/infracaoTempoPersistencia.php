@@ -51,6 +51,45 @@
       return $consulta;
     }
 
+    function buscaInfracaoTempoConsolidacao($login, $lote) {
+      $classe   = new conectaBd();
+      $classe->conecta($login);
+
+      switch( $lote[0]->frota ){
+        case "LP" : $frota=" AND (VCL.VCL_FROTA IN('L','P'))" ;break;
+        case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
+        case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
+      };
+
+      $sql="";
+      $sql.="SELECT ";
+      $sql.="    PLACA, ";
+      $sql.="    FROTA, ";
+      $sql.="    TURNO, ";
+      $sql.="    POSICAO_INICIAL, ";
+      $sql.="    CONVERT(VARCHAR(23),DATA_INICIAL,127) AS DATA_INICIAL,";
+      $sql.="    POSICAO_FINAL, ";
+      $sql.="    CONVERT(VARCHAR(23),DATA_FINAL,127) AS DATA_FINAL,";
+      $sql.="    TEMPO, ";
+      $sql.="    VELOCIDADE, ";
+      $sql.="    VELOCIDADE_MAX, ";
+      $sql.="    MTR_NOME, ";
+      $sql.="    DESCALIBRADO, ";
+      $sql.="    EVE_CODEG, ";
+      $sql.="    RFID, ";
+      $sql.="    DISTANCIA_PERCORRIDA ";
+      $sql.=" FROM INFRACAO ";
+      $sql.="    INNER JOIN MOTORISTA MTO ON CODIGO_MOTORISTA = MTR_CODIGO ";
+      $sql.="    INNER JOIN EVENTO EVE ON CODIGO_EVENTO = EVE_CODIGO ";
+      $sql.=" WHERE 1=1 ";
+
+      $params   = array();
+      $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
+      $consulta = sqlsrv_query($_SESSION['conn'], $sql, $params, $options);
+
+      return $consulta;
+    }
+
     function buscaVelocidadeMaxima($login, $array) {
       $classe   = new conectaBd();
       $classe->conecta($login);
