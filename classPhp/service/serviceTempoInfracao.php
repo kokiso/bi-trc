@@ -23,21 +23,21 @@
                 $vldr     = new validaJSon();
         
                 $retorno  = "";
-                $retCls   = $vldr->validarJs($_POST["grdInfracaoTempo"]);
+                //$retCls   = $vldr->validarJs($_POST["grdInfracaoTempo"]);
                 $atuBd    = false;
-                if($retCls["retorno"] != "OK"){
+                /*if($retCls["retorno"] != "OK"){
                     $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
                     unset($retCls,$vldr);      
-                } else {
+                } else {*/
                     $arrRet  = []; 
-                    $jsonObj  = $retCls["dados"];
-                    $lote     = $jsonObj->lote;
+                    //$jsonObj  = $retCls["dados"];
+                    //$lote     = $jsonObj->lote;
                     //$rotina   = $lote[0]->rotina;
                 //if( $rotina=="select" ){
         
-                    if( $retCls['retorno'] != "OK" ){
+                    /*if( $retCls['retorno'] != "OK" ){
                         $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-                    } else {
+                    } else {*/
                         $linR    = -1;  //Linha do array de retorno
                         $placaOld        = "***9999";
                         $placaAtu        = "***9999";
@@ -210,9 +210,9 @@
                     }
                     $persistencia->insereConsolidacaoInfracao($login, count($arrJs));
                     //$retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
-                    };  
+                    //};  
                 //};
-                };
+                //};
             } catch(Exception $e ){
                 $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]';
             };
