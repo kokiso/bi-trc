@@ -22,7 +22,8 @@ CREATE TABLE CONSOLIDACAO_INFRACAO
 		constraint CONSOLIDACAO_INFRACAO_pk
 			primary key nonclustered,
 	DATA_CONSOLIDACAO datetime not null,
-	ULTIMA_POSICAO_MOVIMENTO bigint not null
+	ULTIMA_POSICAO_MOVIMENTO bigint not null,
+	REGISTROS_IMPORTADOS int not null
 )
 go
 

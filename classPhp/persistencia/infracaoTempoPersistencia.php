@@ -124,14 +124,14 @@
       return $consulta;
     }
 
-    function insereConsolidacaoInfracao($login) {
+    function insereConsolidacaoInfracao($login, $qtdRegistros) {
       $classe   = new conectaBd();
       $classe->conecta($login);
       
       $query = "";
-      $query .= " INSERT INTO CONSOLIDACAO_INFRACAO (DATA_CONSOLIDACAO, ULTIMA_POSICAO_MOVIMENTO ) ";
+      $query .= " INSERT INTO CONSOLIDACAO_INFRACAO (DATA_CONSOLIDACAO, ULTIMA_POSICAO_MOVIMENTO, REGISTROS_IMPORTADOS ) ";
       $query .= " VALUES ";
-      $query .= " (GETDATE(), (select top 1 MVM_POSICAO from MOVIMENTO order by MVM_POSICAO desc))";
+      $query .= " (GETDATE(), (select top 1 MVM_POSICAO from MOVIMENTO order by MVM_POSICAO desc), ".$qtdRegistros.")";
 
       $params   = array();
       $options  = array();
@@ -145,6 +145,7 @@
 
         if ($array[5] == "") {
           $array[5] = "null";
+          $array[19] = 1;
         }
 
         $query = "";
@@ -185,8 +186,6 @@
         $query .= " ,".$array[16];      // CODIGO_UNIDADE
         $query .= " ,".$array[18]."";  // ANO_MES
         $query .= " ,".$array[19].")";  // ERRO
-
-        //echo($query."\n");
 
         $params   = array();
         $options  = array();

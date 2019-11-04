@@ -154,11 +154,16 @@
                             // Se o tempo for maior que 30min considerar erro-01ago2018(Pedro)
                             //////////////////////////////////////////////////////////////////
                             $idfim=$arrRet[$lin]["IDFIM"];
-                            if( $arrRet[$lin]["TEMPO"] <> "**erro**" ){
-                                $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
-                                if( ($splTempo[0]>0) or ($splTempo[1]>30) ){
-                                    $arrRet[$linR]["ERRO"]=1;
-                                };
+                            //if( $arrRet[$lin]["TEMPO"] <> "**erro**" ){
+                            //    $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
+                            //    if( ($splTempo[0]>0) or ($splTempo[1]>30) ){
+                            //        $arrRet[$linR]["ERRO"]=1;
+                            //    };
+                            //};
+                            $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
+
+                            if( ((int)$splTempo[0]>0) or ((int)$splTempo[1]>30) ){
+                                $arrRet[$lin]["ERRO"]=1;
                             };
                             
                             $query = "";
@@ -170,7 +175,7 @@
                             $consulta = $persistencia->buscaVelocidadeMaxima($login, $arrRet[$lin]);
                             while ($veloc_maxima = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
                                 if($veloc_maxima["MVM_VELOCIDADE"] != null) {
-                                $arrRet[$lin]["MAXIMAVELOC"] = $veloc_maxima["MVM_VELOCIDADE"];
+                                    $arrRet[$lin]["MAXIMAVELOC"] = $veloc_maxima["MVM_VELOCIDADE"];
                                 }
                             }
                             
@@ -203,7 +208,7 @@
                         //$persistencia->insereInfracao($lote[0]->login, $value);
                         $persistencia->insereInfracao($login, $value);
                     }
-                    $persistencia->insereConsolidacaoInfracao($login);
+                    $persistencia->insereConsolidacaoInfracao($login, count($arrJs));
                     //$retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
                     };  
                 //};
