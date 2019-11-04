@@ -25,21 +25,21 @@
                 $vldr     = new validaJSon();
         
                 $retorno  = "";
-                $retCls   = $vldr->validarJs($_POST["grdInfracaoTempo"]);
+                //$retCls   = $vldr->validarJs($_POST["grdInfracaoTempo"]);
                 $atuBd    = false;
-                if($retCls["retorno"] != "OK"){
+                /*if($retCls["retorno"] != "OK"){
                     $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
                     unset($retCls,$vldr);      
-                } else {
+                } else {*/
                     $arrRet  = []; 
-                    $jsonObj  = $retCls["dados"];
-                    $lote     = $jsonObj->lote;
+                    //$jsonObj  = $retCls["dados"];
+                    //$lote     = $jsonObj->lote;
                     //$rotina   = $lote[0]->rotina;
                 //if( $rotina=="select" ){
         
-                    if( $retCls['retorno'] != "OK" ){
+                    /*if( $retCls['retorno'] != "OK" ){
                         $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-                    } else {
+                    } else {*/
                         $linR    = -1;  //Linha do array de retorno
                         $placaOld        = "***9999";
                         $placaAtu        = "***9999";
@@ -73,9 +73,9 @@
                                 ,"TURNO"              =>  $linha["MVM_TURNO"]
                                 ,"IDINI"              =>  $linha["MVM_POSICAO"]
                                 ,"DTINI"              =>  $linha["MVM_DATAGPS"]
-                                ,"IDFIM"              =>  "**erro**"
+                                ,"IDFIM"              =>  ""
                                 ,"DTFIM"              =>  $linha["MVM_DATAGPS"]
-                                ,"TEMPO"              =>  "**erro**"
+                                ,"TEMPO"              =>  ""
                                 ,"VELOC"              =>  $linha["MVM_VELOCIDADE"]
                                 ,"CODEG"              =>  $linha["EVE_CODEG"]
                                 ,"CODIGO_EVENTO"      =>  $linha["MVM_CODEVE"]
@@ -87,7 +87,9 @@
                                 ,"RFID"    			  =>  $linha["MTR_RFID"]
                                 ,"ODOMINI"            =>  $linha["MVM_ODOMETRO"]
                                 ,"ODOMFIM"            =>  $linha["MVM_ODOMETRO"]
-                                ,"DISTPERC"           =>  "**erro**"
+                                ,"DISTPERC"           =>  ""
+                                ,"ANO_MES"            =>  $linha["MVM_ANOMES"]
+                                ,"ERRO"               =>  0
                                 ]);
                                 $placaOld=$placaAtu;
                                                 $normalizou  = true;									
@@ -109,7 +111,8 @@
                                 $arrRet[$linR]["TEMPO"]=diferenca($arrRet[$linR]["DTINI"],$arrRet[$linR]["DTFIM"]);
                                 $arrRet[$linR]["DISTPERC"]=number_format(($arrRet[$linR]["ODOMFIM"]-$arrRet[$linR]["ODOMINI"])*1000, 2, '.', '');
                                 if($arrRet[$linR]["DISTPERC"] < 0) {
-                                    $arrRet[$linR]["DISTPERC"] = "**erro**";
+                                    $arrRet[$linR]["ERRO"]=1;
+                                    //$arrRet[$linR]["DISTPERC"] = "**erro**";
                                 }
                                 $placaOld="***9999"; 
                                 $normalizou=false;									
@@ -153,11 +156,16 @@
                             // Se o tempo for maior que 30min considerar erro-01ago2018(Pedro)
                             //////////////////////////////////////////////////////////////////
                             $idfim=$arrRet[$lin]["IDFIM"];
-                            if( $arrRet[$lin]["TEMPO"] <> "**erro**" ){
-                                $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
-                                if( ($splTempo[0]>0) or ($splTempo[1]>30) ){
-                                $idfim="**erro**";  
-                                };
+                            //if( $arrRet[$lin]["TEMPO"] <> "**erro**" ){
+                            //    $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
+                            //    if( ($splTempo[0]>0) or ($splTempo[1]>30) ){
+                            //        $arrRet[$linR]["ERRO"]=1;
+                            //    };
+                            //};
+                            $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
+
+                            if( ((int)$splTempo[0]>0) or ((int)$splTempo[1]>30) ){
+                                $arrRet[$lin]["ERRO"]=1;
                             };
                             
                             $query = "";
@@ -169,46 +177,48 @@
                             $consulta = $persistencia->buscaVelocidadeMaxima($login, $arrRet[$lin]);
                             while ($veloc_maxima = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
                                 if($veloc_maxima["MVM_VELOCIDADE"] != null) {
-                                $arrRet[$lin]["MAXIMAVELOC"] = $veloc_maxima["MVM_VELOCIDADE"];
+                                    $arrRet[$lin]["MAXIMAVELOC"] = $veloc_maxima["MVM_VELOCIDADE"];
                                 }
                             }
-                                            //
+                            
                             array_push($arrJs,[
                                 $arrRet[$lin]["PLACA"]             //0
                                 ,$arrRet[$lin]["LP"]               //1
                                 ,$arrRet[$lin]["TURNO"]            //2
                                 ,$arrRet[$lin]["IDINI"]            //3
                                 ,$arrRet[$lin]["DTINI"]            //4
-                                                ,$idfim                            //5
+                                ,$idfim                            //5
                                 ,$arrRet[$lin]["DTFIM"]            //6
                                 ,$arrRet[$lin]["TEMPO"]            //7
                                 ,$arrRet[$lin]["VELOC"]            //8
                                 ,$arrRet[$lin]["MAXIMAVELOC"]      //9
                                 ,$arrRet[$lin]["MOTORISTA"]        //10
                                 ,$arrRet[$lin]["DESCALIBRADO"]     //11
-                                                ,$arrRet[$lin]["CODEG"]            //12
-                                                ,$arrRet[$lin]["RFID"]             //13
-                                                ,$arrRet[$lin]["DISTPERC"]         //14
+                                ,$arrRet[$lin]["CODEG"]            //12
+                                ,$arrRet[$lin]["RFID"]             //13
+                                ,$arrRet[$lin]["DISTPERC"]         //14
                                 ,$arrRet[$lin]["CODIGO_MOTORISTA"] //15
                                 ,$arrRet[$lin]["CODIGO_UNIDADE"]   //16
-                                                ,$arrRet[$lin]["CODIGO_EVENTO"]    //17
+                                ,$arrRet[$lin]["CODIGO_EVENTO"]    //17
+                                ,$arrRet[$lin]["ANO_MES"]          //18
+                                ,$arrRet[$lin]["ERRO"]             //19
                             ]);
                         }  
                         $lin++;
-                    };  
+                    };
                     foreach ($arrJs as $value) {
                         //$persistencia->insereInfracao($lote[0]->login, $value);
                         $persistencia->insereInfracao($login, $value);
                     }
-                    $persistencia->insereConsolidacaoInfracao($login, end($arrJs));
-                    $retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
-                    };  
+                    $persistencia->insereConsolidacaoInfracao($login, count($arrJs));
+                    //$retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
+                    //};  
                 //};
-                };
+                //};
             } catch(Exception $e ){
                 $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]';
             };
-            echo $retorno;
+            //echo $retorno;
             exit;
         }
 
@@ -234,15 +244,10 @@
                     $arrRet  = []; 
                     $jsonObj  = $retCls["dados"];
                     $lote     = $jsonObj->lote;
-                    //$rotina   = $lote[0]->rotina;
-                //if( $rotina=="select" ){
         
                     if( $retCls['retorno'] != "OK" ){
                         $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
                     } else {
-                        $linR    = -1;  //Linha do array de retorno
-                        $placaOld        = "***9999";
-                        $placaAtu        = "***9999";
                         $params   = array();
                         $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
             
@@ -250,6 +255,9 @@
                         $consulta = $persistencia->buscaInfracaoTempoConsolidacao($login, $lote);
                         $normalizou  = false;
                         while ($linha = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
+                            if($linha["ERRO"] == 1) {
+                                $linha["POSICAO_FINAL"] = "**erro**";
+                            }
                             array_push($arrJs,[
                                  $linha["PLACA"]
                                 ,$linha["FROTA"]

@@ -15,7 +15,7 @@
 
   if( isset($_POST["grdInfracaoTempo"]) ){
     try{     
-      require("../conectaSqlServer.class.php");
+      require("../conectaSqlServer.class.php"); 
       require("../validaJSon.class.php");
       require("../removeAcento.class.php");
       require("../selectRepetidoTrac.class.php");
