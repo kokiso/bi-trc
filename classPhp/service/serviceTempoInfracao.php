@@ -28,21 +28,9 @@
                 $vldr     = new validaJSon();
         
                 $retorno  = "";
-                //$retCls   = $vldr->validarJs($_POST["grdInfracaoTempo"]);
                 $atuBd    = false;
-                /*if($retCls["retorno"] != "OK"){
-                    $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
-                    unset($retCls,$vldr);      
-                } else {*/
                     $arrRet  = []; 
-                    //$jsonObj  = $retCls["dados"];
-                    //$lote     = $jsonObj->lote;
-                    //$rotina   = $lote[0]->rotina;
-                //if( $rotina=="select" ){
-        
-                    /*if( $retCls['retorno'] != "OK" ){
-                        $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-                    } else {*/
+
                         $linR    = -1;  //Linha do array de retorno
                         $placaOld        = "***9999";
                         $placaAtu        = "***9999";
@@ -114,7 +102,6 @@
                                 $arrRet[$linR]["DISTPERC"]=number_format(($arrRet[$linR]["ODOMFIM"]-$arrRet[$linR]["ODOMINI"])*1000, 2, '.', '');
                                 if($arrRet[$linR]["DISTPERC"] < 0) {
                                     $arrRet[$linR]["ERRO"]=1;
-                                    //$arrRet[$linR]["DISTPERC"] = "**erro**";
                                 }
                                 $placaOld="***9999"; 
                                 $normalizou=false;									
@@ -135,35 +122,14 @@
                     
                     while($lin<$qtos){
                         $gravar=true;  
-                        /*if( $lote[0]->tempo>0 ){
-                            $gravar=false;  
-                            $numSeg=str_replace(":","",$arrRet[$lin]["TEMPO"]);
-                            if( $numSeg>$lote[0]->tempo ){
-                                $gravar=true;    
-                            };
-                        };*/
-                        //  
-                        //if( ($gravar) and ($lote[0]->erro=="N") and ($arrRet[$lin]["IDFIM"]=="**erro**") ) $gravar=false;    
-                                    ///////////////////////////////////////////////
-                        // Aqui para saber ser quer EV_EVC ou EV ou EVC
-                        ///////////////////////////////////////////////
-                        /*if( ($gravar) and ($lote[0]->infracao<>"TODOS") ){
-                            if( $lote[0]->infracao<>$arrRet[$lin]["CODEG"] ){
-                                $gravar=false; 	
-                            }; 			
-                        };*/
+                        
                                     
                         if( $gravar ){
                             //////////////////////////////////////////////////////////////////
                             // Se o tempo for maior que 30min considerar erro-01ago2018(Pedro)
                             //////////////////////////////////////////////////////////////////
                             $idfim=$arrRet[$lin]["IDFIM"];
-                            //if( $arrRet[$lin]["TEMPO"] <> "**erro**" ){
-                            //    $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
-                            //    if( ($splTempo[0]>0) or ($splTempo[1]>30) ){
-                            //        $arrRet[$linR]["ERRO"]=1;
-                            //    };
-                            //};
+                            
                             $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
 
                             if(sizeof($splTempo) > 2) {
@@ -180,7 +146,6 @@
                             $query .= " where MVM_DATAGPS between '".$arrRet[$lin]["DTINI"]."' ";
                             $query .= " and '".$arrRet[$lin]["DTFIM"]."' and MVM_PLACA = '".$arrRet[$lin]["PLACA"]."' ";
             
-                            //$consulta = $persistencia->buscaVelocidadeMaxima($lote[0]->login, $arrRet[$lin]);
                             $consulta = $persistencia->buscaVelocidadeMaxima($login, $arrRet[$lin]);
                             while ($veloc_maxima = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
                                 if($veloc_maxima["MVM_VELOCIDADE"] != null) {
@@ -214,18 +179,12 @@
                         $lin++;
                     };
                     foreach ($arrJs as $value) {
-                        //$persistencia->insereInfracao($lote[0]->login, $value);
                         $persistencia->insereInfracao($login, $value);
                     }
                     $persistencia->insereConsolidacaoInfracao($login, count($arrJs));
-                    //$retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
-                    //};  
-                //};
-                //};
             } catch(Exception $e ){
                 $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]';
             };
-            //echo $retorno;
             exit;
         }
 

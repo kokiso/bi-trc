@@ -465,72 +465,6 @@
 			function biDesmarcarClick(){
 				tblBi.retiraChecked();
 			};
-      ////////////////////////////
-      // Filtrando os registros //
-      ////////////////////////////
-      function btnFiltrarClick() {
-				clsJs   = jsString("lote");
-				clsJs.add("rotina"  	, "select"                                  	);
-				clsJs.add("login"   	, jsPub[0].usr_login                        	);
-				clsJs.add("codusu"  	, jsPub[0].usr_codigo                       	);
-				clsJs.add("dtini"   	, document.getElementById("cbIni").value    	);
-				clsJs.add("frota"   	, document.getElementById("cbFrota").value  	);
-				clsJs.add("tempo"   	, document.getElementById("cbTempo").value  	);
-				clsJs.add("erro"    	, document.getElementById("cbErro").value   	);
-        clsJs.add("infracao"	, document.getElementById("cbInfracao").value	);
-
-        var cbPoloValue = document.getElementById("cbPolo").value;
-        var poloCodigo;
-        var poloGrupo;
-
-        if(cbPoloValue != "TODOS") {
-          poloCodigo = cbPoloValue.split('-')[0];
-          poloGrupo = cbPoloValue.split('-')[1];
-          clsJs.add("poloCodigo"	, poloCodigo);
-          clsJs.add("poloGrupo"	, poloGrupo);
-        } else {
-          clsJs.add("poloCodigo"	, '');
-          clsJs.add("poloGrupo"	, '');
-        }
-
-        var cbUnidadeValue = document.getElementById("cbUnidade").value;
-        var unidadeCodigo;
-
-        if(cbUnidadeValue != "TODOS") {
-          unidadeCodigo = cbUnidadeValue.split('-')[0];
-          clsJs.add("unidadeCodigo"	, unidadeCodigo);
-        } else {
-          clsJs.add("unidadeCodigo"	, '');
-        }
-
-        var obrigaUnidade = true;
-
-        if(jsPub[0].usr_cargo == 'ADM' || cbUnidadeValue != "TODOS") {
-          obrigaUnidade = false;
-        }
-
-        if(!obrigaUnidade) {
-          fd = new FormData();
-          fd.append("grdInfracaoTempo" , clsJs.fim());
-          msg     = requestPedido("relatorioTempoInfracao.php",fd);
-          retPhp  = JSON.parse(msg);
-          if( retPhp[0].retorno == "OK" ){
-            //////////////////////////////////////////////////////////////////////////////////
-            // O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
-            // Campo obrigatório se existir rotina de manutenção na table devido Json       //
-            // Esta rotina não tem manutenção via classe clsTable2017                       //
-            // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
-            //////////////////////////////////////////////////////////////////////////////////
-            jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
-            jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
-            objBi.ordenaJSon(jsBi.indiceTable,false);
-            objBi.montarBody2017();
-          };
-        } else {
-          gerarMensagemErro("catch",'É obrigatório escolher uma unidade.',"Atenção");
-        }
-
-      };
 
       function btnFiltrarConsolidacaoClick() {
         clsJs   = jsString("lote");
@@ -982,10 +916,6 @@
 
       <div id="selectUnidadePHP">        
         <?php include '../comum/selectUnidade.class.php';?>
-      </div>
-      
-      <div class="campo10" style="float:left;">            
-        <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>
       </div>
       
       <div class="campo10" style="float:left;">            
