@@ -8,6 +8,8 @@
     require_once("../removeAcento.class.php");
     require_once("../selectRepetidoTrac.class.php");
     require_once("../persistencia/infracaoTempoPersistencia.php");
+    require_once("../exportarExcel.class.php");
+
 
     class serviceTempoInfracao{
 
@@ -266,8 +268,29 @@
                                 ,number_format($linha["DISTANCIA_PERCORRIDA"], 2, '.', '')
                               ]);
                         }; 
-                    };  
-                    $retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
+                    };
+                    $titulos = [
+                        "PLACA",
+                        "LP",
+                        "T",
+                        "IDINI",
+                        "DTINI",
+                        "IDFIM",
+                        "DTFIM",
+                        "TEMPO",
+                        "VEL",
+                        "MAX",
+                        "MOTORISTA",
+                        "DES",
+                        "EVE",
+                        "RFID",
+                        "DISTPERC"
+                    ];
+                    $exportar = new exportarExcel();
+                    $data = $exportar->exportar('BI Infração/Tempo em '. date("M/y"), $arrJs, $titulos);
+
+                    $retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":"", "data":"'.$data.'"}]';
+
                 };
             } catch(Exception $e ){
                 $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]';

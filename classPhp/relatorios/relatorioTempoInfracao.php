@@ -579,21 +579,16 @@
           msg     = requestPedido("relatorioTempoInfracao.php",fd);
           retPhp  = JSON.parse(msg);
           if( retPhp[0].retorno == "OK" ){
-            //////////////////////////////////////////////////////////////////////////////////
-            // O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
-            // Campo obrigatório se existir rotina de manutenção na table devido Json       //
-            // Esta rotina não tem manutenção via classe clsTable2017                       //
-            // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
-            //////////////////////////////////////////////////////////////////////////////////
-            jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
-            jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
-            objBi.ordenaJSon(jsBi.indiceTable,false);
-            objBi.montarBody2017();
-          };
+              var dlink = document.createElement('a');
+              dlink.download = new Date().toLocaleString('default', { day: 'numeric', month: 'long', year: 'numeric'});
+              dlink.href = 'http://localhost:1337/classPhp/relatorios/' + retPhp[0].data + '.xlsx';
+              dlink.click();
+              dlink.remove();
+          }
         } else {
           gerarMensagemErro("catch",'É obrigatório escolher uma unidade.',"Atenção");
         }
-      };
+      }
 
       function montaUnidade() {
         var cbPoloValue = document.getElementById("cbPolo").value;
