@@ -2,7 +2,7 @@
 
 
 $app->get('/teste', function ($request) {
-  return 'teste';
+    return json_encode($request);
   // return $request;
 });
 
