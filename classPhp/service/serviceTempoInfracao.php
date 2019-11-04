@@ -21,8 +21,9 @@
                     $dteDiff  = $dtI->diff($dtF); 
                     return $dteDiff->format("%H:%I:%S"); 
                 };
-                
-                $persistencia->insereConsolidacaoInfracao($login, count($arrJs));
+            
+                $persistencia     = new infracaoTempoPersistencia();
+                $persistencia->atualizaConfiguracaoConsolidacao($login);
         
                 $vldr     = new validaJSon();
         
@@ -47,8 +48,7 @@
                         $placaAtu        = "***9999";
                         $params   = array();
                         $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
-            
-                        $persistencia     = new infracaoTempoPersistencia();
+
                         $consulta = $persistencia->buscaInfracaoTempo($login);
                         $normalizou  = false;
                         while ($linha = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
