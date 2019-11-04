@@ -3,12 +3,12 @@
         session_start(); 
     }
 
-    require_once("../conectaSqlServer.class.php");
-    require_once("../validaJSon.class.php");
-    require_once("../removeAcento.class.php");
-    require_once("../selectRepetidoTrac.class.php");
-    require_once("../persistencia/infracaoTempoPersistencia.php");
-    require_once("../exportarExcel.class.php");
+    require_once __DIR__ . "/../conectaSqlServer.class.php";
+    require_once __DIR__ . "/../validaJSon.class.php";
+    require_once __DIR__ . "/../removeAcento.class.php";
+    require_once __DIR__ . "/../selectRepetidoTrac.class.php";
+    require_once __DIR__ . "/../persistencia/infracaoTempoPersistencia.php";
+    require_once __DIR__ . "/../exportarExcel.class.php";
 
 
     class serviceTempoInfracao{

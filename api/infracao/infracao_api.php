@@ -1,11 +1,11 @@
-  <?php
+<?php
 
-//require_once "../../classPhp/service/serviceTempoInfracao.php";
+include_once __DIR__ . "/../../classPhp/service/serviceTempoInfracao.php";
 
 $app->get('/consolidaInfracao', function ($request) {
-//  $servicoTempoInfracao = new serviceTempoInfracao();
-    return 'hausdhud';
+  $servicoTempoInfracao = new serviceTempoInfracao();
   $servicoTempoInfracao->consolidaTempoInfracao('INTEGRAR');
+  return json_encode($request);
 });
 
 ?>
