@@ -15,7 +15,7 @@
       $classe->conecta($login);
 
       $sql="";
-      $sql.="SELECT top 10000";
+      $sql.="SELECT";
       $sql.="   MVM_POSICAO";
       $sql.="  ,MTR_CODIGO";
       $sql.="  ,MTR_NOME";
@@ -31,14 +31,15 @@
       $sql.="  ,MTR_RFID";
       $sql.="  ,MVM_ODOMETRO";
       $sql.="  ,UNI_CODIGO";
+      $sql.="  ,MVM_ANOMES";
       $sql.="  FROM MOVIMENTO";
       $sql.="  LEFT OUTER JOIN EVENTO EVE ON MVM_CODEVE=EVE.EVE_CODIGO";
       $sql.="  LEFT OUTER JOIN VEICULO VCL ON MVM_PLACA=VCL.VCL_CODIGO";
       $sql.="  LEFT OUTER JOIN MOTORISTA MTR ON MVM_CODMTR=MTR.MTR_CODIGO";
-      $sql.="  LEFT OUTER JOIN UNIDADE UNI ON MVM_CODUNI=UNI.UNI_CODIGO";          
-      $sql.="   WHERE 1 = 1"; 	
-      $sql.="   AND (MVM_POSICAO > (SELECT TOP 1 ULTIMA_POSICAO_MOVIMENTO FROM CONSOLIDACAO_INFRACAO ORDER BY COD_CONSOLIDACAO DESC))"; 
-      $sql.="   AND (MVM_ENTRABI='S')"; 
+      $sql.="  LEFT OUTER JOIN UNIDADE UNI ON MVM_CODUNI=UNI.UNI_CODIGO";
+      $sql.="   WHERE 1 = 1";
+      $sql.="   AND (MVM_POSICAO > (SELECT TOP 1 ULTIMA_POSICAO_MOVIMENTO FROM CONSOLIDACAO_INFRACAO ORDER BY COD_CONSOLIDACAO DESC))";
+      $sql.="   AND (MVM_ENTRABI='S')";
       $sql.="   AND (EVE_MOVIMENTO='S')";
       $sql.="   AND (MVM_VELOCIDADE>0) AND (VCL.VCL_ENTRABI='S') ";
       $sql.="   AND ( MVM_CODEG IN ('EV', 'EVC', 'VN'))";
@@ -56,9 +57,9 @@
       $classe->conecta($login);
 
       switch( $lote[0]->frota ){
-        case "LP" : $frota=" AND (VCL.VCL_FROTA IN('L','P'))" ;break;
-        case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
-        case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
+        case "LP" : $frota=" AND (FROTA IN('L','P'))" ;break;
+        case "L"  : $frota=" AND (FROTA='L')"         ;break;
+        case "P"  : $frota=" AND (FROTA='P')"         ;break;
       };
 
       $sql="";
@@ -77,11 +78,28 @@
       $sql.="    DESCALIBRADO, ";
       $sql.="    EVE_CODEG, ";
       $sql.="    RFID, ";
-      $sql.="    DISTANCIA_PERCORRIDA ";
+      $sql.="    DISTANCIA_PERCORRIDA, ";
+      $sql.="    ERRO ";
       $sql.=" FROM INFRACAO ";
-      $sql.="    INNER JOIN MOTORISTA MTO ON CODIGO_MOTORISTA = MTR_CODIGO ";
-      $sql.="    INNER JOIN EVENTO EVE ON CODIGO_EVENTO = EVE_CODIGO ";
+      $sql.="    LEFT OUTER JOIN MOTORISTA MTO ON CODIGO_MOTORISTA = MTR_CODIGO ";
+      $sql.="    LEFT OUTER JOIN VEICULO VCL ON PLACA=VCL.VCL_CODIGO";
+      $sql.="    LEFT OUTER JOIN EVENTO EVE ON CODIGO_EVENTO = EVE_CODIGO ";
+      $sql.="    LEFT OUTER JOIN UNIDADE UNI ON CODIGO_UNIDADE = UNI_CODIGO ";
       $sql.=" WHERE 1=1 ";
+      $sql.=$frota;
+      $sql.="    AND CONVERT(TIME, TEMPO) > (select cast(dateadd(ms, ".$lote[0]->tempo."*1000, '00:00:00') AS TIME(3)))";
+      if($lote[0]->poloCodigo != "") {
+        $sql.="   AND ( UPPER(UNI.UNI_CODPOL) = UPPER('".$lote[0]->poloCodigo."')) AND (UNI.UNI_CODGRP = ".$lote[0]->poloGrupo.")";
+      }
+      if($lote[0]->unidadeCodigo != "") {
+        $sql.="   AND CODIGO_UNIDADE = ".$lote[0]->unidadeCodigo;
+      }
+      if($lote[0]->dtini != "") {
+        $sql.="   AND ANO_MES = ".$lote[0]->dtini;
+      }
+      if($lote[0]->infracao != "TODOS") {
+        $sql.="   AND EVE_CODEG = '".$lote[0]->infracao."'";
+      }
 
       $params   = array();
       $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
@@ -106,14 +124,14 @@
       return $consulta;
     }
 
-    function insereConsolidacaoInfracao($login, $array) {
+    function insereConsolidacaoInfracao($login) {
       $classe   = new conectaBd();
       $classe->conecta($login);
       
       $query = "";
       $query .= " INSERT INTO CONSOLIDACAO_INFRACAO (DATA_CONSOLIDACAO, ULTIMA_POSICAO_MOVIMENTO ) ";
       $query .= " VALUES ";
-      $query .= " (GETDATE(), ".$array[3].") ";
+      $query .= " (GETDATE(), (select top 1 MVM_POSICAO from MOVIMENTO order by MVM_POSICAO desc))";
 
       $params   = array();
       $options  = array();
@@ -121,49 +139,62 @@
     }
 
     function insereInfracao($login, $array) {
-      $classe   = new conectaBd();
-      $classe->conecta($login);
+      try {
+        $classe   = new conectaBd();
+        $classe->conecta($login);
 
-      $query = "";
-      $query .= " INSERT INTO INFRACAO (PLACA";
-      $query .= "                      ,FROTA ";
-      $query .= "                      ,TURNO ";
-      $query .= "                      ,POSICAO_INICIAL ";
-      $query .= "                      ,DATA_INICIAL ";
-      $query .= "                      ,POSICAO_FINAL ";
-      $query .= "                      ,DATA_FINAL ";
-      $query .= "                      ,TEMPO ";
-      $query .= "                      ,VELOCIDADE ";
-      $query .= "                      ,VELOCIDADE_MAX ";
-      $query .= "                      ,CODIGO_MOTORISTA ";
-      $query .= "                      ,DESCALIBRADO ";
-      $query .= "                      ,CODIGO_EVENTO ";
-      $query .= "                      ,RFID ";
-      $query .= "                      ,DISTANCIA_PERCORRIDA ";
-      $query .= "                      ,CODIGO_UNIDADE )";
-      $query .= " VALUES ";
-      $query .= " ('".$array[0]."'";  // PLACA
-      $query .= " ,'".$array[1]."'";  // FROTA
-      $query .= " ,'".$array[2]."'";  // TURNO
-      $query .= " ,".$array[3];       // POSICAO_INICIAL
-      $query .= " ,'".$array[4]."'";  // DATA_INICIAL
-      $query .= " ,".$array[5];       // POSICAO_FINAL
-      $query .= " ,'".$array[6]."'";  // DATA_FINAL
-      $query .= " ,'".$array[7]."'";  // TEMPO
-      $query .= " ,".$array[8];       // VELOCIDADE
-      $query .= " ,".$array[9];       // VELOCIDADE_MAX
-      $query .= " ,".$array[15];      // CODIGO_MOTORISTA
-      $query .= " ,'".$array[11]."'"; // DESCALIBRADO
-      $query .= " ,".$array[17];      // CODIGO_EVENTO
-      $query .= " ,'".$array[13]."'"; // RFID
-      $query .= " ,".$array[14];      // DISTANCIA_PERCORRIDA
-      $query .= " ,".$array[16].")";  // CODIGO_UNIDADE
+        if ($array[5] == "") {
+          $array[5] = "null";
+        }
 
-      //echo($query."\n");
+        $query = "";
+        $query .= " INSERT INTO INFRACAO (PLACA";
+        $query .= "                      ,FROTA ";
+        $query .= "                      ,TURNO ";
+        $query .= "                      ,POSICAO_INICIAL ";
+        $query .= "                      ,DATA_INICIAL ";
+        $query .= "                      ,POSICAO_FINAL ";
+        $query .= "                      ,DATA_FINAL ";
+        $query .= "                      ,TEMPO ";
+        $query .= "                      ,VELOCIDADE ";
+        $query .= "                      ,VELOCIDADE_MAX ";
+        $query .= "                      ,CODIGO_MOTORISTA ";
+        $query .= "                      ,DESCALIBRADO ";
+        $query .= "                      ,CODIGO_EVENTO ";
+        $query .= "                      ,RFID ";
+        $query .= "                      ,DISTANCIA_PERCORRIDA ";
+        $query .= "                      ,CODIGO_UNIDADE ";
+        $query .= "                      ,ANO_MES ";
+        $query .= "                      ,ERRO )";
+        $query .= " VALUES ";
+        $query .= " ('".$array[0]."'";  // PLACA
+        $query .= " ,'".$array[1]."'";  // FROTA
+        $query .= " ,'".$array[2]."'";  // TURNO
+        $query .= " ,".$array[3];       // POSICAO_INICIAL
+        $query .= " ,'".$array[4]."'";  // DATA_INICIAL
+        $query .= " ,".$array[5];       // POSICAO_FINAL
+        $query .= " ,'".$array[6]."'";  // DATA_FINAL
+        $query .= " ,'".$array[7]."'";  // TEMPO
+        $query .= " ,".$array[8];       // VELOCIDADE
+        $query .= " ,".$array[9];       // VELOCIDADE_MAX
+        $query .= " ,".$array[15];      // CODIGO_MOTORISTA
+        $query .= " ,'".$array[11]."'"; // DESCALIBRADO
+        $query .= " ,".$array[17];      // CODIGO_EVENTO
+        $query .= " ,'".$array[13]."'"; // RFID
+        $query .= " ,".$array[14];      // DISTANCIA_PERCORRIDA
+        $query .= " ,".$array[16];      // CODIGO_UNIDADE
+        $query .= " ,".$array[18]."";  // ANO_MES
+        $query .= " ,".$array[19].")";  // ERRO
 
-      $params   = array();
-      $options  = array();
-      sqlsrv_query($_SESSION['conn'], $query, $params, $options);
+        //echo($query."\n");
+
+        $params   = array();
+        $options  = array();
+        sqlsrv_query($_SESSION['conn'], $query, $params, $options);
+      } catch(Exception $e){
+        echo('Erro - '.$e);
+      }
+      
     }
   }
 ?>
