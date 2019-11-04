@@ -20,7 +20,9 @@
                     $dtF      = new DateTime($parF);
                     $dteDiff  = $dtI->diff($dtF); 
                     return $dteDiff->format("%H:%I:%S"); 
-                };  
+                };
+                
+                $persistencia->insereConsolidacaoInfracao($login, count($arrJs));
         
                 $vldr     = new validaJSon();
         

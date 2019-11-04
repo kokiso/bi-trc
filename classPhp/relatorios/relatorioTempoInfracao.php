@@ -581,7 +581,7 @@
           if( retPhp[0].retorno == "OK" ){
               var dlink = document.createElement('a');
               dlink.download = new Date().toLocaleString('default', { day: 'numeric', month: 'long', year: 'numeric'});
-              dlink.href = 'http://localhost:1337/classPhp/relatorios/' + retPhp[0].data + '.xlsx';
+              dlink.href = 'http://localhost:5000/classPhp/relatorios/' + retPhp[0].data + '.xlsx';
               dlink.click();
               dlink.remove();
           }
@@ -989,10 +989,10 @@
       </div>
       
       <div class="campo10" style="float:left;">            
-        <input id="btnFilttrar" onClick="btnFiltrarConsolidacaoClick();" type="button" value="Filtrar Consolidação" class="botaoSobreTable"/>
+        <input id="btnFilttrar" onClick="btnFiltrarConsolidacaoClick();" type="button" value="Relatório" class="botaoSobreTable"/>
       </div>
     </div>
-    <div class="divTelaCheia" style="float:left;">
+    <!--<div class="divTelaCheia" style="float:left;">
       <div id="divContabil" class="conteudo" style="display:block;overflow-x:auto;position:relative;float:left;width:110em;height:55em;">
         <div id="divTopoInicio">
         </div>
@@ -1022,7 +1022,7 @@
       <form method="post" name="frmScf" class="center" id="frmScf" action="classPhp/imprimirsql.php" target="_newpage" style="position:fixed;top:10em;width:90em;z-index:30;display:none;">
         <input type="hidden" id="sql" name="sql"/>
       </form>
-    </div>    
+    </div>-->
     
     <script>
       var acc = document.getElementsByClassName("acordeon");

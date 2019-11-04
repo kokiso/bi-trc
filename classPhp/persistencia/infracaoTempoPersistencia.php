@@ -138,6 +138,18 @@
       sqlsrv_query($_SESSION['conn'], $query, $params, $options);
     }
 
+    function atualizaConfiguracaoConsolidacao($login) {
+      $classe   = new conectaBd();
+      $classe->conecta($login);
+      
+      $query = "";
+      $query .= " UPDATE CONFIGURACAO_CONSOLIDACAO_INFRACAO SET DATA_CONSOLIDACAO = GETDATE() ";
+
+      $params   = array();
+      $options  = array();
+      sqlsrv_query($_SESSION['conn'], $query, $params, $options);
+    }
+
     function insereInfracao($login, $array) {
       try {
         $classe   = new conectaBd();
