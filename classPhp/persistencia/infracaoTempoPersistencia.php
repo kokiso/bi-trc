@@ -157,6 +157,7 @@
 
         if ($array[5] == "") {
           $array[5] = "null";
+          $array[14] = "null";
           $array[19] = 1;
         }
 

@@ -166,9 +166,14 @@
                             //};
                             $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
 
-                            if( ((int)$splTempo[0]>0) or ((int)$splTempo[1]>30) ){
+                            if(sizeof($splTempo) > 2) {
+                                if( ((int)$splTempo[0]>0) or ((int)$splTempo[1]>30) ){
+                                    $arrRet[$lin]["ERRO"]=1;
+                                };
+                            } else {
                                 $arrRet[$lin]["ERRO"]=1;
-                            };
+                                $arrRet[$lin]["TEMPO"]="**erro**";
+                            }
                             
                             $query = "";
                             $query .= " select MAX(MVM_VELOCIDADE) as MVM_VELOCIDADE from MOVIMENTO ";
