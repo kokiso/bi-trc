@@ -56,7 +56,6 @@ if (isset($_REQUEST)) {
     
     $app = new App();
 
-    require_once __DIR__ . '/teste/teste_api.php';
     require_once __DIR__ . '/infracao/infracao_api.php';
 
     $app->execute($_REQUEST);

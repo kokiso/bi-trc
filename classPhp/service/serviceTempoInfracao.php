@@ -3,12 +3,12 @@
         session_start(); 
     }
 
-    require_once __DIR__ . "/../conectaSqlServer.class.php";
-    require_once __DIR__ . "/../validaJSon.class.php";
-    require_once __DIR__ . "/../removeAcento.class.php";
-    require_once __DIR__ . "/../selectRepetidoTrac.class.php";
-    require_once __DIR__ . "/../persistencia/infracaoTempoPersistencia.php";
-    require_once __DIR__ . "/../exportarExcel.class.php";
+    require_once(__DIR__ . "/../conectaSqlServer.class.php");
+    require_once(__DIR__ . "/../validaJSon.class.php");
+    require_once(__DIR__ . "/../removeAcento.class.php");
+    require_once(__DIR__ . "/../selectRepetidoTrac.class.php");
+    require_once(__DIR__ . "/../persistencia/infracaoTempoPersistencia.php");
+    require_once(__DIR__ . "/../exportarExcel.class.php");
 
 
     class serviceTempoInfracao{
@@ -108,7 +108,7 @@
                     };									
                 } else {
                     if( $placaAtu==$placaOld  ){
-                        ( $linha["MVM_VELOCIDADE"]>$arrRet[$linR]["MAXIMAVELOC"] )
+                        if ( $linha["MVM_VELOCIDADE"]>$arrRet[$linR]["MAXIMAVELOC"] )
                           $arrRet[$linR]["MAXIMAVELOC"]=$linha["MVM_VELOCIDADE"];
                           
                     };
@@ -182,6 +182,7 @@
                     $persistencia->insereInfracao($login, $value);
                 }
                 $persistencia->insereConsolidacaoInfracao($login, count($arrJs));
+            }
             } catch(Exception $e ){
                 $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]';
             };
