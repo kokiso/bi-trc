@@ -10,6 +10,7 @@
   class infracaoTempoPersistencia{
     var $retorno="";
 
+    // Busca registros para realizar a consolidação
     function buscaInfracaoTempo($login) {
       $classe   = new conectaBd();
       $classe->conecta($login);
@@ -52,6 +53,7 @@
       return $consulta;
     }
 
+    // Busca os dados consolidados
     function buscaInfracaoTempoConsolidacao($login, $lote) {
       $classe   = new conectaBd();
       $classe->conecta($login);
@@ -108,6 +110,7 @@
       return $consulta;
     }
 
+    // Busca a velocidade máxima de um intervalo de movimento
     function buscaVelocidadeMaxima($login, $array) {
       $classe   = new conectaBd();
       $classe->conecta($login);
@@ -124,6 +127,7 @@
       return $consulta;
     }
 
+    // Insere uma linha de histórico de consolidação
     function insereConsolidacaoInfracao($login, $qtdRegistros) {
       $classe   = new conectaBd();
       $classe->conecta($login);
@@ -138,6 +142,7 @@
       sqlsrv_query($_SESSION['conn'], $query, $params, $options);
     }
 
+    // Adiciona o horário de consolidação na tabela de configuração
     function atualizaConfiguracaoConsolidacao($login) {
       $classe   = new conectaBd();
       $classe->conecta($login);
@@ -150,6 +155,7 @@
       sqlsrv_query($_SESSION['conn'], $query, $params, $options);
     }
 
+    // Insere um registro consolidado
     function insereInfracao($login, $array) {
       try {
         $classe   = new conectaBd();
