@@ -255,7 +255,8 @@
                         "DISTPERC"
                     ];
                     $exportar = new exportarExcel();
-                    $data = $exportar->exportar('BI Infração/Tempo em '. date("M/y"), $arrJs, $titulos);
+                    $nomeArquivo = 'BI Infração/Tempo em '. date("M/y");
+                    $data = $exportar->exportar($nomeArquivo, $arrJs, $titulos);
                     $retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":"", "data":"'.$data.'"}]';
                 };
             } catch(Exception $e ){

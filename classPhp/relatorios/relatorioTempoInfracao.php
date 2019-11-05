@@ -21,7 +21,8 @@
     <title>Infração/tempo</title>
     <link rel="stylesheet" href="../../css/css2017.css">
     <link rel="stylesheet" href="../../css/cssTable2017.css">
-    <link rel="stylesheet" href="../../css/Acordeon.css">    
+    <link rel="stylesheet" href="../../css/Acordeon.css">
+    <script src="../../config/configuracoes.js"></script>
     <script src="../../js/js2017.js"></script>
     <script src="../../js/jsTable2017.js"></script>
     <script language="javascript" type="text/javascript"></script>
@@ -252,7 +253,7 @@
       /////////////////////////////////
 			function biDesmarcarClick(){
 				tblBi.retiraChecked();
-			};
+      };
 
       function btnFiltrarConsolidacaoClick() {
         clsJs   = jsString("lote");
@@ -303,7 +304,7 @@
           if( retPhp[0].retorno == "OK" ){
               var dlink = document.createElement('a');
               dlink.download = new Date().toLocaleString('default', { day: 'numeric', month: 'long', year: 'numeric'});
-              dlink.href = 'http://localhost:5000/classPhp/relatorios/' + retPhp[0].data + '.xlsx';
+              dlink.href = ENDERECO_DOWNLOAD + retPhp[0].data + '.xlsx';
               dlink.click();
               dlink.remove();
           }
@@ -707,7 +708,7 @@
       </div>
       
       <div class="campo10" style="float:left;">            
-        <input id="btnFilttrar" onClick="btnFiltrarConsolidacaoClick();" type="button" value="Relatório" class="botaoSobreTable"/>
+        <input id="btnFiltrar" onClick="btnFiltrarConsolidacaoClick();" type="button" value="Relatório" class="botaoSobreTable"/>
       </div>
     </div>
     
