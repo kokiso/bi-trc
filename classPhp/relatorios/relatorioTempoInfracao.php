@@ -710,37 +710,6 @@
         <input id="btnFilttrar" onClick="btnFiltrarConsolidacaoClick();" type="button" value="Relatório" class="botaoSobreTable"/>
       </div>
     </div>
-    <!--<div class="divTelaCheia" style="float:left;">
-      <div id="divContabil" class="conteudo" style="display:block;overflow-x:auto;position:relative;float:left;width:110em;height:55em;">
-        <div id="divTopoInicio">
-        </div>
-      </div>
-      <a name="ancoraDetalhe">
-      <button id="btnDetalhe"
-              class="acordeon"
-              style="width:25%;margin-left:0.1em;">Detalhe do registro</button>
-      <div class="acrdnDiv" style="width:90%;margin-left:0.1em;height:42em;">
-        <div id="divDetalhe" class="conteudo" style="position:relative;float:left;height:41em;width:150em;">
-          <div id="divDetalheReg">
-          </div>
-        </div>
-      </div>
-
-      <a name="ancoraMotorista">
-      <button id="btnMotorista"
-              class="acordeon"
-              style="width:25%;margin-left:0.1em;">Motorista</button>
-      <div class="acrdnDiv" style="width:78%;margin-left:0.1em;height:42em;">
-        <div id="divMtr" class="conteudo" style="position:relative;float:left;height:41em;width:78%;">
-          <div id="divMtrReg">
-          </div>
-        </div>
-      </div>
-
-      <form method="post" name="frmScf" class="center" id="frmScf" action="classPhp/imprimirsql.php" target="_newpage" style="position:fixed;top:10em;width:90em;z-index:30;display:none;">
-        <input type="hidden" id="sql" name="sql"/>
-      </form>
-    </div>-->
     
     <script>
       var acc = document.getElementsByClassName("acordeon");
