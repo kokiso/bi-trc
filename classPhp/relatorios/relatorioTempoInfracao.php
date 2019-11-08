@@ -49,6 +49,7 @@
     </style>  
     <script>
       "use strict";
+
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
 				//comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
@@ -239,7 +240,7 @@
       var clsErro;                    // Classe para erros            
       var fd;                         // Formulario para envio de dados para o PHP
       var msg;                        // Variavel para guardadar mensagens de retorno/erro 
-      var retPhp                      // Retorno do Php para a rotina chamadora
+      var retPhp;                      // Retorno do Php para a rotina chamadora
       var clsChecados;                // Classe para montar Json
       var chkds;                      // Guarda todos registros checados na table 
       var tamC;                       // Guarda a quantidade de registros dentro do vetor chkds
@@ -252,8 +253,7 @@
       /////////////////////////////////
 			function biDesmarcarClick(){
 				tblBi.retiraChecked();
-			};
-
+            }
       function btnFiltrarConsolidacaoClick() {
         clsJs   = jsString("lote");
 				clsJs.add("rotina"  	, "select"                                  	);
@@ -303,7 +303,7 @@
           if( retPhp[0].retorno == "OK" ){
               var dlink = document.createElement('a');
               dlink.download = new Date().toLocaleString('default', { day: 'numeric', month: 'long', year: 'numeric'});
-              dlink.href = 'http://localhost:5000/classPhp/relatorios/' + retPhp[0].data + '.xlsx';
+              dlink.href = 'http://localhost:1337/classPhp/relatorios/' + retPhp[0].data + '.xlsx';
               dlink.click();
               dlink.remove();
           }
