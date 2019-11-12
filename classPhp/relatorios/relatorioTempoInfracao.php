@@ -254,12 +254,8 @@
       /////////////////////////////////
 			function biDesmarcarClick(){
 				tblBi.retiraChecked();
-<<<<<<< HEAD
-            }
-=======
       };
 
->>>>>>> 091590a3060ad2e3144fde71283d0060b3bf9e85
       function btnFiltrarConsolidacaoClick() {
         clsJs   = jsString("lote");
 				clsJs.add("rotina"  	, "select"                                  	);
@@ -311,7 +307,7 @@
               dlink.download = new Date().toLocaleString('default', { day: 'numeric', month: 'long', year: 'numeric'});
               dlink.href = ENDERECO_DOWNLOAD + retPhp[0].data + '.xlsx';
               dlink.click();
-              dlink.remove();
+              dlink.remove();   
           }
         } else {
           gerarMensagemErro("catch",'É obrigatório escolher uma unidade.',"Atenção");
