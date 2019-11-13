@@ -763,17 +763,6 @@
           document.getElementById("edtVcl").classList.remove('inputF10');
         }
       };
-      function codVclBlur(obj){
-        if (!document.getElementById("edtVcl").readOnly && document.getElementById("edtCodUni").value !== '0000'){
-          const codigoUnidade = document.getElementById("edtCodUni").value;
-          var ret = fVeiculoF10(codigoUnidade);
-          document.getElementById(obj.id).value          = ( ret.length == 0 ? "0000"    : jsNmrs(ret[0].CODIGO).emZero(4).ret()  );
-          document.getElementById("edtVcl").value     = ( ret.length == 0 ? ""        : ret[0].APELIDO                         );
-        } else {
-          document.getElementById("edtVcl").readOnly = true;
-          document.getElementById("edtVcl").classList.remove('inputF10');
-        }
-      };
     </script>
   </head>
   <body>
@@ -839,7 +828,6 @@
               </div>
                 <div class="campotexto campo20">
                     <input class="campo_input_titulo" id="edtVcl"
-                           onBlur="codVclBlur(this);" 
                            onFocus="uniFocus(this);"
                            onClick="vclF10Click('edtVcl');" 
                            autocomplete="off"
