@@ -5,7 +5,7 @@
     }
 
     require_once(__DIR__."/../conectaSqlServer.class.php");
-    require_once(__DIR__."/../validaJSon.class.php");    
+    require_once(__DIR__."/../validaJson.class.php");    
 
     $classe   = new conectaBd();      
     $classe->conecta($_SESSION['login']);

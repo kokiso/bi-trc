@@ -3,7 +3,7 @@
   if( isset($_POST["biInfracao"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/selectRepetidoTrac.class.php"); 
 

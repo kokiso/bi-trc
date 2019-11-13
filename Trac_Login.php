@@ -1,7 +1,7 @@
 <?php
   session_start();
   require("classPhp/conectaSqlServer.class.php");
-  require("classPhp/validaJSon.class.php");
+  require("classPhp/validaJson.class.php");
   if( isset($_POST["login"]) ){
     $vldr = new validaJSon();          
     $retorno  = "";

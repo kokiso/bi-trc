@@ -4,7 +4,7 @@
     }
     
     require_once(__DIR__ . "/../conectaSqlServer.class.php");
-    require_once(__DIR__ . "/../validaJSon.class.php");
+    require_once(__DIR__ . "/../validaJson.class.php");
     require_once(__DIR__ . "/../removeAcento.class.php");
     require_once(__DIR__ . "/../selectRepetidoTrac.class.php");
     require_once(__DIR__ . "/../persistencia/infracaoTempoPersistencia.php");

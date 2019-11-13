@@ -31,7 +31,7 @@
          ,["login"=>"ATLAS2"    , "path"=>"127.0.0.1" , "cnpj"=>"18269882000150","user"=>"sa","pass"=>"BIS@18"]       //Bd desenvolvimento
          ,["login"=>"ATLAS3"    , "path"=>"127.0.0.1" , "cnpj"=>"18269882000150","user"=>"sa","pass"=>"BIS@18"]       //Bd desenvolvimento
          ,["login"=>"ATLAS4"    , "path"=>"127.0.0.1" , "cnpj"=>"18269882000150","user"=>"sa","pass"=>"BIS@18"]       //Bd desenvolvimento
-         ,["login"=>"INTEGRAR"  , "path"=>"189.112.62.30,15100" , "cnpj"=>"18269882000150","user"=>"sa","pass"=>"@A1111111"]       //Bd para ler base de dados SistemSat
+         ,["login"=>"INTEGRAR"  , "path"=>"192.168.1.51,1433" , "cnpj"=>"18269882000150","user"=>"sa","pass"=>"@A1111111"]       //Bd para ler base de dados SistemSat
          ,["login"=>"INTEGRAR1" , "path"=>"127.0.0.1" , "cnpj"=>"18269882000150","user"=>"sa","pass"=>"BIS@2018"]       //Bd para ler base de dados SistemSat
          )
         )
