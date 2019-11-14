@@ -829,7 +829,7 @@
                            onClick="vclF10Click('edtVcl');" 
                            autocomplete="off"
                            type="text"
-                           readonly />
+                    />
                     <label class="campo_label" for="edtVcl">VEICULO</label>
                 </div>
               <div class="campotexto campo15">
