@@ -709,7 +709,9 @@
         if (document.getElementById("edtVcl").value) {
           document.getElementById("edtVcl").value = "";
         }
-        document.getElementById("edtVcl").readOnly = false;
+        if (!document.getElementById("edtVcl").classList.contains('inputF10')){
+          document.getElementById("edtVcl").classList.add('inputF10');
+        }
       };
       function buscarUni(){
         clsJs   = jsString("lote");  
@@ -743,20 +745,18 @@
       };  
 
       function vclF10Click(){
-        if (!document.getElementById("edtVcl").readOnly && document.getElementById("edtCodUni").value !== '0000'){
+        if (document.getElementById("edtCodUni").value !== '0000'){
          const codigoUnidade = document.getElementById("edtCodUni").value;
          fVeiculoF10(codigoUnidade);
         } else {
-          document.getElementById("edtVcl").readOnly = true;
           document.getElementById("edtVcl").classList.remove('inputF10');
         }
       };  
       function RetF10tblVcl(arr){
-        if (!document.getElementById("edtVcl").readOnly && document.getElementById("edtCodUni").value !== '0000'){
+        if (document.getElementById("edtCodUni").value !== '0000'){
         document.getElementById("edtVcl").value   = arr[0].CODIGO;
         document.getElementById("edtVcl").setAttribute("data-oldvalue",arr[0].CODIGO);
         } else {
-          document.getElementById("edtVcl").readOnly = true;
           document.getElementById("edtVcl").classList.remove('inputF10');
         }
       };
@@ -828,8 +828,7 @@
                            onFocus="uniFocus(this);"
                            onClick="vclF10Click('edtVcl');" 
                            autocomplete="off"
-                           type="text"
-                    />
+                           type="text" />
                     <label class="campo_label" for="edtVcl">VEICULO</label>
                 </div>
               <div class="campotexto campo15">
