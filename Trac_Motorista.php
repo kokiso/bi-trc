@@ -710,9 +710,6 @@
           document.getElementById("edtVcl").value = "";
         }
         document.getElementById("edtVcl").readOnly = false;
-        if (!document.getElementById("edtVcl").classList.contains('inputF10')){
-          document.getElementById("edtVcl").classList.add('inputF10');
-        }
       };
       function buscarUni(){
         clsJs   = jsString("lote");  
@@ -827,7 +824,7 @@
                 <label class="campo_label campo_required" for="edtDesUni">RAZAO_UNIDADE</label>
               </div>
                 <div class="campotexto campo20">
-                    <input class="campo_input_titulo" id="edtVcl"
+                    <input class="campo_input_titulo inputF10" id="edtVcl"
                            onFocus="uniFocus(this);"
                            onClick="vclF10Click('edtVcl');" 
                            autocomplete="off"
