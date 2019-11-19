@@ -649,7 +649,7 @@
     <script>
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
-				comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbCompetencia"));
+				// comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbCompetencia"));
         //buscarCompetencia();
         buscarUni();
         buscarPol();
@@ -1483,11 +1483,13 @@ function criarElemento(elem,attr,app){
           </select>
         </div>
 
-        <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
+        <!-- <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
           <select id="cbCompetencia" onChange="chngCompetencia();" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
           </select>
-        </div>
+        </div> -->
         
+        <?php include 'classPhp/comum/selectMesDashboard.class.php';?>
+
         <ul class="nav navbar-nav">
           <li class="dropdown notifications-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">

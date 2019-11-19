@@ -2942,7 +2942,7 @@ function comboCompetencia(qual, el) {
   }
   if (qual == "classif_mot") {
     meses.push({ valor: "201805|201805", texto: "MAI/18" });
-    meses.push({ valor: "201806|201805", texto: "UN/18" });
+    meses.push({ valor: "201806|201805", texto: "JUN/18" });
     meses.push({ valor: "201807|201805", texto: "JUL/18" });
     meses.push({ valor: "201808|201805", texto: "AGO/18" });
     meses.push({ valor: "201809|201805", texto: "SET/18" });
