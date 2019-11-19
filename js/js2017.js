@@ -2968,7 +2968,7 @@ function comboCompetencia(qual, el) {
       ceOpt.appendChild(ceContext);
       ceOpt.setAttribute("value", meses[lin].valor);
       ceOpt.setAttribute("text", meses[lin].texto);
-      if (meses[lin].texto == "NOV/18") ceOpt.setAttribute("selected", true);
+      if (meses[lin].texto == "OUT/19") ceOpt.setAttribute("selected", true);
       el.appendChild(ceOpt);
     }
   }
