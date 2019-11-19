@@ -1460,6 +1460,7 @@ function criarElemento(elem,attr,app){
         }    
       }; 
       function chngCompetencia(){
+        iniciarBi(0,"Todas unidades","*","Todos polos");
         fncContar("contarKm"        ,"qtosKm" ,pubCodUni,pubCodPol,"*");  
 				fncContar("contarMotorista" ,"qtosMtr",pubCodUni,pubCodPol,"*");
 				fncContar("contarVeiculo"   ,"qtosVcl",pubCodUni,pubCodPol,pubLevPes);				
