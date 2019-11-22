@@ -157,6 +157,7 @@
             ,"DESUSU"              :"'.$retPhp[0]["USR_APELIDO"].'"
             ,"usr_cargo"           :"'.$_SESSION["usr_cargo"].'" 
             ,"consultar_relatorio":"'.$_SESSION["consultar_relatorio"].'"   
+            ,"grupo_operacional":"'.$_SESSION["grupo_operacional"].'"   
           }]';              
         $retorno='[{"retorno":"OK","dados":'.str_replace(array("\r","\n"),'',$str).',"erro":""}]';
       };
@@ -228,7 +229,7 @@
 
             if( retPhp[0].retorno=="OK" ){
               localStorage.setItem("lsPublico",JSON.stringify(retPhp[0].dados));
-              localStorage.setItem("lsPathPhp","phpSqlServer.php");
+              localStorage.setItem("lsPathPhp","/phpSqlServer.php");
               if( retPhp[0].dados[0].usr_interno=="E" ){
                 window.location="Trac_BiDashBoard.php";   
               } else {        

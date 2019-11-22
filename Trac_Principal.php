@@ -110,6 +110,7 @@
                   </a>
                   <ul class="treeview-menu">
                     <li><a href="#" onclick="ifAbrir('Trac_Grupo.php'       ,'jsPub[0].usr_d06','Grupos');"><i class="fa fa-circle-o"></i> Grupos</a></li>
+                    <li><a href="#" onClick="window.open('classPhp/paginas/grupoOperacional/grupoOperacional.php','iframeCorpo');"><i class="fa fa-circle-o"></i> Grupos Operacionais</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_Unidade.php'     ,'jsPub[0].usr_d07','Unidades');"><i class="fa fa-circle-o"></i> Unidades</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_Polo.php'        ,'jsPub[0].usr_d08','Polos');"><i class="fa fa-circle-o"></i> Polos</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_Veiculo.php'     ,'jsPub[0].usr_d09','Veiculos');"><i class="fa fa-circle-o"></i> Veiculos</a></li>
@@ -157,7 +158,7 @@
                       </span>
                     </a>
                     <ul class="treeview-menu">
-                    <li><a href="#" onClick="window.open('classPhp/relatorios/relatorioTempoInfracao.php','iframeCorpo');"><i class="fa fa-circle-o"></i> Tempo/Infrações</a></li>
+                    <li><a href="#" onClick="window.open('classPhp/paginas/relatorios/relatorioTempoInfracao.php','iframeCorpo');"><i class="fa fa-circle-o"></i> Tempo/Infrações</a></li>
                     </ul>
                   </li>
                 <?php } ?>

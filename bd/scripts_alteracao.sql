@@ -83,3 +83,47 @@ alter table BKPMOTORISTA
 	add MTR_VEICULO varchar(10)
 go
 
+/*Adiciona a coluna para verificar se o perfil do usuário permite acessar o menu de grupos operacionais*/
+alter table USUARIOPERFIL
+	add GRUPO_OPERACIONAL varchar(1)
+go
+
+alter table BKPUSUARIOPERFIL
+	add GRUPO_OPERACINAL varchar(1)
+go
+
+alter view VUSUARIOPERFIL as SELECT UP_CODIGO
+  ,UP_NOME
+  ,UP_D01,UP_D02,UP_D03,UP_D04,UP_D05,UP_D06,UP_D07,UP_D08,UP_D09,UP_D10
+  ,UP_D11,UP_D12,UP_D13,UP_D14,UP_D15,UP_D16,UP_D17,UP_D18,UP_D19,UP_D20
+  ,UP_ATIVO,UP_REG,UP_CODUSR, CONSULTAR_RELATORIO, GRUPO_OPERACIONAL
+FROM USUARIOPERFIL
+go
+
+create table dbo.GRUPOOPERACIONAL
+(
+    GPO_CODIGO  int identity
+        primary key,
+    GPO_NOME    varchar(60) not null,
+    GPO_CODUSR  int not null
+)
+go
+
+alter table dbo.VEICULO
+	add VCL_CODGPO int NULL
+go
+
+ALTER VIEW [dbo].[VVEICULO] AS
+SELECT A.VCL_CODIGO,
+       A.VCL_NOME,
+       A.VCL_FROTA,
+       A.VCL_CODUNI,
+       A.VCL_ENTRABI,
+       VCL_DTCALIBRACAO,
+       VCL_NUMFROTA,
+       VCL_ATIVO,
+       A.VCL_REG,
+       A.VCL_CODUSR,
+       A.VCL_CODGPO
+FROM VEICULO A
+go

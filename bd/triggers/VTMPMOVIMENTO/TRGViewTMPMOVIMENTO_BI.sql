@@ -122,10 +122,10 @@ BEGIN
       -- Pode existir RFID duplicado desde que nao esteja ativo
       -- Tem que ser na view para atualizar UNI_QTOSMTR
       ---------------------------------------------------------
-      SELECT @varCodMtr=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mvmRfid) AND (MTR_ATIVO='S'));
+      SELECT @varCodMtr=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mvmRfid) AND (MTR_NOME=@mvmDesMtr) AND (MTR_ATIVO='S'));
       IF( @varCodMtr=0 ) BEGIN
         SELECT @varCodMtr=(MAX(MTR_CODIGO)+1) FROM MOTORISTA;
-        INSERT INTO dbo.VMOTORISTA( 
+        INSERT INTO dbo.VMOTORISTA(
           MTR_CODIGO  ,MTR_NOME    ,MTR_RFID ,MTR_CODUNI,MTR_ATIVO ,MTR_REG,MTR_POSICAO,MTR_CODUSR) VALUES(
           @varCodMtr  ,@mvmDesMtr  ,@mvmRfid ,@mvmCodUni,'S'       ,'P'    ,@mvmPosicao,1
         );
@@ -696,7 +696,15 @@ BEGIN
       ----------------------------------------------------------
       -- Fim Produtividade
       ----------------------------------------------------------
-      
+
+      DECLARE @dataProximaConsolidacao DATETIME;
+
+      SELECT @dataProximaConsolidacao = DATEADD(HOUR, INTERVALO_CONSOLIDACAO, DATA_CONSOLIDACAO)
+	    FROM CONFIGURACAO_CONSOLIDACAO_INFRACAO;
+
+	    IF @dataProximaConsolidacao > GETDATE() BEGIN
+        exec consolidaInfracao;
+      END
     END
   END
 END
