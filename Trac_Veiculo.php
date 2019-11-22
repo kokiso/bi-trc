@@ -398,6 +398,16 @@
                       ,"validar"        : ["notnull"]                      
                       ,"ajudaCampo"     : ["Nome da unidade."]
                       ,"padrao":0}
+            ,{"id":2  ,"field"          : "GPO_NOME"   
+                      ,"labelCol"       : "GRUPO OPERACIONAL"
+                      ,"obj"            : "edtGrpOpr"
+                      ,"tamGrd"         : "25em"
+                      ,"tamImp"         : "80"
+                      ,"digitosMinMax"  : [3,40]
+                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
+                      ,"ajudaCampo"     : ["Nome do veiculo com até 20 caracteres."]
+                      ,"importaExcel"   : "S"                                          
+                      ,"padrao":0}
             ,{"id":9  ,"field"          : "VCL_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"
@@ -771,18 +781,18 @@
                 <input class="campo_input" id="edtDtCalibracao" type="text" OnKeyUp="mascaraData(this,event);" maxlength="10" />
                 <label class="campo_label campo_required" for="edtDtCalibracao">CALIBRACAO</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo15">
                 <input class="campo_input" id="edtNumFrota" type="text" maxlength="20" />
                 <label class="campo_label campo_required" for="edtNumFrota">NUM.FROTA</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo10">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbAtivo">ATIVO</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo20">
                 <select class="campo_input_combo" id="cbReg">
                   <option value="P">PUBLICO</option>               
                 </select>
