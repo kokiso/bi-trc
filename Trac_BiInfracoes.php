@@ -556,7 +556,7 @@
     <script>
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
-				comboCompetencia("classif_mot",document.getElementById("cbCompetencia"));
+				// comboCompetencia("classif_mot",document.getElementById("cbCompetencia"));
         window.parent.document.getElementById("iframeCorpo").height="50em";
         buscarUni();
         buscarPol();

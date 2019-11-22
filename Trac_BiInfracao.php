@@ -348,8 +348,8 @@
       "use strict";
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
-				comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbMesAno"));
-        document.getElementById("cbMesAno").focus();
+				// comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
+        document.getElementById("cbIni").focus();
         jsBi={
           "titulo":[
              {"id":0  ,"labelCol":"OPC"     
@@ -524,11 +524,11 @@
         clsJs.add("rotina"  , "selectBi"                                  );
         clsJs.add("login"   , jsPub[0].usr_login                          );
         clsJs.add("codusu"   , jsPub[0].usr_codigo                        );
-        clsJs.add("dtini"   , document.getElementById("cbMesAno").value   );
+        clsJs.add("dtini"   , document.getElementById("cbIni").value   );
         clsJs.add("infracao", document.getElementById("cbInfracao").value );
         clsJs.add("frota"   , document.getElementById("cbFrota").value    );
         clsJs.add("qtos"    , document.getElementById("cbqtos").value     );
-debugger;				
+// debugger;				
         
         fd = new FormData();
         fd.append("biInfracao" , clsJs.fim());
@@ -543,7 +543,7 @@ debugger;
           //////////////////////////////////////////////////////////////////////////////////
           jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
           jsBi.relTitulo="BI "+document.getElementById("cbInfracao").options[document.getElementById("cbInfracao").selectedIndex].text
-                         +" NO PERIODO DE "+document.getElementById("cbMesAno").value;//+" A "+document.getElementById("edtFim").value;
+                         +" NO PERIODO DE "+document.getElementById("cbIni").value;//+" A "+document.getElementById("edtFim").value;
           objBi.ordenaJSon(jsBi.indiceTable,false);  
           objBi.montarBody2017();
         };  
@@ -888,7 +888,7 @@ debugger;
           clsJs.add("coduni"  , chkds[0].CODUNI                             );
           clsJs.add("codmtr"  , chkds[0].CODMTR                             );
           clsJs.add("codvcl"  , chkds[0].PLACA                              );
-          clsJs.add("dtini"   , document.getElementById("cbMesAno").value   );
+          clsJs.add("dtini"   , document.getElementById("cbIni").value   );
           clsJs.add("infracao", document.getElementById("cbInfracao").value );
           clsJs.add("frota"   , document.getElementById("cbFrota").value    );
           fd          = new FormData();
@@ -1073,9 +1073,9 @@ debugger;
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-      <div class="campotexto campo15">
-        <select class="campo_input_combo" id="cbMesAno">
-					<!--
+      <!-- <div class="campotexto campo15">
+        <select class="campo_input_combo" id="cbIni">
+					
           <option value="201805">MAI/18</option>
           <option value="201806">JUN/18</option>
           <option value="201807">JUL/18</option>
@@ -1084,10 +1084,12 @@ debugger;
           <option value="201810">OUT/18</option>
           <option value="201811">NOV/18</option>
           <option value="201812">DEZ/18</option>
-					-->
+					
         </select>
-        <label class="campo_label campo_required" for="cbMesAno">INFORME</label>
-      </div>
+        <label class="campo_label campo_required" for="cbIni">INFORME</label>
+      </div> -->
+
+      <?php include 'classPhp/comum/selectMes.class.php';?>
       
       <div class="campotexto campo25">
         <select class="campo_input_combo" id="cbInfracao" class="selectBis">

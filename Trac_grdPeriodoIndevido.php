@@ -312,7 +312,7 @@
       "use strict";
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
-				comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
+				// comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
         document.getElementById("cbIni").focus();
         jsBi={
           "titulo":[
@@ -854,11 +854,13 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-      <div class="campotexto campo10">      
+      <!-- <div class="campotexto campo10">      
         <select class="campo_input_combo" id="cbIni">
         </select>
         <label class="campo_label campo_required" for="cbFrota">MÊS</label>
-      </div>
+      </div> -->
+
+      <?php include 'classPhp/comum/selectMes.class.php';?>
 			
       <div class="campotexto campo15">
         <select class="campo_input_combo" id="cbFrota">
