@@ -1290,7 +1290,10 @@
       barChartOptions.datasetFill = false
       barChart.Bar(barChartData, barChartOptions)
     }
-    
+
+    function chngCompetencia(){
+        iniciarBi(0,"Todas unidades","*","Todos polos");
+      };
     
     </script> 
   </head>
@@ -1309,9 +1312,9 @@
           </select>
         </div>
 
-        <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
+        <!-- <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
           <select id="cbCompetencia" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
-						<!--
+						
             <option value="201805|201805">MAI/18</option>
             <option value="201806|201805">JUN/18</option>
             <option value="201807|201805">JUL/18</option>
@@ -1320,9 +1323,11 @@
             <option value="201810|201805">OUT/18</option>
             <option value="201811|201805">NOV/18</option>
             <option value="201812|201805">DEZ/18</option>
-						-->
+						
           </select>
-        </div>
+        </div> -->
+
+        <?php include 'classPhp/comum/selectMesDashboard.class.php';?>
         
         <ul class="nav navbar-nav">
           <li class="dropdown notifications-menu">
