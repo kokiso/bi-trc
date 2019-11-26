@@ -166,7 +166,7 @@
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
           ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
-          ,"idBtnConfirmar" : "btnConfirmar"            // Se existir executa o confirmar do form/fieldSet
+          ,"idBtnConfirmarAtualizar" : "idBtnConfirmarAtualizar"            // Se existir executa o confirmar do form/fieldSet
           ,"idBtnCancelar"  : "btnCancelar"             // Se existir executa o cancelar do form/fieldSet
           ,"div"            : "frmGpo"                  // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaGpo"               // Para fechar a div onde estão os fieldset ao cadastrar
@@ -186,7 +186,7 @@
           ,"relFonte"       : "8"                       // Fonte do relatório
           ,"foco"           : ["edtDescricao"
                               ,"edtDescricao"
-                              ,"btnConfirmar"]          // Foco qdo Cad/Alt/Exc
+                              ,"idBtnConfirmarAtualizar"]          // Foco qdo Cad/Alt/Exc
           ,"formPassoPasso" : "/Trac_Espiao.php"         // Enderço da pagina PASSO A PASSO
           ,"indiceTable"    : "DESCRICAO"               // Indice inicial da table
           ,"tamBotao"       : "15"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
@@ -396,7 +396,7 @@
                   <label class="campo_labelSombra">Campo obrigatório</label>
                 </div>              
                 <div class="campo20" style="float:right;">            
-                  <input id="btnConfirmar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
+                  <input id="idBtnConfirmarAtualizar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
                   <i class="faBtn fa-check icon-large"></i>
                 </div>
                 <div class="campo20" style="float:right;">            
