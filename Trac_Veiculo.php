@@ -1,12 +1,12 @@
 <?php
   session_start();
   if( isset($_POST["veiculo"]) ){
-    try{     
+    try{
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJson.class.php"); 
-      require("classPhp/removeAcento.class.php"); 
+      require("classPhp/validaJson.class.php");
+      require("classPhp/removeAcento.class.php");
 
-      $vldr     = new validaJSon();          
+      $vldr     = new validaJSon();
       $retorno  = "";
       $retCls   = $vldr->validarJs($_POST["veiculo"]);
       ///////////////////////////////////////////////////////////////////////
@@ -15,10 +15,10 @@
       $atuBd    = false;
       if($retCls["retorno"] != "OK"){
         $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
-        unset($retCls,$vldr);      
+        unset($retCls,$vldr);
       } else {
-        $strExcel = "*"; 
-        $arrUpdt  = []; 
+        $strExcel = "*";
+        $arrUpdt  = [];
         $jsonObj  = $retCls["dados"];
         $lote     = $jsonObj->lote;
         $rotina   = $lote[0]->rotina;
@@ -37,11 +37,24 @@
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-          } else { 
-            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
-          };  
-        };  
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
+          } else {
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]';
+          };
+        };
+        ///////////////////////////////////////////////////////////
+        //   Buscando apenas as unidades que usuario tem direito //
+        ///////////////////////////////////////////////////////////
+        if( $rotina=="grupoOperacional" ){
+          $sql="SELECT A.GPO_CODIGO AS CODIGO, A.GPO_NOME AS NOME FROM GRUPOOPERACIONAL A";
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
+          } else {
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]';
+          };
+        };
         ////////////////////////////////////////////////
         //       Dados para JavaScript VEICULO        //
         ////////////////////////////////////////////////
@@ -52,54 +65,57 @@
           $sql.="      ,CASE WHEN A.VCL_FROTA='L' THEN CAST('LEVE' AS VARCHAR(4)) ELSE CAST('PESADA' AS VARCHAR(6)) END AS VCL_FROTA";
           $sql.="      ,VCL_CODUNI";
           $sql.="      ,CASE WHEN A.VCL_ENTRABI='S' THEN 'SIM' ELSE 'NAO' END AS VCL_ENTRABI";
-          $sql.="      ,CONVERT(VARCHAR(10),VCL_DTCALIBRACAO,127) AS VCL_DTCALIBRACAO";          
-          $sql.="      ,VCL_NUMFROTA";          
+          $sql.="      ,CONVERT(VARCHAR(10),VCL_DTCALIBRACAO,127) AS VCL_DTCALIBRACAO";
+          $sql.="      ,VCL_NUMFROTA";
           $sql.="      ,UNI.UNI_APELIDO";
+          $sql.="      ,COALESCE(VCL_CODGPO, 0)";
+          $sql.="      ,GPO.GPO_NOME";
           $sql.="      ,CASE WHEN A.VCL_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS VCL_ATIVO";
           $sql.="      ,CASE WHEN A.VCL_REG='P' THEN 'PUB' WHEN A.VCL_REG='S' THEN 'SIS' ELSE 'ADM' END AS VCL_REG";
           $sql.="      ,US_APELIDO";
           $sql.="      ,VCL_CODUSR";
           $sql.="  FROM VEICULO A";
           $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.VCL_CODUSR=U.US_CODIGO";
-          $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.VCL_CODUNI=UNI.UNI_CODIGO";                  
+          $sql.="  LEFT OUTER JOIN GRUPOOPERACIONAL GPO ON A.VCL_CODGPO=GPO.GPO_CODIGO";
+          $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.VCL_CODUNI=UNI.UNI_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-          $sql.=" WHERE (((VCL_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')) AND (COALESCE(UU.UU_ATIVO,'')='S'))"; 
+          $sql.=" WHERE (((VCL_ATIVO='".$lote[0]->ativo."') OR ('* '='".$lote[0]->ativo."')) AND (COALESCE(UU.UU_ATIVO,'')='S'))";
           if( $lote[0]->coduni > 0 ){
             $sql.=" AND (VCL_CODUNI=".$lote[0]->coduni.")";
-          };          
+          };
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-          } else { 
-            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
-          };  
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
+          } else {
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]';
+          };
         };
         ////////////////////////////////////
         // Dados para JavaScript          //
         ////////////////////////////////////
         if( $rotina=="impExcel" ){
-          $strExcel   = "S";                                                //Se S mostra na grade e importa, se N só mostra na grade    
+          $strExcel   = "S";                                                //Se S mostra na grade e importa, se N só mostra na grade
           $dom        = DOMDocument::load($_FILES["arquivo"]["tmp_name"]);  //Abre o arquivo completo
           $rows       = $dom->getElementsByTagName("Row");                  //Retorna um array de todas as linhas
 
           $tamR     = $rows->length; // tamanho do array rows
-          $data     = [];        
-          $arrUpdt  = []; 
+          $data     = [];
+          $arrUpdt  = [];
           $arrDup   = []; //Verifica se existe duplicidade no arquivo recebido
           $clsRa    = new removeAcento();
-          
+
           for ($linR = 0; $linR < $tamR; $linR ++){
             $cells = $rows->item($linR)->getElementsByTagName("Cell");
-            
+
             if( $linR==0 ){
               $tamC=$cells->length;
               $cabec="";
-              
+
               foreach($cells as $cell){
                 $cabec.=($cabec=="" ? "" : "|").strtoupper( $cell->nodeValue );
               };
-              
+
               if( $cabec != $lote[0]->cabec ){
                 //array_push($data,["0000","CABECALHO","LINHA 1 DEVE SER ".$lote[0]->cabec]);
                 ////////////////////////////////////////////////////////
@@ -111,13 +127,13 @@
                                   ,"CODUNI"       /* 03 */
                                   ,"ENTRABI"      /* 04 */
                                   ,"DTCALIBRACAO" /* 05 */
-                                  
+
                                   ,"LINHA 1 DEVE SER ".$lote[0]->cabec]);
                 $strExcel   = "N";
               };
             } else {
               $erro="OK";
-              
+
               $linC = -1;
               foreach($cells as $cell){
                 $linC++;
@@ -125,10 +141,10 @@
                   /////////////////
                   //    PLACA    //
                   /////////////////
-                  case 0: 
+                  case 0:
                     $clsRa->montaRetorno($cell->nodeValue);
                     $codigo=$clsRa->getNome();
-                    if( strlen($codigo)<>7 ){ 
+                    if( strlen($codigo)<>7 ){
                       $erro     = "CAMPO PLACA DEVE TER TAMANHO 07..07";
                       $strExcel = "N";
                     };
@@ -145,15 +161,15 @@
                       array_push($arrDup,[
                         "DESCRICAO"=>$codigo
                       ]);
-                    };    
+                    };
                     break;
                   /////////////////
                   //  DESCRICAO  //
                   /////////////////
-                  case 1: 
+                  case 1:
                     $clsRa->montaRetorno($cell->nodeValue);
                     $descricao=$clsRa->getNome();
-                    if( (strlen($descricao)<3) or (strlen($descricao)>40) ){ 
+                    if( (strlen($descricao)<3) or (strlen($descricao)>40) ){
                       $erro     = "CAMPO DESCRICAO DEVE TER TAMANHO 01..20";
                       $strExcel = "N";
                     };
@@ -161,38 +177,38 @@
                   /////////////////
                   //  FROTA      //
                   /////////////////
-                  case 2: 
+                  case 2:
                     $clsRa->montaRetorno($cell->nodeValue);
                     $frota=$clsRa->getNome();
                     if( !preg_match("/^(L|P)$/",$frota) ){
                       $erro     = "CAMPO FROTA ACEITA APENAS L/P";
                       $strExcel = "N";
-                    };  
-                    break;                  
+                    };
+                    break;
                   /////////////////
                   //   UNIDADE   //
                   /////////////////
-                  case 3: 
-                    $coduni=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));                    
-                    break;                  
+                  case 3:
+                    $coduni=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
+                    break;
                   /////////////////
                   //  ENTRABI    //
                   /////////////////
-                  case 4: 
+                  case 4:
                     $clsRa->montaRetorno($cell->nodeValue);
                     $entrabi=$clsRa->getNome();
                     if( !preg_match("/^(S|N)$/",$entrabi) ){
                       $erro     = "CAMPO ENTRABI ACEITA APENAS S/V";
                       $strExcel = "N";
-                    };  
-                    break;                  
+                    };
+                    break;
                   ////////////////////
                   //  DTCALIBRACAO  //
                   ////////////////////
-                  case 5: 
+                  case 5:
                     $dtcalibracao=$cell->nodeValue;
-                    break;                  
-                    
+                    break;
+
                 };
               };
               ////////////////////////////////////////////
@@ -202,7 +218,7 @@
               /////////////////////////////////////////////////////
               // Guardando os inserts se não existir nenhum erro //
               /////////////////////////////////////////////////////
-              $sql="INSERT INTO VVEICULO("          
+              $sql="INSERT INTO VVEICULO("
                 ."VCL_CODIGO"
                 .",VCL_NOME"
                 .",VCL_FROTA"
@@ -230,14 +246,14 @@
         // Passou pela rotina de importação mas deu erro //
         ///////////////////////////////////////////////////
         if( $strExcel== "N"){
-          $retorno='[{"retorno":"OK","dados":'.json_encode($data).',"erro":"ERRO(s) ENCONTRADOS"}]';   
+          $retorno='[{"retorno":"OK","dados":'.json_encode($data).',"erro":"ERRO(s) ENCONTRADOS"}]';
         } else {
           ////////////////////////////////////////////////////////////////////
           // Se strExcel="S" eh pq tem rotina de importacao e nao teve erro //
           ////////////////////////////////////////////////////////////////////
           if( $strExcel== "S"){
             $atuBd=true;
-          };  
+          };
           ///////////////////////////////////////////////////////////////////
           // Atualizando o banco de dados se opcao de insert/updade/delete //
           ///////////////////////////////////////////////////////////////////
@@ -245,22 +261,22 @@
             if( count($arrUpdt) >0 ){
               $retCls=$classe->cmd($arrUpdt);
               if( $retCls['retorno']=="OK" ){
-                $retorno='[{"retorno":"OK","dados":'.json_encode($data).',"erro":"'.count($arrUpdt).' REGISTRO(s) ATUALIZADO(s)!"}]'; 
+                $retorno='[{"retorno":"OK","dados":'.json_encode($data).',"erro":"'.count($arrUpdt).' REGISTRO(s) ATUALIZADO(s)!"}]';
               } else {
-                $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-              };  
+                $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
+              };
             } else {
               $retorno='[{"retorno":"OK","dados":"","erro":"NENHUM REGISTRO CADASTRADO!"}]';
-            };  
+            };
           };
         };
       };
     } catch(Exception $e ){
-      $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]'; 
-    };    
+      $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]';
+    };
     echo $retorno;
     exit;
-  };  
+  };
 ?>
 <!DOCTYPE html>
   <head>
@@ -273,7 +289,8 @@
     <link rel="stylesheet" href="css/cssFaTable.css">
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
-    <script src="tabelaTrac/f10/tabelaUnidadeF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaUnidadeF10.js"></script>
+    <script src="tabelaTrac/f10/tabelaGrupoOperacionalF10.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -285,7 +302,7 @@
         height:5em;
         border:1px solid silver;
         border-radius: 6px 6px 6px 6px;
-        background-color:white;        
+        background-color:white;
       }
       .botaoSobreTable {
         width:6em;
@@ -294,21 +311,21 @@
         height:3.05em;
         border-radius: 4px 4px 4px 4px;
       }
-    </style>  
+    </style>
     <script>
       "use strict";
       ////////////////////////////////////////////////
       // Executar o codigo após a pagina carregada  //
       ////////////////////////////////////////////////
-      document.addEventListener("DOMContentLoaded", function(){ 
+      document.addEventListener("DOMContentLoaded", function(){
         /////////////////////////////////////////////
         //       Objeto clsTable2017 VEICULO       //
         /////////////////////////////////////////////
         jsVcl={
           "titulo":[
-             {"id":0  ,"labelCol":"OPC"     
-                      ,"padrao":1}            
-            ,{"id":1  ,"field"          :"VCL_CODIGO" 
+             {"id":0  ,"labelCol":"OPC"
+                      ,"padrao":1}
+            ,{"id":1  ,"field"          :"VCL_CODIGO"
                       ,"labelCol"       : "PLACA"
                       ,"obj"            : "edtCodigo"
                       ,"tamGrd"         : "7em"
@@ -317,14 +334,14 @@
                       ,"pk"             : "S"
                       ,"newRecord"      : ["","this","this"]
                       ,"insUpDel"       : ["S","N","N"]
-                      ,"digitosMinMax"  : [7,7] 
-                      ,"formato"        : ["uppercase","removeacentos","tiraaspas","alltrim"]                      
+                      ,"digitosMinMax"  : [7,7]
+                      ,"formato"        : ["uppercase","removeacentos","tiraaspas","alltrim"]
                       ,"validar"        : ["notnull"]
                       ,"ajudaCampo"     : [  "Codigo do veiculo conforme definição empresa. Este campo é único e deve tem o formato AAA"
                                             ,"Campo deve ser utilizado em cadastros de Usuario"]
-                      ,"importaExcel"   : "S"                                                                
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":2  ,"field"          : "VCL_NOME"   
+            ,{"id":2  ,"field"          : "VCL_NOME"
                       ,"labelCol"       : "DESCRICAO"
                       ,"obj"            : "edtDescricao"
                       ,"tamGrd"         : "25em"
@@ -332,9 +349,9 @@
                       ,"digitosMinMax"  : [3,40]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
                       ,"ajudaCampo"     : ["Nome do veiculo com até 20 caracteres."]
-                      ,"importaExcel"   : "S"                                          
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":3  ,"field"          : "VCL_FROTA"   
+            ,{"id":3  ,"field"          : "VCL_FROTA"
                       ,"labelCol"       : "FROTA"
                       ,"obj"            : "cbFrota"
                       ,"tamGrd"         : "6em"
@@ -342,23 +359,23 @@
                       ,"tipo"           : "cb"
                       ,"newRecord"      : ["P","this","this"]
                       ,"ajudaCampo"     : ["Frota leve ou pesada."]
-                      ,"importaExcel"   : "S"                                          
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":4  ,"field"          : "VCL_CODUNI"   
+            ,{"id":4  ,"field"          : "VCL_CODUNI"
                       ,"labelCol"       : "CODUNI"
                       ,"labelColImp"    : "UNID"
                       ,"obj"            : "edtCodUni"
-                      ,"fieldType"      : "int"              
-                      ,"newRecord"      : ["0000","this","this"]                      
+                      ,"fieldType"      : "int"
+                      ,"newRecord"      : ["0000","this","this"]
                       ,"formato"        : ["i4"]
                       ,"validar"        : ["notnull","intMaiorZero"]
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "10"
                       ,"ajudaDetalhe"   : ["Para ver esta unidade é necessario direito em USUARIO->UNIDADE"]
                       ,"ajudaCampo"     : ["Para ver esta unidade é necessario direito em USUARIO->UNIDADE"]
-                      ,"importaExcel"   : "S"                                          
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":5  ,"field"          : "VCL_ENTRABI"   
+            ,{"id":5  ,"field"          : "VCL_ENTRABI"
                       ,"labelCol"       : "ENTRABI"
                       ,"obj"            : "cbEntraBi"
                       ,"tamGrd"         : "6em"
@@ -366,19 +383,19 @@
                       ,"tipo"           : "cb"
                       ,"newRecord"      : ["S","this","this"]
                       ,"ajudaCampo"     : ["Se veiculo entra nas estatisticas de BI."]
-                      ,"importaExcel"   : "S"                                          
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":6  ,"field"          : "VCL_DTCALIBRACAO"   
+            ,{"id":6  ,"field"          : "VCL_DTCALIBRACAO"
                       ,"labelCol"       : "CALIBRACAO"
                       ,"obj"            : "edtDtCalibracao"
-                      ,"fieldType"      : "dat"                                    
+                      ,"fieldType"      : "dat"
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "20"
                       ,"newRecord"      : ["01/01/1900","this","this"]
                       ,"ajudaCampo"     : ["Data de calibracao veiculo."]
-                      ,"importaExcel"   : "S"                                          
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":7  ,"field"          : "VCL_NUMFROTA"   
+            ,{"id":7  ,"field"          : "VCL_NUMFROTA"
                       ,"labelCol"       : "NUMFROTA"
                       ,"obj"            : "edtNumFrota"
                       ,"tamGrd"         : "10em"
@@ -386,49 +403,61 @@
                       ,"digitosMinMax"  : [3,20]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
                       ,"ajudaCampo"     : ["Frota do veiculo com até 20 caracteres."]
-                      ,"importaExcel"   : "N"                                          
+                      ,"importaExcel"   : "N"
                       ,"padrao":0}
-            ,{"id":8  ,"field"          : "UNI_APELIDO"   
+            ,{"id":8  ,"field"          : "UNI_APELIDO"
                       ,"insUpDel"       : ["N","N","N"]
                       ,"labelCol"       : "UNID"
                       ,"obj"            : "edtDesUni"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "30"
                       ,"digitosMinMax"  : [3,15]
-                      ,"validar"        : ["notnull"]                      
+                      ,"validar"        : ["notnull"]
                       ,"ajudaCampo"     : ["Nome da unidade."]
                       ,"padrao":0}
-            ,{"id":2  ,"field"          : "GPO_NOME"   
+            ,{"id":9  ,"field"          : "VCL_CODGPO"
                       ,"labelCol"       : "GRUPO OPERACIONAL"
-                      ,"obj"            : "edtGrpOpr"
-                      ,"tamGrd"         : "25em"
-                      ,"tamImp"         : "80"
-                      ,"digitosMinMax"  : [3,40]
-                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
-                      ,"ajudaCampo"     : ["Nome do veiculo com até 20 caracteres."]
-                      ,"importaExcel"   : "S"                                          
+                      ,"obj"            : "edtCodGpo"
+                      ,"fieldType"      : "int"
+                      ,"newRecord"      : ["0000","this","this"]
+                      ,"formato"        : ["i4"]
+                      ,"tamGrd"         : "0em"
+                      ,"tamImp"         : "10"
+                      ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":9  ,"field"          : "VCL_ATIVO"  
-                      ,"labelCol"       : "ATIVO"   
+            ,{"id":10 ,"field"          : "GPO_NOME"
+                      ,"insUpDel"       : ["N","N","N"]
+                      ,"labelCol"       : "GRUPO OPERACIONAL"
+                      ,"validar"        : ["podeNull"]
+                      ,"obj"            : "edtDesGpo"
+                      ,"tamGrd"         : "15em"
+                      ,"tamImp"         : "80"
+                      ,"digitosMinMax"  : [0,40]
+                      ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
+                      ,"ajudaCampo"     : ["Nome do grupo operacional."]
+                      ,"importaExcel"   : "S"
+                      ,"padrao":0}
+            ,{"id":11  ,"field"          : "VCL_ATIVO"
+                      ,"labelCol"       : "ATIVO"
                       ,"obj"            : "cbAtivo"
                       ,"ajudaDetalhe"   : "Se o veiculo esta ativo para uso"
-                      ,"padrao":2}                                        
-            ,{"id":10 ,"field"          : "VCL_REG"    
-                      ,"labelCol"       : "REG"     
-                      ,"obj"            : "cbReg"      
-                      ,"lblDetalhe"     : "REGISTRO"     
-                      ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
-                      ,"padrao":3}  
-            ,{"id":11 ,"field"          : "US_APELIDO" 
-                      ,"labelCol"       : "USUARIO" 
-                      ,"obj"            : "edtUsuario" 
-                      ,"padrao":4}                
-            ,{"id":12 ,"field"          : "VCL_CODUSR" 
-                      ,"labelCol"       : "CODUSU"  
-                      ,"obj"            : "edtCodUsu"  
-                      ,"padrao":5}                                      
-            ,{"id":13 ,"labelCol"       : "PP"      
-                      ,"obj"            : "imgPP"        
+                      ,"padrao":2}
+            ,{"id":12 ,"field"          : "VCL_REG"
+                      ,"labelCol"       : "REG"
+                      ,"obj"            : "cbReg"
+                      ,"lblDetalhe"     : "REGISTRO"
+                      ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"
+                      ,"padrao":3}
+            ,{"id":13 ,"field"          : "US_APELIDO"
+                      ,"labelCol"       : "USUARIO"
+                      ,"obj"            : "edtUsuario"
+                      ,"padrao":4}
+            ,{"id":14 ,"field"          : "VCL_CODUSR"
+                      ,"labelCol"       : "CODUSU"
+                      ,"obj"            : "edtCodUsu"
+                      ,"padrao":5}
+            ,{"id":15 ,"labelCol"       : "PP"
+                      ,"obj"            : "imgPP"
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
                         +"objVcl.espiao();"
@@ -439,34 +468,34 @@
           "detalheRegistro":
           [
             { "width"           :"100%"
-              ,"height"         :"320px" 
+              ,"height"         :"320px"
               ,"label"          :"VEICULO - Detalhe do registro"
             }
           ]
-          , 
+          ,
           "botoesH":[
              {"texto":"Cadastrar" ,"name":"horCadastrar"  ,"onClick":"0"  ,"enabled":true ,"imagem":"fa fa-plus"             ,"ajuda":"Novo registro" }
             ,{"texto":"Alterar"   ,"name":"horAlterar"    ,"onClick":"1"  ,"enabled":true ,"imagem":"fa fa-pencil-square-o"  ,"ajuda":"Alterar registro selecionado" }
             ,{"texto":"Excluir"   ,"name":"horExcluir"    ,"onClick":"2"  ,"enabled":true ,"imagem":"fa fa-minus"            ,"ajuda":"Excluir registro selecionado" }
-            ,{"texto":"Excel"     ,"name":"horExcel"      ,"onClick":"5"  ,"enabled":false,"imagem":"fa fa-file-excel-o"     ,"ajuda":"Exportar para excel" }        
+            ,{"texto":"Excel"     ,"name":"horExcel"      ,"onClick":"5"  ,"enabled":false,"imagem":"fa fa-file-excel-o"     ,"ajuda":"Exportar para excel" }
             ,{"texto":"Fechar"    ,"name":"horFechar"     ,"onClick":"8"  ,"enabled":true ,"imagem":"fa fa-close"            ,"ajuda":"Fechar formulario" }
-          ] 
+          ]
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
-          ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
-          ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
-          ,"idBtnConfirmar" : "btnConfirmar"            // Se existir executa o confirmar do form/fieldSet
+          ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar
+          ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)
+          ,"idBtnConfirmarAtualizar" : "idBtnConfirmarAtualizar"            // Se existir executa o confirmar do form/fieldSet
           ,"idBtnCancelar"  : "btnCancelar"             // Se existir executa o cancelar do form/fieldSet
           ,"div"            : "frmVcl"                  // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaVcl"               // Para fechar a div onde estão os fieldset ao cadastrar
-          ,"form"           : "frmVcl"                  // Onde vai ser gerado o fieldSet       
-          ,"divModal"       : "divTopoInicio"           // Onde vai se appendado abaixo deste a table 
+          ,"form"           : "frmVcl"                  // Onde vai ser gerado o fieldSet
+          ,"divModal"       : "divTopoInicio"           // Onde vai se appendado abaixo deste a table
           ,"tbl"            : "tblVcl"                  // Nome da table
           ,"prefixo"        : "Vcl"                     // Prefixo para elementos do HTML em jsTable2017.js
-          ,"tabelaBD"       : "VVEICULO"                // Nome da tabela no banco de dados  
-          ,"tabelaBKP"      : "BKPVEICULO"              // Nome da tabela no banco de dados  
+          ,"tabelaBD"       : "VVEICULO"                // Nome da tabela no banco de dados
+          ,"tabelaBKP"      : "BKPVEICULO"              // Nome da tabela no banco de dados
           ,"fieldAtivo"     : "VCL_ATIVO"               // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
-          ,"fieldReg"       : "VCL_REG"                 // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
-          ,"fieldCodUsu"    : "VCL_CODUSR"              // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
+          ,"fieldReg"       : "VCL_REG"                 // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD
+          ,"fieldCodUsu"    : "VCL_CODUSR"              // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD
           ,"iFrame"         : "iframeCorpo"             // Se a table vai ficar dentro de uma tag iFrame
           ,"width"          : "92em"                    // Tamanho da table
           ,"height"         : "58em"                    // Altura da table
@@ -476,12 +505,12 @@
           ,"relFonte"       : "8"                       // Fonte do relatório
           ,"foco"           : ["edtCodigo"
                               ,"edtDescricao"
-                              ,"btnConfirmar"]          // Foco qdo Cad/Alt/Exc
+                              ,"idBtnConfirmarAtualizar"]          // Foco qdo Cad/Alt/Exc
           ,"formPassoPasso" : "Trac_Espiao.php"         // Enderço da pagina PASSO A PASSO
           ,"indiceTable"    : "PLACA"                   // Indice inicial da table
           ,"tamBotao"       : "15"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
-          ,"tamMenuTable"   : ["10em","20em"]                                
-          ,"labelMenuTable" : "Opções"              // Caption para menu table 
+          ,"tamMenuTable"   : ["10em","20em"]
+          ,"labelMenuTable" : "Opções"              // Caption para menu table
           ,"_menuTable"     :[
                                 ["Regitros ativos"                        ,"fa-thumbs-o-up"   ,"btnFiltrarClick('S');"]
                                ,["Registros inativos"                     ,"fa-thumbs-o-down" ,"btnFiltrarClick('N');"]
@@ -494,21 +523,21 @@
                                ,["Passo a passo do registro"              ,"fa-binoculars"    ,"objVcl.espiao();"]
                                ,["Alterar status Ativo/Inativo"           ,"fa-share"         ,"objVcl.altAtivo(intCodDir);"]
                                ,["Alterar registro PUBlico/ADMinistrador" ,"fa-reply"         ,"objVcl.altPubAdm(intCodDir,jsPub[0].usr_admpub);"]
-                               //,["Alterar para registro do SISTEMA"       ,"fa-reply"         ,"objVcl.altRegSistema("+jsPub[0].usr_d05+");"]                               
+                               //,["Alterar para registro do SISTEMA"       ,"fa-reply"         ,"objVcl.altRegSistema("+jsPub[0].usr_d05+");"]
                                ,["Número de registros em tela"            ,"fa-info"          ,"objVcl.numRegistros();"]
-                               ,["Número de registros em tela"            ,"fa-info"          ,"objVcl.numRegistros();"]                               
-                               ,["Atualizar grade consulta"               ,"fa-filter"        ,"btnFiltrarClick('S');"]                               
-                             ]  
-          ,"codTblUsu"      : "VEICULO[09]"                          
+                               ,["Número de registros em tela"            ,"fa-info"          ,"objVcl.numRegistros();"]
+                               ,["Atualizar grade consulta"               ,"fa-filter"        ,"btnFiltrarClick('S');"]
+                             ]
+          ,"codTblUsu"      : "VEICULO[09]"
           ,"codDir"         : intCodDir
-        }; 
-        if( objVcl === undefined ){  
+        };
+        if( objVcl === undefined ){
           objVcl=new clsTable2017("objVcl");
-        };  
-        objVcl.montarHtmlCE2017(jsVcl); 
+        };
+        objVcl.montarHtmlCE2017(jsVcl);
         //////////////////////////////////////////////////
         //          Fim objeto clsTable2017 VEICULO     //
-        ////////////////////////////////////////////////// 
+        //////////////////////////////////////////////////
         //
         //
         //////////////////////////////////////////////
@@ -524,20 +553,20 @@
             ,{"id":5  ,"field":"ERRO"       ,"labelCol":"ERRO"      ,"tamGrd":"35em"  ,"tamImp":"100"}
           ]
           ,"botoesH":[
-             {"texto":"Imprimir"  ,"name":"excImprimir"   ,"onClick":"3"  ,"enabled":true ,"imagem":"fa fa-print"            ,"ajuda":"Imprimir registros em tela" }        
-            ,{"texto":"Excel"     ,"name":"excExcel"      ,"onClick":"5"  ,"enabled":false,"imagem":"fa fa-file-excel-o"     ,"ajuda":"Exportar para excel" }        
+             {"texto":"Imprimir"  ,"name":"excImprimir"   ,"onClick":"3"  ,"enabled":true ,"imagem":"fa fa-print"            ,"ajuda":"Imprimir registros em tela" }
+            ,{"texto":"Excel"     ,"name":"excExcel"      ,"onClick":"5"  ,"enabled":false,"imagem":"fa fa-file-excel-o"     ,"ajuda":"Exportar para excel" }
             ,{"texto":"Fechar"    ,"name":"excFechar"     ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-close"            ,"ajuda":"Fechar formulario" }
-          ] 
+          ]
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
-          ,"corLinha"       : "if(ceTr.cells[4].innerHTML !='OK') {ceTr.style.color='yellow';ceTr.style.backgroundColor='red';}"      
-          ,"checarTags"     : "N"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                                
+          ,"corLinha"       : "if(ceTr.cells[4].innerHTML !='OK') {ceTr.style.color='yellow';ceTr.style.backgroundColor='red';}"
+          ,"checarTags"     : "N"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)
           ,"div"            : "frmExc"                  // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaExc"               // Para fechar a div onde estão os fieldset ao cadastrar
-          ,"form"           : "frmExc"                  // Onde vai ser gerado o fieldSet                     
+          ,"form"           : "frmExc"                  // Onde vai ser gerado o fieldSet
           ,"divModal"       : "divTopoInicioE"          // Nome da div que vai fazer o show modal
           ,"tbl"            : "tblExc"                  // Nome da table
           ,"prefixo"        : "exc"                     // Prefixo para elementos do HTML em jsTable2017.js
-          ,"tabelaBD"       : "*"                       // Nome da tabela no banco de dados  
+          ,"tabelaBD"       : "*"                       // Nome da tabela no banco de dados
           ,"width"          : "90em"                    // Tamanho da table
           ,"height"         : "48em"                    // Altura da table
           ,"tableLeft"      : "sim"                     // Se tiver menu esquerdo
@@ -545,63 +574,64 @@
           ,"relOrientacao"  : "P"                       // Paisagem ou retrato
           ,"indiceTable"    : "TAG"                     // Indice inicial da table
           ,"relFonte"       : "8"                       // Fonte do relatório
-          ,"formName"       : "frmExc"                  // Nome do formulario para opção de impressão 
+          ,"formName"       : "frmExc"                  // Nome do formulario para opção de impressão
           ,"tamBotao"       : "20"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
-        }; 
-        if( objExc === undefined ){          
+        };
+        if( objExc === undefined ){
           objExc=new clsTable2017("objCon");
-        };  
+        };
         objExc.montarHtmlCE2017(jsExc);
         //
-        //  
+        //
         buscarUni();
       });
       //
       var objVcl;                     // Obrigatório para instanciar o JS TFormaCob
       var jsVcl;                      // Obj principal da classe clsTable2017
-      var objUniF10;                  // Obrigatório para instanciar o JS CidadeF10                      
+      var objUniF10;                  // Obrigatório para instanciar o JS CidadeF10
+      var objGpoF10;                  // Obrigatório para instanciar o JS GrupoOperacionalF10
       var objExc;                     // Obrigatório para instanciar o JS Importar excel
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
-      var clsErro;                    // Classe para erros            
+      var clsErro;                    // Classe para erros
       var fd;                         // Formulario para envio de dados para o PHP
-      var msg;                        // Variavel para guardadar mensagens de retorno/erro 
+      var msg;                        // Variavel para guardadar mensagens de retorno/erro
       var retPhp                      // Retorno do Php para a rotina chamadora
       var contMsg   = 0;              // contador para mensagens
       var cmp       = new clsCampo(); // Abrindo a classe campos
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
       var intCodDir = parseInt(jsPub[0].usr_d09);
       function funcRetornar(intOpc){
-        document.getElementById("divRotina").style.display  = (intOpc==0 ? "block" : "none" );        
+        document.getElementById("divRotina").style.display  = (intOpc==0 ? "block" : "none" );
         document.getElementById("divExcel").style.display   = (intOpc==1 ? "block" : "none" );
       };
       function fExcel(){
         if( intCodDir<2 ){
           clsErro     = new clsMensagem("Erro");
-          clsErro.add("USUARIO SEM DIREITO DE CADASTRAR NESTA TABELA DO BANCO DE DADOS");            
+          clsErro.add("USUARIO SEM DIREITO DE CADASTRAR NESTA TABELA DO BANCO DE DADOS");
           if( clsErro.ListaErr() != "" ){
             clsErro.Show();
           }
-        } else {  
-          funcRetornar(1);  
-        }  
+        } else {
+          funcRetornar(1);
+        }
       };
       function excFecharClick(){
-        funcRetornar(0);  
+        funcRetornar(0);
       };
       ////////////////////////////
       // Filtrando os registros //
       ////////////////////////////
       function btnFiltrarClick(atv) {
-        if( document.getElementById("cbUnidade").value != "*" ){        
-          clsJs   = jsString("lote");  
+        if( document.getElementById("cbUnidade").value != "*" ){
+          clsJs   = jsString("lote");
           clsJs.add("rotina"      , "selectVcl"                                 );
           clsJs.add("login"       , jsPub[0].usr_login                          );
           clsJs.add("ativo"       , atv                                         );
           clsJs.add("coduni"      , document.getElementById("cbUnidade").value  );
           fd = new FormData();
           fd.append("veiculo" , clsJs.fim());
-          msg     = requestPedido("Trac_Veiculo.php",fd); 
+          msg     = requestPedido("Trac_Veiculo.php",fd);
           retPhp  = JSON.parse(msg);
           if( retPhp[0].retorno == "OK" ){
             //////////////////////////////////////////////////////////////////////////////////
@@ -611,9 +641,9 @@
             // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
             //////////////////////////////////////////////////////////////////////////////////
             jsVcl.registros=objVcl.addIdUnico(retPhp[0]["dados"]);
-            objVcl.ordenaJSon(jsVcl.indiceTable,false);  
+            objVcl.ordenaJSon(jsVcl.indiceTable,false);
             objVcl.montarBody2017();
-          };  
+          };
         };
       };
       ////////////////////
@@ -625,15 +655,15 @@
         if( clsErro.ListaErr() != "" ){
           clsErro.Show();
         } else {
-          clsJs   = jsString("lote");  
+          clsJs   = jsString("lote");
           clsJs.add("rotina"      , "impExcel"                              );
           clsJs.add("login"       , jsPub[0].usr_login                      );
-          clsJs.add("cabec"       , "PLACA|DESCRICAO|FROTA|CODUNI|ENTRABI"  );          
+          clsJs.add("cabec"       , "PLACA|DESCRICAO|FROTA|CODUNI|ENTRABI"  );
 
           fd = new FormData();
           fd.append("veiculo"      , clsJs.fim());
           fd.append("arquivo"   , edtArquivo.files[0] );
-          msg     = requestPedido("Trac_Veiculo.php",fd); 
+          msg     = requestPedido("Trac_Veiculo.php",fd);
           retPhp  = JSON.parse(msg);
           if( retPhp[0].retorno == "OK" ){
             //////////////////////////////////////////////////////////////////////////////////
@@ -644,25 +674,31 @@
             //////////////////////////////////////////////////////////////////////////////////
             jsExc.registros=retPhp[0]["dados"];
             objExc.montarBody2017();
-          };  
+          };
           /////////////////////////////////////////////////////////////////////////////////////////
           // Mesmo se der erro mostro o erro, se der ok mostro a qtdade de registros atualizados //
           // dlgCancelar fecha a caixa de informacao de data                                     //
           /////////////////////////////////////////////////////////////////////////////////////////
-          gerarMensagemErro("Vcl",retPhp[0].erro,"AVISO");    
-        };  
+          gerarMensagemErro("Vcl",retPhp[0].erro,"AVISO");
+        };
       };
       ////////////////////////
       // AJUDA PARA UNIDADE //
       ////////////////////////
-      function uniFocus(obj){ 
-        document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
+      function uniFocus(obj){
+        document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value);
       };
-      function uniF10Click(){ fUnidadeF10(0,"edtCodUni","cbAtivo","soAtivo"); };  
+      function uniF10Click(){ fUnidadeF10(0,"edtCodUni","cbAtivo","soAtivo"); };
+      function gpoF10Click(){ fGrupoOperacionalF10("cbAtivo"); };
       function RetF10tblUni(arr){
         document.getElementById("edtCodUni").value   = arr[0].CODIGO;
         document.getElementById("edtDesUni").value   = arr[0].APELIDO;
         document.getElementById("edtCodUni").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function RetF10tblGpo(arr){
+        document.getElementById("edtCodGpo").value   = arr[0].CODIGO;
+        document.getElementById("edtDesGpo").value   = arr[0].NOME;
+        document.getElementById("edtCodGpo").setAttribute("data-oldvalue",arr[0].CODIGO);
       };
       function codUniBlur(obj){
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
@@ -675,35 +711,35 @@
         };
       };
       function buscarUni(){
-        clsJs   = jsString("lote");  
+        clsJs   = jsString("lote");
         clsJs.add("rotina"      , "unidade"           );
         clsJs.add("login"       , jsPub[0].usr_login  );
         fd = new FormData();
         fd.append("veiculo" , clsJs.fim());
-        msg     = requestPedido("Trac_Veiculo.php",fd); 
+        msg     = requestPedido("Trac_Veiculo.php",fd);
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           msg=retPhp[0]["dados"].length;
           if(msg==0){
-            var ceOpt 	= document.createElement("option");        
+            var ceOpt 	= document.createElement("option");
             ceOpt.value = "*";
             ceOpt.text  = "SEM DIREITO"
             document.getElementById("cbUnidade").appendChild(ceOpt);
           } else {
-            var ceOpt 	= document.createElement("option");        
+            var ceOpt 	= document.createElement("option");
             ceOpt.value = "0";
             ceOpt.text  = "TODOS";
             document.getElementById("cbUnidade").appendChild(ceOpt);
-            
+
             for( var lin=0;lin<msg;lin++ ){
-              var ceOpt 	= document.createElement("option");        
+              var ceOpt 	= document.createElement("option");
               ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
               ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
               document.getElementById("cbUnidade").appendChild(ceOpt);
-            };  
+            };
           };
-        };  
-      };  
+        };
+      };
     </script>
   </head>
   <body>
@@ -713,24 +749,24 @@
         </select>
         <label class="campo_label campo_required" for="cbAtivo">UNIDADE</label>
       </div>
-      <div class="campo10" style="float:left;">            
+      <div class="campo10" style="float:left;">
         <input id="btnFilttrar" onClick="btnFiltrarClick('S');" type="button" value="Filtrar" class="botaoSobreTable"/>
       </div>
       <div class="_campotexto campo100" style="margin-top:1.7em;height:3em;">
         <label class="campo_required" style="font-size:1.4em;"></label>
         <label class="campo_labelSombra">Solicitado filtro devido quantidade de registros</label>
-      </div>              
+      </div>
     </div>
-  
+
     <div class="divTelaCheia" style="float:left;">
-      <div id="divRotina" class="conteudo" style="display:block;overflow-x:auto;">  
+      <div id="divRotina" class="conteudo" style="display:block;overflow-x:auto;">
         <div id="divTopoInicio">
         </div>
-        <form method="post" 
-              name="frmVcl" 
-              id="frmVcl" 
-              class="frmTable" 
-              action="classPhp/imprimirsql.php" 
+        <form method="post"
+              name="frmVcl"
+              id="frmVcl"
+              class="frmTable"
+              action="classPhp/imprimirsql.php"
               target="_newpage"
               style="top: 6em; width:90em;position: absolute; z-index:30;display:none;">
           <p class="frmCampoTit">
@@ -757,12 +793,11 @@
               <div class="campotexto campo15">
                 <input class="campo_input inputF10" id="edtCodUni"
                                                     OnKeyPress="return mascaraInteiro(event);"
-                                                    onBlur="codUniBlur(this);" 
-                                                    onFocus="uniFocus(this);" 
+                                                    onBlur="codUniBlur(this);"
+                                                    onFocus="uniFocus(this);"
                                                     onClick="uniF10Click('edtCodUni');"
                                                     data-oldvalue=""
-                                                    autocomplete="off" 
-                                                    maxlength="4"
+                                                    autocomplete="off"
                                                     type="text" />
                 <label class="campo_label campo_required" for="edtCodUni">UNIDADE</label>
               </div>
@@ -792,11 +827,26 @@
                 </select>
                 <label class="campo_label campo_required" for="cbAtivo">ATIVO</label>
               </div>
-              <div class="campotexto campo20">
+              <div class="campotexto campo15">
                 <select class="campo_input_combo" id="cbReg">
-                  <option value="P">PUBLICO</option>               
+                  <option value="P">PUBLICO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
+              </div>
+              <div class="campotexto campo10">
+                <input class="campo_input inputF10" id="edtCodGpo"
+                                                    OnKeyPress="return mascaraInteiro(event);"
+                                                    onFocus="uniFocus(this);"
+                                                    onClick="gpoF10Click('edtCodGpo');"
+                                                    data-oldvalue=""
+                                                    autocomplete="off"
+                                                    maxlength="4"
+                                                    type="text" />
+                <label class="campo_label" for="edtCodGpo">GRUPO OP.</label>
+              </div>
+              <div class="campotexto campo25">
+                <input class="campo_input_titulo input" id="edtDesGpo" type="text" disabled />
+                <label class="campo_label" for="edtDesGpo">NOME GRUPO OPERACIONAL</label>
               </div>
               <div class="campotexto campo25">
                 <input class="campo_input_titulo" disabled id="edtUsuario" type="text" />
@@ -809,13 +859,13 @@
                 <div class="campotexto campo50" style="margin-top:1em;">
                   <label class="campo_required" style="font-size:1.4em;"></label>
                   <label class="campo_labelSombra">Campo obrigatório</label>
-                </div>              
-                <div class="campo20" style="float:right;">            
-                  <input id="btnConfirmar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
+                </div>
+                <div class="campo20" style="float:right;">
+                  <input id="idBtnConfirmarAtualizar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>
                   <i class="faBtn fa-check icon-large"></i>
                 </div>
-                <div class="campo20" style="float:right;">            
-                  <input id="btnCancelar" type="button" value="Cancelar" class="campo100 tableBotao botaoForaTable"/>            
+                <div class="campo20" style="float:right;">
+                  <input id="btnCancelar" type="button" value="Cancelar" class="campo100 tableBotao botaoForaTable"/>
                   <i class="faBtn fa-close icon-large"></i>
                 </div>
               </div>
@@ -831,10 +881,10 @@
               <input class="campo_file input" name="edtArquivo" id="edtArquivo" type="file" />
               <label class="campo_label" for="edtArquivo">Arquivo</label>
             </div>
-            <div class="campo12" style="float:left;">            
-              <input id="btnAbrirExcel" onClick="btnAbrirExcelClick();" type="button" value="Abrir" class="campo100 tableBotao botaoForaTable" style="height: 3.4em !important;"/>            
+            <div class="campo12" style="float:left;">
+              <input id="btnAbrirExcel" onClick="btnAbrirExcelClick();" type="button" value="Abrir" class="campo100 tableBotao botaoForaTable" style="height: 3.4em !important;"/>
             </div>
-          </div>        
+          </div>
         </div>
         <div id="xmlModal" class="divShowModal" style="display:none;"></div>
         <div id="divErr" class="conteudo" style="display:block;overflow-x:auto;">
@@ -846,6 +896,6 @@
         </div>
       </div>
       <!-- Fim Importar excel -->
-    </div>       
+    </div>
   </body>
 </html>

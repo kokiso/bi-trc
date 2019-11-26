@@ -168,9 +168,9 @@
           ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
           ,"idBtnConfirmar" : "btnConfirmar"            // Se existir executa o confirmar do form/fieldSet
           ,"idBtnCancelar"  : "btnCancelar"             // Se existir executa o cancelar do form/fieldSet
-          ,"div"            : "frmGrp"                  // Onde vai ser gerado a table
-          ,"divFieldSet"    : "tabelaGrp"               // Para fechar a div onde estão os fieldset ao cadastrar
-          ,"form"           : "frmGrp"                  // Onde vai ser gerado o fieldSet       
+          ,"div"            : "frmGpo"                  // Onde vai ser gerado a table
+          ,"divFieldSet"    : "tabelaGpo"               // Para fechar a div onde estão os fieldset ao cadastrar
+          ,"form"           : "frmGpo"                  // Onde vai ser gerado o fieldSet       
           ,"divModal"       : "divTopoInicio"           // Onde vai se appendado abaixo deste a table 
           ,"tbl"            : "tblGrp"                  // Nome da table
           ,"prefixo"        : "Grp"                     // Prefixo para elementos do HTML em jsTable2017.js
@@ -363,8 +363,8 @@
         <div id="divTopoInicio">
         </div>
         <form method="post" 
-              name="frmGrp" 
-              id="frmGrp" 
+              name="frmGpo" 
+              id="frmGpo" 
               class="frmTable" 
               action="classPhp/imprimirsql.php" 
               target="_newpage"
