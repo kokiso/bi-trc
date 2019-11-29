@@ -161,7 +161,7 @@
       "use strict";
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
-				comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbMesAno"));
+				// comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
         jsBi={
           "titulo":[
              {"id":0  ,"labelCol":"OPC"     
@@ -374,7 +374,7 @@
         //////////////////////////////////////////////
         //Buscando a dada de inicio/fim para select //
         //////////////////////////////////////////////
-        //var splt=document.getElementById("cbMesAno").value.split('|');
+        //var splt=document.getElementById("cbIni").value.split('|');
         //
         clsJs   = jsString("lote");  
         clsJs.add("rotina"  	, "select"                                  	);
@@ -382,8 +382,8 @@
         clsJs.add("codusu"  	, jsPub[0].usr_codigo                       	);
         //clsJs.add("dtini"   	, splt[1]                                   );
         //clsJs.add("dtfim"   	, splt[0]                                   );          
-        clsJs.add("dtini"   	, document.getElementById("cbMesAno").value   );
-        clsJs.add("dtfim"   	, document.getElementById("cbMesAno").value   );
+        clsJs.add("dtini"   	, document.getElementById("cbIni").value   );
+        clsJs.add("dtfim"   	, document.getElementById("cbIni").value   );
         clsJs.add("frota"   	, document.getElementById("cbFrota").value  	);
         fd = new FormData();
         fd.append("grdProdutividadevei" , clsJs.fim());
@@ -439,7 +439,7 @@
             pubKm       += (parseFloat(lin.KMFIM)-parseFloat(lin.KMINI));
           });
           jsBi.registros=objBi.addIdUnico(retJs);
-          jsBi.relTitulo="BI Produtividade por veiculo "+document.getElementById("cbMesAno").value;
+          jsBi.relTitulo="BI Produtividade por veiculo "+document.getElementById("cbIni").value;
           jsBi.indiceTable="PLACA";
           objBi.ordenaJSon(jsBi.indiceTable,false);  
           objBi.montarBody2017();
@@ -884,9 +884,9 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-      <div class="campotexto campo15">
-        <select class="campo_input_combo" id="cbMesAno">
-					<!--
+      <!-- <div class="campotexto campo15">
+        <select class="campo_input_combo" id="cbIni">
+					
           <option value="201805|201805">MAI/18</option>
           <option value="201806|201806">JUN/18</option>
           <option value="201807|201807">JUL/18</option>
@@ -895,10 +895,12 @@
           <option value="201810|201810">OUT/18</option>
           <option value="201811|201811">NOV/18</option>
           <option value="201812|201812">DEZ/18</option>
-					-->
+					
         </select>
-        <label class="campo_label campo_required" for="cbMesAno">INICIO</label>
-      </div>
+        <label class="campo_label campo_required" for="cbIni">INICIO</label>
+      </div> -->
+
+      <?php include 'classPhp/comum/selectMes.class.php';?>
 
       <div class="campotexto campo15">
         <select class="campo_input_combo" id="cbFrota">

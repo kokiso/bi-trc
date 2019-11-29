@@ -816,11 +816,11 @@
                 <input class="campo_input" id="edtDtCalibracao" type="text" OnKeyUp="mascaraData(this,event);" maxlength="10" />
                 <label class="campo_label campo_required" for="edtDtCalibracao">CALIBRACAO</label>
               </div>
-              <div class="campotexto campo15">
+              <div class="campotexto campo25">
                 <input class="campo_input" id="edtNumFrota" type="text" maxlength="20" />
                 <label class="campo_label campo_required" for="edtNumFrota">NUM.FROTA</label>
               </div>
-              <div class="campotexto campo10">
+              <div class="campotexto campo25">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>

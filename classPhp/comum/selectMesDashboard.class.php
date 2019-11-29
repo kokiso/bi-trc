@@ -11,7 +11,7 @@
     $classe->conecta($_SESSION['login']);
 
     $sql="";
-    $sql.=" select TOP 1 MONTH(MVM_DATAGPS) as MES, YEAR(MVM_DATAGPS) as ANO from MOVIMENTO order by MVM_DATAGPS desc; ";
+    $sql.="select TOP 1 MONTH(MVM_DATAGPS) as MES, YEAR(MVM_DATAGPS) as ANO from MOVIMENTO order by MVM_POSICAO desc;";
     $classe->msgSelect(false);
     $retCls=$classe->selectAssoc($sql);
 
