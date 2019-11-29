@@ -59,6 +59,11 @@
         //       Dados para JavaScript VEICULO        //
         ////////////////////////////////////////////////
         if( $rotina=="selectVcl" ){
+          
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (A.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
+
           $sql="";
           $sql.="SELECT VCL_CODIGO";
           $sql.="      ,VCL_NOME";
@@ -83,6 +88,7 @@
           if( $lote[0]->coduni > 0 ){
             $sql.=" AND (VCL_CODUNI=".$lote[0]->coduni.")";
           };
+          $sql.=$gpo;
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -629,6 +635,7 @@
           clsJs.add("login"       , jsPub[0].usr_login                          );
           clsJs.add("ativo"       , atv                                         );
           clsJs.add("coduni"      , document.getElementById("cbUnidade").value  );
+          clsJs.add("grupoOperacional"   	, document.getElementById("cbGpo").value  	);
           fd = new FormData();
           fd.append("veiculo" , clsJs.fim());
           msg     = requestPedido("Trac_Veiculo.php",fd);
@@ -748,6 +755,10 @@
         <select class="campo_input_combo" id="cbUnidade">
         </select>
         <label class="campo_label campo_required" for="cbAtivo">UNIDADE</label>
+      </div>
+
+      <div style="margin-top:3px;margin-left:3px;">
+        <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
       </div>
       <div class="campo10" style="float:left;">
         <input id="btnFilttrar" onClick="btnFiltrarClick('S');" type="button" value="Filtrar" class="botaoSobreTable"/>

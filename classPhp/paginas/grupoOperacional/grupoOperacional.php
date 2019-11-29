@@ -172,8 +172,8 @@
           ,"divFieldSet"    : "tabelaGpo"               // Para fechar a div onde estão os fieldset ao cadastrar
           ,"form"           : "frmGpo"                  // Onde vai ser gerado o fieldSet       
           ,"divModal"       : "divTopoInicio"           // Onde vai se appendado abaixo deste a table 
-          ,"tbl"            : "tblGrp"                  // Nome da table
-          ,"prefixo"        : "Grp"                     // Prefixo para elementos do HTML em jsTable2017.js
+          ,"tbl"            : "tblGpo"                  // Nome da table
+          ,"prefixo"        : "Gpo"                     // Prefixo para elementos do HTML em jsTable2017.js
           ,"tabelaBD"       : "GRUPOOPERACIONAL"        // Nome da tabela no banco de dados  
           ,"tabelaBKP"      : "BKPGRUPO"                // Nome da tabela no banco de dados  
           ,"fieldCodUsu"    : "GPO_CODUSR"              // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        

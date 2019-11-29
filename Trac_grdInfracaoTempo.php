@@ -54,6 +54,9 @@
             case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
           };
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
           ///////////////////////////////////////////////////////////////
           // Buscando um facilitador para indice devido tamanho da tabela
           ///////////////////////////////////////////////////////////////  
@@ -104,6 +107,7 @@
             if($lote[0]->unidadeCodigo != "") {
               $sql.="   AND (UNI.UNI_CODIGO = ".$lote[0]->unidadeCodigo.")";
             }
+            $sql.=$gpo;
             $sql.=" ORDER BY MVM_CODVEI,CONVERT(VARCHAR(23),MVM_DATAGPS,127)";
           //};
           if( $retCls['retorno'] != "OK" ){
@@ -584,6 +588,7 @@
 				clsJs.add("tempo"   	, document.getElementById("cbTempo").value  	);
 				clsJs.add("erro"    	, document.getElementById("cbErro").value   	);
         clsJs.add("infracao"	, document.getElementById("cbInfracao").value	);
+        clsJs.add("grupoOperacional"   	, document.getElementById("cbGpo").value  	);
 
         var cbPoloValue = document.getElementById("cbPolo").value;
         var poloCodigo;
@@ -1030,6 +1035,9 @@
       <div id="selectUnidadePHP">        
         <?php include 'classPhp/comum/selectUnidade.class.php';?>
       </div>
+
+      <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
+
       
       <div class="campo10" style="float:left;">            
         <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>
