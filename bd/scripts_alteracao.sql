@@ -89,7 +89,7 @@ alter table USUARIOPERFIL
 go
 
 alter table BKPUSUARIOPERFIL
-	add GRUPO_OPERACINAL varchar(1)
+	add GRUPO_OPERACIONAL varchar(1)
 go
 
 alter view VUSUARIOPERFIL as SELECT UP_CODIGO

@@ -57,6 +57,7 @@
                     ,P.UP_D20
                     ,A.USR_CODCRG
                     ,P.CONSULTAR_RELATORIO
+                    ,P.GRUPO_OPERACIONAL
              FROM USUARIO A
              LEFT OUTER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO 
             WHERE A.USR_CPF='".$lote[0]->usuario."'
@@ -79,6 +80,7 @@
         $_SESSION["usr_email"]            = $retPhp[0]["USR_EMAIL"];
         $_SESSION["usr_cargo"]            = $retPhp[0]["USR_CODCRG"];
         $_SESSION["consultar_relatorio"]  = $retPhp[0]["CONSULTAR_RELATORIO"];
+        $_SESSION["grupo_operacional"]  = $retPhp[0]["GRUPO_OPERACIONAL"];
         $_SESSION["usr_grupos"]           = "(0)";                    // Qual(is) grupos(s) o usuario que esta se logando pode ver na tela de grupos e f10
         ////////////////////////////////////////////////////////////////////////
         // PARAMETRO PARA SABER QUAL(IS) GRUPO(S) O USUARIO LOGADO PODE VER   //
@@ -157,7 +159,7 @@
             ,"DESUSU"              :"'.$retPhp[0]["USR_APELIDO"].'"
             ,"usr_cargo"           :"'.$_SESSION["usr_cargo"].'" 
             ,"consultar_relatorio":"'.$_SESSION["consultar_relatorio"].'"   
-            ,"grupo_operacional":"'.$_SESSION["grupo_operacional"].'"   
+            ,"grupo_operacional":"'.$_SESSION["GRUPO_OPERACIONAL"].'"   
           }]';              
         $retorno='[{"retorno":"OK","dados":'.str_replace(array("\r","\n"),'',$str).',"erro":""}]';
       };

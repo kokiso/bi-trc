@@ -1,20 +1,20 @@
 CREATE TRIGGER [dbo].[TRGVMOTORISTA_BI] ON [dbo].[VMOTORISTA]
-INSTEAD OF INSERT
+INSTEAD OF INSERT 
 AS
 BEGIN
    -- CAMPO          |INS|UPD|DEL| TIPO               Obs
    -- ---------------|---|---|---|--------------------|----------------------------------------------------------
    -- MTR_CODIGO     |PK |   |   | INT NN IDENTITY    | Codigo informado
-   -- MTR_NOME       |   |   |   | VC(60) NN          |
+   -- MTR_NOME       |   |   |   | VC(60) NN          | 
    -- MTR_RFID       |   |   |   | VC(30) NN          |
-   -- MTR_CODUNI     |   |   |   | INT NN             | Codigo da UNIDADE em FK(UNIDADE)
+   -- MTR_CODUNI     |   |   |   | INT NN             | Codigo da UNIDADE em FK(UNIDADE)      
    -- MTR_ATIVO      |   |   |   | VC(1) NN check     | S|N     Se o registro pode ser usado em tabelas auxiliares
-   -- MTR_REG        |   |   |   | VC(1) NN check     | P|A|S   P=Publico  A=Administrador S=Sistema
+   -- MTR_REG        |   |   |   | VC(1) NN check     | P|A|S   P=Publico  A=Administrador S=Sistema 
    -- MTR_CODUSR     |   |   |   | INT NN             | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
    -- USR_APELIDO    |   |   |   | VC(15) NN          | Campo relacionado (USUARIO)
    -- ---------------|---|---|---|--------------------|----------------------------------------------------------
-   -- O Direito desta tabela em USUARIOPERFEIL(Ver select)
-  SET NOCOUNT ON;
+   -- O Direito desta tabela em USUARIOPERFEIL(Ver select) 
+  SET NOCOUNT ON;  
   DECLARE @direitoNew INTEGER;        -- Recupera o direito de usuario para esta tabela
   DECLARE @fkIntNew INTEGER = 0;      -- Para procurar campo foreign key int
   DECLARE @fkStrNew VARCHAR(20) = ''; -- Para procurar campo foreign key str
@@ -31,6 +31,7 @@ BEGIN
   DECLARE @mtrAtivoNew VARCHAR(1);
   DECLARE @mtrRegNew VARCHAR(1);
   DECLARE @mtrCodUsrNew INTEGER;
+  DECLARE @mtrVeiculoNew VARCHAR(10);
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   ---------------------------------------------------
@@ -41,17 +42,18 @@ BEGIN
          ,@mtrRfidNew    = UPPER(i.MTR_RFID)
          ,@mtrCodUniNew  = i.MTR_CODUNI
          ,@uniApelidoNew = COALESCE(UNI.UNI_APELIDO,'ERRO')
-         ,@mtrPosicaoNew = i.MTR_POSICAO
+         ,@mtrPosicaoNew = COALESCE(i.MTR_POSICAO, 0)
          ,@mtrAtivoNew   = UPPER(i.MTR_ATIVO)
          ,@mtrRegNew     = UPPER(i.MTR_REG)
-         ,@mtrCodUsrNew  = i.MTR_CODUSR
+         ,@mtrCodUsrNew  = i.MTR_CODUSR         
          ,@usrApelidoNew = COALESCE(USR.USR_APELIDO,'ERRO')
-         ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')
+         ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')         
          ,@direitoNew    = UP.UP_D04
+         ,@mtrVeiculoNew = i.MTR_VEICULO
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.MTR_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
-    LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO
-    LEFT OUTER JOIN UNIDADE UNI ON i.MTR_CODUNI=UNI.UNI_CODIGO;
+    LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO    
+    LEFT OUTER JOIN UNIDADE UNI ON i.MTR_CODUNI=UNI.UNI_CODIGO;    
   -----------------------------
   -- VERIFICANDO A FOREIGN KEYs
   -----------------------------
@@ -77,32 +79,24 @@ BEGIN
   --IF( COALESCE(@fkStrNew,'')<>'' )
   --  RAISERROR('CODIGO JA CADASTRADO NA TABELA MOTORISTA %s',15,1,@fkStrNew);
 
-  ---------------------------------------------------------------------
-  -- O mesmo RFID pode ser usado mas nunca dois com ATIVO='S'
-  ---------------------------------------------------------------------
-  IF( @mtrAtivoNew='S' ) BEGIN
-    SET @fkIntNew=0;
-    SELECT @fkIntNew=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mtrRfidNew) AND (MTR_ATIVO='S'));
-    IF( @fkIntNew>0 )
-      RAISERROR('RFID JA CADASTRADO NA TABELA MOTORISTA NO CODIGO %i',15,1,@fkIntNew);
-  END
   ------------------------------
   -- Verificando o campo USR_REG
   ------------------------------
   SET @erroNew=dbo.fncCampoRegInc( @usrAdmPubNew,@mtrRegNew,4 );
   IF( @erroNew != 'OK' )
     RAISERROR(@erroNew,15,1);
-  --
+  --  
   BEGIN TRY
-    INSERT INTO dbo.MOTORISTA(
+    INSERT INTO dbo.MOTORISTA( 
       MTR_CODIGO
       ,MTR_NOME
       ,MTR_RFID
       ,MTR_CODUNI
-      ,MTR_POSICAO
+      ,MTR_POSICAO      
       ,MTR_ATIVO
       ,MTR_REG
-      ,MTR_CODUSR) VALUES(
+      ,MTR_CODUSR
+      ,MTR_VEICULO) VALUES(
       @mtrCodigoNew   -- MTR_CODIGO
       ,@mtrNomeNew    -- MTR_NOME
       ,@mtrRfidNew    -- MTR_RFID
@@ -111,7 +105,21 @@ BEGIN
       ,@mtrAtivoNew   -- MTR_ATIVO
       ,@mtrRegNew     -- MTR_REG
       ,@mtrCodUsrNew  -- MTR_CODUSR
+      ,@mtrVeiculoNew -- MTR_VEICULO
     );
+
+  ---------------------------------------------------------------------
+  -- O mesmo RFID pode ser usado mas nunca dois com ATIVO='S', caso aconteça, inativar o antigo
+  ---------------------------------------------------------------------
+  IF( @mtrAtivoNew='S' ) BEGIN
+    SET @fkIntNew=0;
+    SELECT @fkIntNew=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mtrRfidNew) AND (MTR_ATIVO='S'));
+      IF( @fkIntNew<>0 )
+            UPDATE dbo.MOTORISTA
+       SET MTR_ATIVO  = 'N'
+    WHERE MTR_CODIGO <> @mtrCodigoNew AND MTR_RFID = @mtrRfidNew AND MTR_ATIVO = 'S';
+  END
+    ----
     ---------------------------------------------------
     -- Atualizando a qtdade de veiculos em cada unidade
     ---------------------------------------------------
@@ -128,7 +136,8 @@ BEGIN
       ,MTR_CODUNI
       ,MTR_ATIVO
       ,MTR_REG
-      ,MTR_CODUSR) VALUES(
+      ,MTR_CODUSR
+      ,MTR_VEICULO) VALUES(
       'I'                         -- MTR_ACAO
       ,@mtrCodigoNew              -- MTR_CODIGO
       ,@mtrNomeNew                -- MTR_NOME
@@ -137,7 +146,8 @@ BEGIN
       ,@mtrAtivoNew               -- MTR_ATIVO
       ,@mtrRegNew                 -- MTR_REG
       ,@mtrCodUsrNew              -- MTR_CODUSR
-    );
+      ,@mtrVeiculoNew             -- MTR_VEICULO
+    );  
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);

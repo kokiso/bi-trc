@@ -702,9 +702,6 @@ BEGIN
       SELECT @dataProximaConsolidacao = DATEADD(HOUR, INTERVALO_CONSOLIDACAO, DATA_CONSOLIDACAO)
 	    FROM CONFIGURACAO_CONSOLIDACAO_INFRACAO;
 
-	    IF @dataProximaConsolidacao > GETDATE() BEGIN
-        exec consolidaInfracao;
-      END
     END
   END
 END
