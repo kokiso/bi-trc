@@ -27,12 +27,13 @@
         /////////////////////////////////////////////////
         //   Dados para JavaScript GRUPO OPERACIONAL   //
         /////////////////////////////////////////////////
-        if( $rotina=="selectGrp" ){
+        if( $rotina=="selectGpo" ){
           $sql="";
           $sql.="SELECT";
           $sql.="   GPO_CODIGO";
           $sql.="  ,GPO_NOME";
           $sql.="  ,US_APELIDO";
+          $sql.="  ,GPO_CODUSR";
           $sql.="  FROM GRUPOOPERACIONAL GPO";
           $sql.="   LEFT OUTER JOIN USUARIOSISTEMA U ON GPO.GPO_CODUSR=U.US_CODIGO";
           $classe->msgSelect(false);
@@ -100,7 +101,7 @@
         /////////////////////////////////////////////
         //         Objeto clsTable2017 GRUPO       //
         /////////////////////////////////////////////
-        jsGrp={
+        jsGpo={
           "titulo":[
              {"id":0  ,"labelCol":"OPC"     
                       ,"padrao":1}            
@@ -143,7 +144,7 @@
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
-                        +"objGrp.espiao();"
+                        +"objGpo.espiao();"
                         +"elTr.cells[0].childNodes[0].checked=false;"
                       ,"padrao":8}
           ]
@@ -197,23 +198,23 @@
                                ,["Registros inativos"                     ,"fa-thumbs-o-down" ,"btnFiltrarClick('N');"]
                                ,["Todos"                                  ,"fa-folder-open"   ,"btnFiltrarClick('*');"]
                                //,["Importar planilha excel"                ,"fa-file-excel-o"  ,"fExcel()"]
-                               ,["Imprimir registros em tela"             ,"fa-print"         ,"objGrp.imprimir()"]
-                               ,["Ajuda para campos padrões"              ,"fa-info"          ,"objGrp.AjudaSisAtivo(jsGrp);"]
-                               ,["Detalhe do registro"                    ,"fa-folder-o"      ,"objGrp.detalhe();"]
-                               ,["Gerar excel"                            ,"fa-file-excel-o"  ,"objGrp.excel();"]
-                               ,["Passo a passo do registro"              ,"fa-binoculars"    ,"objGrp.espiao();"]
-                               ,["Alterar status Ativo/Inativo"           ,"fa-share"         ,"objGrp.altAtivo(intCodDir);"]
-                               ,["Alterar registro PUBlico/ADMinistrador" ,"fa-reply"         ,"objGrp.altPubAdm(intCodDir,jsPub[0].usr_admpub);"]
-                               //,["Alterar para registro do SISTEMA"       ,"fa-reply"         ,"objGrp.altRegSistema("+jsPub[0].usr_d05+");"]                               
+                               ,["Imprimir registros em tela"             ,"fa-print"         ,"objGpo.imprimir()"]
+                               ,["Ajuda para campos padrões"              ,"fa-info"          ,"objGpo.AjudaSisAtivo(jsGpo);"]
+                               ,["Detalhe do registro"                    ,"fa-folder-o"      ,"objGpo.detalhe();"]
+                               ,["Gerar excel"                            ,"fa-file-excel-o"  ,"objGpo.excel();"]
+                               ,["Passo a passo do registro"              ,"fa-binoculars"    ,"objGpo.espiao();"]
+                               ,["Alterar status Ativo/Inativo"           ,"fa-share"         ,"objGpo.altAtivo(intCodDir);"]
+                               ,["Alterar registro PUBlico/ADMinistrador" ,"fa-reply"         ,"objGpo.altPubAdm(intCodDir,jsPub[0].usr_admpub);"]
+                               //,["Alterar para registro do SISTEMA"       ,"fa-reply"         ,"objGpo.altRegSistema("+jsPub[0].usr_d05+");"]                               
                                ,["Atualizar grade consulta"               ,"fa-filter"        ,"btnFiltrarClick('S');"]                               
                              ]  
-          ,"codTblUsu"      : "GRUPO[06]"                          
+          ,"codTblUsu"      : "USUARIO[01]"                          
           ,"codDir"         : intCodDir
         }; 
-        if( objGrp === undefined ){  
-          objGrp=new clsTable2017("objGrp");
+        if( objGpo === undefined ){  
+          objGpo=new clsTable2017("objGpo");
         };  
-        objGrp.montarHtmlCE2017(jsGrp); 
+        objGpo.montarHtmlCE2017(jsGpo); 
         //////////////////////////////////////////////////
         //          Fim objeto clsTable2017 GRUPO       //
         ////////////////////////////////////////////////// 
@@ -264,8 +265,8 @@
         btnFiltrarClick("S");  
       });
       //
-      var objGrp;                     // Obrigatório para instanciar o JS TFormaCob
-      var jsGrp;                      // Obj principal da classe clsTable2017
+      var objGpo;                     // Obrigatório para instanciar o JS TFormaCob
+      var jsGpo;                      // Obj principal da classe clsTable2017
       //var objExc;                     // Obrigatório para instanciar o JS Importar excel
       //var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
@@ -300,9 +301,8 @@
       ////////////////////////////
       function btnFiltrarClick(atv) { 
         clsJs   = jsString("lote");  
-        clsJs.add("rotina"      , "selectGrp"         );
+        clsJs.add("rotina"      , "selectGpo"         );
         clsJs.add("login"       , jsPub[0].usr_login  );
-        clsJs.add("ativo"       , atv                 );
         fd = new FormData();
         fd.append("grupoOperacional" , clsJs.fim());
         msg     = requestPedido("grupoOperacional.php",fd); 
@@ -314,9 +314,9 @@
           // Esta rotina não tem manutenção via classe clsTable2017                       //
           // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
           //////////////////////////////////////////////////////////////////////////////////
-          jsGrp.registros=objGrp.addIdUnico(retPhp[0]["dados"]);
-          objGrp.ordenaJSon(jsGrp.indiceTable,false);  
-          objGrp.montarBody2017();
+          jsGpo.registros=objGpo.addIdUnico(retPhp[0]["dados"]);
+          objGpo.ordenaJSon(jsGpo.indiceTable,false);  
+          objGpo.montarBody2017();
         };  
       };
       ////////////////////
@@ -352,7 +352,7 @@
           // Mesmo se der erro mostro o erro, se der ok mostro a qtdade de registros atualizados //
           // dlgCancelar fecha a caixa de informacao de data                                     //
           /////////////////////////////////////////////////////////////////////////////////////////
-          gerarMensagemErro("Grp",retPhp[0].erro,"AVISO");    
+          gerarMensagemErro("Gpo",retPhp[0].erro,"AVISO");    
         };  
       };
     </script>
@@ -366,11 +366,11 @@
               name="frmGpo" 
               id="frmGpo" 
               class="frmTable" 
-              action="classPhp/imprimirsql.php" 
+              action="/classPhp/imprimirsql.php" 
               target="_newpage"
               style="top: 6em; width:90em;position: absolute; z-index:30;display:none;">
           <p class="frmCampoTit">
-          <input class="informe" type="text" name="titulo" value="Grupo" disabled="" style="color: white; text-align: left;">
+          <input class="informe" type="text" name="titulo" value="Grupo Operacional" disabled="" style="color: white; text-align: left;">
           </p>
           <div style="height: 160px; overflow-y: auto;">
             <input type="hidden" id="sql" name="sql"/>

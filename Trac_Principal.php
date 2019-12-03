@@ -111,7 +111,7 @@
                   <ul class="treeview-menu">
                     <li><a href="#" onclick="ifAbrir('Trac_Grupo.php'       ,'jsPub[0].usr_d06','Grupos');"><i class="fa fa-circle-o"></i> Grupos</a></li>
                     <?php  if($_SESSION['grupo_operacional'] == 'S') { ?>
-                      <li><a href="#" onClick="window.open('classPhp/paginas/grupoOperacional/grupoOperacional.php','iframeCorpo');"><i class="fa fa-circle-o"></i> Grupos Operacionais</a></li>
+                      <li><a href="#" onClick="ifAbrir('classPhp/paginas/grupoOperacional/grupoOperacional.php', 'jsPub[0].grupo_operacional', 'Grupo Operacional');"><i class="fa fa-circle-o"></i> Grupos Operacionais</a></li>
                     <?php } ?>
                     <li><a href="#" onclick="ifAbrir('Trac_Unidade.php'     ,'jsPub[0].usr_d07','Unidades');"><i class="fa fa-circle-o"></i> Unidades</a></li>
                     <li><a href="#" onclick="ifAbrir('Trac_Polo.php'        ,'jsPub[0].usr_d08','Polos');"><i class="fa fa-circle-o"></i> Polos</a></li>

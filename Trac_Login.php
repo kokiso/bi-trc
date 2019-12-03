@@ -159,7 +159,7 @@
             ,"DESUSU"              :"'.$retPhp[0]["USR_APELIDO"].'"
             ,"usr_cargo"           :"'.$_SESSION["usr_cargo"].'" 
             ,"consultar_relatorio":"'.$_SESSION["consultar_relatorio"].'"   
-            ,"grupo_operacional":"'.$_SESSION["GRUPO_OPERACIONAL"].'"   
+            ,"grupo_operacional":"'.$_SESSION["grupo_operacional"].'"   
           }]';              
         $retorno='[{"retorno":"OK","dados":'.str_replace(array("\r","\n"),'',$str).',"erro":""}]';
       };
