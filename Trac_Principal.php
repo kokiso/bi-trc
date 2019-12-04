@@ -41,9 +41,9 @@
         }
       };
 
-      function temPermissao(permissao) {
-        console.log(eval(permissao));
-      }
+      // function temPermissao(permissao) {
+      //   console.log(eval(permissao));
+      // }
       
       var jsPub      = JSON.parse(localStorage.getItem("lsPublico"));
       var contMsg    = 0;            // contador para mensagens

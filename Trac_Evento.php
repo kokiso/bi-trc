@@ -544,7 +544,7 @@
             }
           };
         }catch( e ){
-          console.log(req);
+          // console.log(req);
           gerarMensagemErro("Composição do evento",e,"Erro");
         }
       };
