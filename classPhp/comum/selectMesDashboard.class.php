@@ -9,6 +9,13 @@
     
     $classe   = new conectaBd();      
     $classe->conecta($_SESSION['login']);
+    
+    if (!isset($mesAntigoPipe)){
+        $mesAntigoPipe = false;
+    }
+    if (!isset($mesAtualPipe)){
+        $mesAtualPipe = false;
+    }
 
     $sql="";
     $sql.="select TOP 1 MONTH(MVM_DATAGPS) as MES, YEAR(MVM_DATAGPS) as ANO from MOVIMENTO order by MVM_POSICAO desc;";
