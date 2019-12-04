@@ -1001,7 +1001,7 @@
           ceTr = document.createElement("tr");
           ceTr.style.height="15px";
           msg=0;
-          for( var linR=0;  linR<10;  linR++ ){
+          for( var linR=0;  retPhp[0]["dados"].length < 10 ? linR<retPhp[0]["dados"].length : linR<10;  linR++ ){
             ceTr = document.createElement("tr");
             ceTr.style.backgroundColor = (linR % 2 ? "#CDC9C9" : "white");     
             ceTr.style.fontSize = "13px";          
