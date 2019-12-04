@@ -98,7 +98,7 @@ BEGIN
       ,MTR_CODUSR
       ,MTR_VEICULO) VALUES(
       @mtrCodigoNew   -- MTR_CODIGO
-      ,@mtrNomeNew    -- MTR_NOME
+      ,REPLACE(@mtrNomeNew, '_', ' ') -- MTR_NOME
       ,@mtrRfidNew    -- MTR_RFID
       ,@mtrCodUniNew  -- MTR_CODUNI
       ,@mtrPosicaoNew -- MTR_POSICAO
