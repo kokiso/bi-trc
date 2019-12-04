@@ -11,15 +11,14 @@
     $classe->conecta($_SESSION['login']);
 
     $sql="";
-    $sql.=" SELECT ";
-    $sql.="  POL_CODIGO, ";
-    $sql.="  POL_CODGRP, ";
-    $sql.="  POL_NOME  ";
-    $sql.="  FROM POLO ";
-    $sql.="  WHERE POL_CODIGO IN (SELECT UNI_CODPOL ";
-    $sql.="   FROM UNIDADE ";
-    $sql.="   JOIN USUARIOUNIDADE ON UNI_CODIGO = UU_CODUNI ";
-    $sql.="   WHERE UU_CODUSR = ".$_SESSION["usr_codigo"].");";
+    $sql.="SELECT P.POL_CODIGO, P.POL_CODGRP, P.POL_NOME
+            FROM UNIDADE A
+             LEFT OUTER JOIN POLO P ON A.UNI_CODPOL = P.POL_CODIGO
+             LEFT OUTER JOIN USUARIOSISTEMA U ON A.UNI_CODUSR = U.US_CODIGO
+             LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO = UU.UU_CODUNI AND UU.UU_CODUSR = '".$_SESSION["usr_codigo"]."' 
+
+    WHERE ((UNI_ATIVO = 'S') AND (COALESCE(UU.UU_ATIVO, '') = 'S'))
+    GROUP BY P.POL_CODIGO, P.POL_NOME, P.POL_CODGRP;";
     $classe->msgSelect(false);
     $retCls=$classe->selectAssoc($sql);
 ?>

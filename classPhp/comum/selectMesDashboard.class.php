@@ -67,8 +67,16 @@
 <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
   <select id="cbCompetencia" onChange="chngCompetencia();" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
       <?php foreach ($listaMeses as $li) { ?>
-        <option value="<?php echo '20'.$li[1].$li[0] ?>" selected="selected">
-        <?php echo $li[2].'/'.$li[1] ?></option>
+        <option value="<?php 
+        $mes = $li[1].$li[0];
+        if ($mesAntigoPipe) {
+            $mes = $mes.'|201805';
+        } elseif ($mesAtualPipe) {
+            $mes = $mes.'|'.$mes;
+        }
+        echo '20'.$mes ?>" selected="selected">
+        <?php echo $li[2].'/'.$li[1] ?>
+        </option>
       <?php } ?>
   </select>
 </div>

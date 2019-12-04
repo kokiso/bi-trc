@@ -66,10 +66,18 @@
 ?>
 <div id="divCbMes" class="campotexto campo15">
 <select class="campo_input_combo" id="cbIni">
-    <?php foreach ($listaMeses as $li) { ?>
-      <option value="<?php echo '20'.$li[1].$li[0] ?>" selected="selected">
-      <?php echo $li[2].'/'.$li[1] ?></option>
-    <?php } ?>
+<?php foreach ($listaMeses as $li) { ?>
+        <option value="<?php 
+        $mes = $li[1].$li[0];
+        if ($mesAntigoPipe) {
+            $mes = $mes.'|201805';
+        } elseif ($mesAtualPipe) {
+            $mes = $mes.'|'.'20'.$mes;
+        }
+        echo '20'.$mes ?>" selected="selected">
+        <?php echo $li[2].'/'.$li[1] ?>
+        </option>
+      <?php } ?>
 </select>
 <label class="campo_label campo_required" for="cbIni">MÊS</label>
 </div>

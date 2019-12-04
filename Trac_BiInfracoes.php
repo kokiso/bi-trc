@@ -1327,7 +1327,7 @@
           </select>
         </div> -->
 
-        <?php include 'classPhp/comum/selectMesDashboard.class.php';?>
+        <?php $mesAntigoPipe=true; include 'classPhp/comum/selectMesDashboard.class.php';?>
         
         <ul class="nav navbar-nav">
           <li class="dropdown notifications-menu">
