@@ -871,7 +871,7 @@
         <label class="campo_label campo_required" for="cbIni">INICIO</label>
       </div> -->
 
-      <?php include 'classPhp/comum/selectMes.class.php';?>
+      <?php $mesAtualPipe=true; include 'classPhp/comum/selectMes.class.php';?>
 
       <!--
       <div class="campotexto campo15">
