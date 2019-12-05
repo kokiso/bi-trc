@@ -827,11 +827,11 @@
                 <input class="campo_input" id="edtDtCalibracao" type="text" OnKeyUp="mascaraData(this,event);" maxlength="10" />
                 <label class="campo_label campo_required" for="edtDtCalibracao">CALIBRACAO</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo15">
                 <input class="campo_input" id="edtNumFrota" type="text" maxlength="20" />
                 <label class="campo_label campo_required" for="edtNumFrota">NUM.FROTA</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo15">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
@@ -859,7 +859,7 @@
                 <input class="campo_input_titulo input" id="edtDesGpo" type="text" disabled />
                 <label class="campo_label" for="edtDesGpo">NOME GRUPO OPERACIONAL</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo20">
                 <input class="campo_input_titulo" disabled id="edtUsuario" type="text" />
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>
