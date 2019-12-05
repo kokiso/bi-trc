@@ -1,13 +1,15 @@
 <?php
+
   session_start();
-  
+
   ////////////////////////////////////////////////////
   // Tempo de espera para cada chamada da rotina 30seg
-  ////////////////////////////////////////////////////  
+  ////////////////////////////////////////////////////
   $ciclo = "20";
   ////////////////////////////////////////////////////
   // Classes auxiliares
-  ////////////////////////////////////////////////////  
+  ////////////////////////////////////////////////////
+  include_once __DIR__ . "/classPhp/service/serviceTempoInfracao.php";
   require("classPhp/conectaSqlServer.class.php");
   require("classPhp/validaJson.class.php"); 
   require("classPhp/removeAcento.class.php"); 
@@ -427,7 +429,9 @@
 						echo "OK   - ENVIANDO ".count($arrUpdt)." REGISTROS {$idIni} a {$mvmPosicao}!"."\r\n";                          
             $retCls=$classe->cmd($arrUpdt);
             if( $retCls['retorno']=="OK" ){
-              echo "OK   - GRAVOU ".count($arrUpdt)." REGISTROS! ".date("d/m/Y H:i:s",strtotime($mvmDataGps))."\r\n";              
+              echo "OK   - GRAVOU ".count($arrUpdt)." REGISTROS! ".date("d/m/Y H:i:s",strtotime($mvmDataGps))."\r\n";
+                $servicoTempoInfracao = new serviceTempoInfracao();
+                $servicoTempoInfracao->consolidaTempoInfracao('INTEGRAR');
             } else {
               echo "ERRO - ".$retCls["erro"]."\r\n";                
             } 
