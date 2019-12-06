@@ -180,6 +180,7 @@
     <link rel="stylesheet" href="css/cssTable2017.css">
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
+    <script src="config/configuracoes.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .layout-boxed {
@@ -231,7 +232,7 @@
 
             if( retPhp[0].retorno=="OK" ){
               localStorage.setItem("lsPublico",JSON.stringify(retPhp[0].dados));
-              localStorage.setItem("lsPathPhp","/phpSqlServer.php");
+              localStorage.setItem("lsPathPhp",ENDERECO+"/phpSqlServer.php");
               if( retPhp[0].dados[0].usr_interno=="E" ){
                 window.location="Trac_BiDashBoard.php";   
               } else {        
