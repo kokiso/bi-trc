@@ -60,6 +60,8 @@
         ////////////////////////////////////////////////
         if( $rotina=="selectVcl" ){
           
+          $gpo="";
+
           if( $lote[0]->grupoOperacional != 'TODOS' ) {
             $gpo = " AND (A.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
           }
