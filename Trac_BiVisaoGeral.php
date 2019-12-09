@@ -27,6 +27,7 @@
         $lote     = $jsonObj->lote;
         $rotina   = $lote[0]->rotina;
         $codmes   = $lote[0]->compet;
+        $gpo      = "";
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
         ///////////////////////////////////////////////////////////
@@ -129,6 +130,11 @@
         ////////////////
         if( $rotina=="biSimples" ){
           $sql="";
+
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (A.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
+
           if( $lote[0]->qualSelect=="bisUniKm" ){
             $sql.="SELECT UNI.UNI_APELIDO AS NOME,SUM(A.BIKMM_TOTAL) AS QTOS";
             $sql.="  FROM BI_KILOMETROMES A";
@@ -199,6 +205,7 @@
               case "L"  : $frota=" AND (A.VCL_FROTA='L')"         ;break;
               case "P"  : $frota=" AND (A.VCL_FROTA='P')"         ;break;
             }  
+            $sql.=$gpo;
             if( $lote[0]->coduni >0 ){
               $sql.="  WHERE ((A.VCL_ATIVO='S') AND (A.VCL_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";
             } elseif($lote[0]->codpol != "*" ){              
@@ -209,6 +216,7 @@
             $sql.="  GROUP BY UNI.UNI_APELIDO";              
           };       
           if( $lote[0]->qualSelect=="bisVeiculoPol" ){
+
             $sql.="SELECT POL.POL_NOME AS NOME,COUNT(A.VCL_CODIGO) AS QTOS";
             $sql.="  FROM VEICULO A";
             $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.VCL_CODUSR=U.US_CODIGO";
@@ -219,7 +227,8 @@
               case "LP" : $frota=" AND (A.VCL_FROTA IN('L','P'))" ;break;
               case "L"  : $frota=" AND (A.VCL_FROTA='L')"         ;break;
               case "P"  : $frota=" AND (A.VCL_FROTA='P')"         ;break;
-            }  
+            }
+
             if( $lote[0]->coduni >0 ){
               $sql.="  WHERE ((A.VCL_ATIVO='S') AND (A.VCL_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";
             } elseif($lote[0]->codpol != "*" ){              
@@ -304,6 +313,9 @@
             case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
           };  
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
           //
           $sql="";
           if( $lote[0]->qualSelect=="infracao" ){ 
@@ -335,6 +347,7 @@
               $sql.="  WHERE (".$alias."_ANOMES=".$codmes.")";
               $sql.="    AND (COALESCE(UU.UU_ATIVO,'')='S')";
               $sql.=$frota;
+              $sql.=$gpo; 
               if( $lote[0]->coduni >0 ){
                 $sql.="    AND (".$alias."_CODUNI=".$lote[0]->coduni.")";  
               };
@@ -781,6 +794,7 @@
         clsJs.add("codpol"      , qualCodPol                                      );
         clsJs.add("levpes"      , qualLevPes                                      );      
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
+        clsJs.add("grupoOperacional"      , document.getElementById("cbGrupoOperacional").value  );      
         fd = new FormData();
         fd.append("visaogeral" , clsJs.fim());
         msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
@@ -947,6 +961,7 @@ function criarElemento(elem,attr,app){
         clsJs.add("codpol"      , qualCodPol                                      );
         clsJs.add("levpes"      , qualLevPes                                      );      
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
+        clsJs.add("grupoOperacional"      , document.getElementById("cbGrupoOperacional").value  );      
         fd = new FormData();
         fd.append("visaogeral" , clsJs.fim());
         msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
@@ -1462,6 +1477,9 @@ function criarElemento(elem,attr,app){
       function chngCompetencia(){
         iniciarBi(0,"Todas unidades","*","Todos polos");
       };
+      function chngGrupoOperacional(){
+        iniciarBi(0,"Todas unidades","*","Todos polos");
+      };
      </script> 
   </head>
   <body>
@@ -1483,6 +1501,8 @@ function criarElemento(elem,attr,app){
           <select id="cbCompetencia" onChange="chngCompetencia();" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
           </select>
         </div> -->
+
+        <?php include 'classPhp\comum\selectGrupoOperacionalDashboard.class.php';?>
         
         <?php include 'classPhp/comum/selectMesDashboard.class.php';?>
 
@@ -1516,6 +1536,7 @@ function criarElemento(elem,attr,app){
               <li class="footer"><a href="#">Fechar</a></li>
             </ul>
           </li>
+
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <span class="hidden-xs">Trac</span>

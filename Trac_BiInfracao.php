@@ -122,6 +122,9 @@
         //          Select completo       //
         ////////////////////////////////////
         if( $rotina=="selectBi" ){
+
+          $gpo="";
+
           if( $lote[0]->grupoOperacional != 'TODOS' ) {
             $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
           }
