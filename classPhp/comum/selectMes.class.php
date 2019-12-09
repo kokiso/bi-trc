@@ -5,13 +5,20 @@
     }
 
     require_once(__DIR__."/../conectaSqlServer.class.php");
-    require_once(__DIR__."/../validaJSon.class.php");    
+    require_once(__DIR__."/../validaJson.class.php");    
     
     $classe   = new conectaBd();      
     $classe->conecta($_SESSION['login']);
 
+    if (!isset($mesAntigoPipe)){
+        $mesAntigoPipe = false;
+    }
+    if (!isset($mesAtualPipe)){
+        $mesAtualPipe = false;
+    }
+
     $sql="";
-    $sql.=" select TOP 1 MONTH(MVM_DATAGPS) as MES, YEAR(MVM_DATAGPS) as ANO from MOVIMENTO order by MVM_DATAGPS desc; ";
+    $sql.="select TOP 1 MONTH(MVM_DATAGPS) as MES, YEAR(MVM_DATAGPS) as ANO from MOVIMENTO order by MVM_POSICAO desc;";
     $classe->msgSelect(false);
     $retCls=$classe->selectAssoc($sql);
 
@@ -66,10 +73,18 @@
 ?>
 <div id="divCbMes" class="campotexto campo15">
 <select class="campo_input_combo" id="cbIni">
-    <?php foreach ($listaMeses as $li) { ?>
-      <option value="<?php echo '20'.$li[1].$li[0] ?>" selected="selected">
-      <?php echo $li[2].'/'.$li[1] ?></option>
-    <?php } ?>
+<?php foreach ($listaMeses as $li) { ?>
+        <option value="<?php 
+        $mes = $li[1].$li[0];
+        if ($mesAntigoPipe) {
+            $mes = $mes.'|201805';
+        } elseif ($mesAtualPipe) {
+            $mes = $mes.'|'.'20'.$mes;
+        }
+        echo '20'.$mes ?>" selected="selected">
+        <?php echo $li[2].'/'.$li[1] ?>
+        </option>
+      <?php } ?>
 </select>
 <label class="campo_label campo_required" for="cbIni">MÊS</label>
 </div>

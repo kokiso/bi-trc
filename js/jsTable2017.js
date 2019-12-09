@@ -721,6 +721,13 @@ function clsTable2017(obj) {
                     self.gravar();
                 });
             };
+        } else if (tagValida(self.Js.idBtnConfirmarAtualizar)) {
+            if (document.getElementById(self.Js.idBtnConfirmarAtualizar) != null) {
+                document.getElementById(self.Js.idBtnConfirmarAtualizar).addEventListener('click', function() {
+                    self.gravar();
+                    btnFiltrarClick("S");
+                });
+            };
         };
         this.ordenaJSon(self.Js.indiceTable, false);
         this.montarBody2017();
@@ -1582,7 +1589,7 @@ function clsTable2017(obj) {
                                 self.addId[0] = (self.addId[0] + 1);
                                 break;
                             default:
-                                cntd = document.getElementById(reg.obj).value;
+                                cntd = reg.obj ? document.getElementById(reg.obj).value : "";
                                 break;
                         };
                         arr.push(cntd);

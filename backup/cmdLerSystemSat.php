@@ -9,7 +9,7 @@
     // Classes auxiliares
     ////////////////////////////////////////////////////  
     require("classPhp/conectaSqlServer.class.php");
-    require("classPhp/validaJSon.class.php"); 
+    require("classPhp/validaJson.class.php"); 
     require("classPhp/removeAcento.class.php"); 
     ///////////////////////////////
     // Funcao para ordenar array //

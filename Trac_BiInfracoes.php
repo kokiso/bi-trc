@@ -3,7 +3,7 @@
   if( isset($_POST["principal"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/selectRepetidoTrac.class.php"); 
       require("classPhp/dataCompetencia.class.php");
@@ -556,7 +556,7 @@
     <script>
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
-				comboCompetencia("classif_mot",document.getElementById("cbCompetencia"));
+				// comboCompetencia("classif_mot",document.getElementById("cbCompetencia"));
         window.parent.document.getElementById("iframeCorpo").height="50em";
         buscarUni();
         buscarPol();
@@ -1001,7 +1001,7 @@
           ceTr = document.createElement("tr");
           ceTr.style.height="15px";
           msg=0;
-          for( var linR=0;  linR<10;  linR++ ){
+          for( var linR=0;  retPhp[0]["dados"].length < 10 ? linR<retPhp[0]["dados"].length : linR<10;  linR++ ){
             ceTr = document.createElement("tr");
             ceTr.style.backgroundColor = (linR % 2 ? "#CDC9C9" : "white");     
             ceTr.style.fontSize = "13px";          
@@ -1290,7 +1290,10 @@
       barChartOptions.datasetFill = false
       barChart.Bar(barChartData, barChartOptions)
     }
-    
+
+    function chngCompetencia(){
+        iniciarBi(0,"Todas unidades","*","Todos polos");
+      };
     
     </script> 
   </head>
@@ -1309,9 +1312,9 @@
           </select>
         </div>
 
-        <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
+        <!-- <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
           <select id="cbCompetencia" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
-						<!--
+						
             <option value="201805|201805">MAI/18</option>
             <option value="201806|201805">JUN/18</option>
             <option value="201807|201805">JUL/18</option>
@@ -1320,9 +1323,11 @@
             <option value="201810|201805">OUT/18</option>
             <option value="201811|201805">NOV/18</option>
             <option value="201812|201805">DEZ/18</option>
-						-->
+						
           </select>
-        </div>
+        </div> -->
+
+        <?php $mesAntigoPipe=true; include 'classPhp/comum/selectMesDashboard.class.php';?>
         
         <ul class="nav navbar-nav">
           <li class="dropdown notifications-menu">

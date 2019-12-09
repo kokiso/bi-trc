@@ -3,7 +3,7 @@
   if( isset($_POST["visaogeral"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       require("classPhp/selectRepetidoTrac.class.php"); 
 
@@ -649,7 +649,7 @@
     <script>
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
-				comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbCompetencia"));
+				// comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbCompetencia"));
         //buscarCompetencia();
         buscarUni();
         buscarPol();
@@ -1460,11 +1460,7 @@ function criarElemento(elem,attr,app){
         }    
       }; 
       function chngCompetencia(){
-        fncContar("contarKm"        ,"qtosKm" ,pubCodUni,pubCodPol,"*");  
-				fncContar("contarMotorista" ,"qtosMtr",pubCodUni,pubCodPol,"*");
-				fncContar("contarVeiculo"   ,"qtosVcl",pubCodUni,pubCodPol,pubLevPes);				
-				fncContar("contarHoraRodando"	,"qtosHRod"	,pubCodUni,pubCodPol,"*");								
-				fncContar("contarHoraParado"	,"qtosHPar"	,pubCodUni,pubCodPol,"*");				
+        iniciarBi(0,"Todas unidades","*","Todos polos");
       };
      </script> 
   </head>
@@ -1483,11 +1479,13 @@ function criarElemento(elem,attr,app){
           </select>
         </div>
 
-        <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
+        <!-- <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
           <select id="cbCompetencia" onChange="chngCompetencia();" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
           </select>
-        </div>
+        </div> -->
         
+        <?php include 'classPhp/comum/selectMesDashboard.class.php';?>
+
         <ul class="nav navbar-nav">
           <li class="dropdown notifications-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">

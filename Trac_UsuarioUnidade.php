@@ -3,7 +3,7 @@
   if( isset($_POST["usuariounidade"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
 
       $vldr     = new validaJSon();          
@@ -537,7 +537,7 @@
       // Em todas chamadas tragos somente soAtivo, aqui tenho que trazer todos
       function uniF10Click(){ fUnidadeF10(0,"edtCodUni","cbAtivo","soAtivo"); };  
       function RetF10tblUni(arr){
-        debugger;
+        // debugger;
         document.getElementById("edtCodUni").value    = arr[0].CODIGO;
         document.getElementById("edtDesUni").value    = arr[0].APELIDO;
         document.getElementById("edtDesGrp").value    = arr[0].GRUPO;
@@ -545,7 +545,7 @@
         document.getElementById("edtCodUni").setAttribute("data-oldvalue",arr[0].CODIGO);
       };
       function codUniBlur(obj){
-        debugger;        
+        // debugger;        
         var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
         var elNew = jsNmrs(obj.id).inteiro().ret();
         if( elOld != elNew ){

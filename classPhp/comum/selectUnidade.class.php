@@ -5,19 +5,15 @@
     }
 
     require_once(__DIR__."/../conectaSqlServer.class.php");
-    require_once(__DIR__."/../validaJSon.class.php");    
+    require_once(__DIR__."/../validaJson.class.php");    
 
     $classe   = new conectaBd();      
     $classe->conecta($_SESSION['login']);
 
     $sql="";
-    $sql.=" SELECT ";
-    $sql.="  UNI_CODIGO, ";
-    $sql.="  UNI_CODGRP, ";
-    $sql.="  UNI_NOME  ";
-    $sql.="  FROM UNIDADE ";
-    $sql.="  JOIN USUARIOUNIDADE ON UNI_CODIGO = UU_CODUNI ";
-    $sql.="  WHERE UU_CODUSR = ".$_SESSION["usr_codigo"];
+    $sql.="SELECT UNI_CODIGO, UNI_CODGRP, UNI_NOME FROM UNIDADE A LEFT OUTER JOIN USUARIOSISTEMA U ON A.UNI_CODUSR=U.US_CODIGO
+    LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo']."
+    WHERE ((UNI_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S'))";
 
     if( isset($_POST["montaSelectUnidade"]) ){
         $vldr     = new validaJSon();          

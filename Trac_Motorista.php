@@ -3,7 +3,7 @@
   if( isset($_POST["motorista"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
 
       $vldr     = new validaJSon();          
@@ -60,6 +60,7 @@
           $sql.="      ,MTR_CODUNI";
           $sql.="      ,UNI.UNI_APELIDO";
 					$sql.="      ,MTR_POSICAO";										
+					$sql.="      ,MTR_VEICULO";										
           $sql.="      ,CASE WHEN A.MTR_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS MTR_ATIVO";
           $sql.="      ,CASE WHEN A.MTR_REG='P' THEN 'PUB' WHEN A.MTR_REG='S' THEN 'SIS' ELSE 'ADM' END AS MTR_REG";
           $sql.="      ,US_APELIDO";
@@ -169,7 +170,8 @@
                 .",MTR_CODUNI"
                 .",MTR_REG"
                 .",MTR_CODUSR"
-                .",MTR_ATIVO) VALUES("
+                .",MTR_ATIVO"
+                .",MTR_VEICULO) VALUES("
                 ."'$codigo'"                  // MTR_CODIGO
                 .",'".$descricao."'"          // MTR_NOME
                 .",'".$rfid."'"               // MTR_RFID
@@ -177,6 +179,7 @@
                 .",'P'"                       // MTR_REG
                 .",".$_SESSION["usr_codigo"]  // MTR_CODUSR
                 .",'S'"                       // MTR_ATIVO
+                .",".$veiculo."'"             // MTR_VEICULO
               .")";
               array_push($arrUpdt,$sql);
             };
@@ -230,6 +233,7 @@
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaUnidadeF10.js"></script>        
+    <script src="tabelaTrac/f10/tabelaVeiculoF10.js"></script>        
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -428,25 +432,33 @@
                       ,"ajudaCampo"     : ["Id systemsat."]
                       ,"importaExcel"   : "N"                                          
                       ,"padrao":0}
-            ,{"id":14 ,"field"          : "MTR_ATIVO"  
+            ,{"id":14 ,"field"          : "MTR_VEICULO"
+                      ,"labelCol"       : "VEICULO"
+                      ,"obj"            : "edtVcl"
+                      ,"validar"        : ["podeNull"]
+                      ,"tamGrd"         : "10em"
+                      ,"tamImp"         : "30"              
+                      ,"ajudaCampo"     : ["Placa do veículo."]
+                      ,"padrao":0}  
+            ,{"id":15 ,"field"          : "MTR_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"padrao":2}                                        
-            ,{"id":15 ,"field"          : "MTR_REG"    
+            ,{"id":16 ,"field"          : "MTR_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":16 ,"field"          : "US_APELIDO" 
+            ,{"id":17 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario" 
                       ,"padrao":4}                
-            ,{"id":17 ,"field"          : "MTR_CODUSR" 
+            ,{"id":18 ,"field"          : "MTR_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
-                      ,"padrao":5}                                      
-            ,{"id":18 ,"labelCol"       : "PP"      
+                      ,"padrao":5}                                   
+            ,{"id":19 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -473,7 +485,7 @@
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
           ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
-          ,"idBtnConfirmar" : "btnConfirmar"            // Se existir executa o confirmar do form/fieldSet
+          ,"idBtnConfirmarAtualizar" : "btnConfirmarAtualizar"            // Se existir executa o confirmar do form/fieldSet, e atualiza a grid depois
           ,"idBtnCancelar"  : "btnCancelar"             // Se existir executa o cancelar do form/fieldSet
           ,"div"            : "frmMtr"                  // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaMtr"               // Para fechar a div onde estão os fieldset ao cadastrar
@@ -496,7 +508,7 @@
           ,"relFonte"       : "8"                       // Fonte do relatório
           ,"foco"           : ["edtDescricao"
                               ,"edtDescricao"
-                              ,"btnConfirmar"]          // Foco qdo Cad/Alt/Exc
+                              ,"btnConfirmarAtualizar"]          // Foco qdo Cad/Alt/Exc
           ,"formPassoPasso" : "Trac_Espiao.php"         // Enderço da pagina PASSO A PASSO
           ,"indiceTable"    : "DESCRICAO"               // Indice inicial da table
           ,"tamBotao"       : "15"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
@@ -578,6 +590,7 @@
       var objMtr;                     // Obrigatório para instanciar o JS TFormaCob
       var jsMtr;                      // Obj principal da classe clsTable2017
       var objUniF10;                  // Obrigatório para instanciar o JS CidadeF10      
+      var objVclF10;                  // Obrigatório para instanciar o JS VeiculoF10      
       var objExc;                     // Obrigatório para instanciar o JS Importar excel
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
@@ -676,7 +689,9 @@
       function uniFocus(obj){ 
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
       };
-      function uniF10Click(){ fUnidadeF10(0,"edtCodUni","cbAtivo","soAtivo"); };  
+      function uniF10Click(){
+         fUnidadeF10(0,"edtCodUni","cbAtivo","soAtivo");
+       };  
       function RetF10tblUni(arr){
         document.getElementById("edtCodUni").value   = arr[0].CODIGO;
         document.getElementById("edtDesUni").value   = arr[0].APELIDO;
@@ -691,6 +706,12 @@
           document.getElementById("edtDesUni").value     = ( ret.length == 0 ? ""        : ret[0].APELIDO                         );
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )               );
         };
+        if (document.getElementById("edtVcl").value) {
+          document.getElementById("edtVcl").value = "";
+        }
+        if (!document.getElementById("edtVcl").classList.contains('inputF10')){
+          document.getElementById("edtVcl").classList.add('inputF10');
+        }
       };
       function buscarUni(){
         clsJs   = jsString("lote");  
@@ -722,6 +743,23 @@
           };
         };  
       };  
+
+      function vclF10Click(){
+        if (document.getElementById("edtCodUni").value !== '0000'){
+         const codigoUnidade = document.getElementById("edtCodUni").value;
+         fVeiculoF10(codigoUnidade);
+        } else {
+          document.getElementById("edtVcl").classList.remove('inputF10');
+        }
+      };  
+      function RetF10tblVcl(arr){
+        if (document.getElementById("edtCodUni").value !== '0000'){
+        document.getElementById("edtVcl").value   = arr[0].CODIGO;
+        document.getElementById("edtVcl").setAttribute("data-oldvalue",arr[0].CODIGO);
+        } else {
+          document.getElementById("edtVcl").classList.remove('inputF10');
+        }
+      };
     </script>
   </head>
   <body>
@@ -785,14 +823,22 @@
                 <input class="campo_input_titulo input" id="edtDesUni" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesUni">RAZAO_UNIDADE</label>
               </div>
-              <div class="campotexto campo25">
+                <div class="campotexto campo20">
+                    <input class="campo_input_titulo inputF10" id="edtVcl"
+                           onFocus="uniFocus(this);"
+                           onClick="vclF10Click('edtVcl');" 
+                           autocomplete="off"
+                           type="text" />
+                    <label class="campo_label" for="edtVcl">VEICULO</label>
+                </div>
+              <div class="campotexto campo15">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbAtivo">ATIVO</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo15">
                 <select class="campo_input_combo" id="cbReg">
                   <option value="P">PUBLICO</option>               
                 </select>
@@ -818,7 +864,7 @@
                   <label class="campo_labelSombra">Campo obrigatório</label>
                 </div>              
                 <div class="campo20" style="float:right;">            
-                  <input id="btnConfirmar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
+                  <input id="btnConfirmarAtualizar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>
                   <i class="faBtn fa-check icon-large"></i>
                 </div>
                 <div class="campo20" style="float:right;">            

@@ -3,7 +3,7 @@
   if( isset($_POST["principal"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
 
       $vldr     = new validaJSon();          
@@ -662,7 +662,7 @@
       // Tb eh usada qdo selecionado filtro por uma unidade                     //
       ////////////////////////////////////////////////////////////////////////////
       function iniciarBi(ibCodUni,ibDesUni,ibCodPol,ibDesPol){
-        document.getElementById("infracaoCompet").innerHTML="Infrações "+document.getElementById("cbCompetencia").options[document.getElementById("cbCompetencia").selectedIndex].text+" ";
+        // document.getElementById("infracaoCompet").innerHTML="Infrações "+document.getElementById("cbCompetencia").options[document.getElementById("cbCompetencia").selectedIndex].text+" ";
         pubCodUni=ibCodUni;
         pubDesUni=ibDesUni;
         pubCodPol=ibCodPol;
@@ -1175,7 +1175,7 @@
           ceTr = document.createElement("tr");
           ceTr.style.height="15px";
           msg=0;
-          for( var linR=0;  linR<10;  linR++ ){
+          for( var linR=0;  retPhp[0]["dados"].length < 10 ? linR<retPhp[0]["dados"].length : linR<10;  linR++ ){
             ceTr = document.createElement("tr");
             ceTr.style.backgroundColor = (linR % 2 ? "#CDC9C9" : "white");     
             ceTr.style.fontSize = "13px";          
@@ -1412,10 +1412,12 @@
           </select>
         </div>
 
-        <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
+        <!-- <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
           <select id="cbCompetencia" onChange="chngCompetencia();" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
           </select>
-        </div>
+        </div> -->
+
+        <?php include 'classPhp/comum/selectMesDashboard.class.php';?>
         
         <ul class="nav navbar-nav">
           <li class="dropdown notifications-menu">

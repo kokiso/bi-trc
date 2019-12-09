@@ -3,7 +3,7 @@
   if( isset($_POST["grdClassifMotorista"]) ){
     try{     
       require("classPhp/conectaSqlServer.class.php");
-      require("classPhp/validaJSon.class.php"); 
+      require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php"); 
       
       function diferenca($parI,$parF){
@@ -302,7 +302,7 @@
       "use strict";
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
-        comboCompetencia("classif_mot",document.getElementById("cbMesAno"));			
+        // comboCompetencia("classif_mot",document.getElementById("cbIni"));			
         jsBi={
           "titulo":[
              {"id":0  ,"labelCol":"OPC"     
@@ -456,8 +456,8 @@
           //////////////////////////////////////////////
           //Buscando a dada de inicio/fim para select //
           //////////////////////////////////////////////
-          //alert(bl("cbMesAno").value());    
-          var splt=document.getElementById("cbMesAno").value.split('|');
+          //alert(bl("cbIni").value());    
+          var splt=document.getElementById("cbIni").value.split('|');
           //
 					clsJs   = jsString("lote");  
 					clsJs.add("rotina"  	, "select"                                  	);
@@ -479,8 +479,8 @@
 						// jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
 						//////////////////////////////////////////////////////////////////////////////////
 						jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
-						//jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbMesAno").value;
-						jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbMesAno").options[document.getElementById("cbMesAno").selectedIndex].text;
+						//jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").value;
+						jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
 						objBi.ordenaJSon(jsBi.indiceTable,false);  
 						objBi.montarBody2017();
 					};  
@@ -493,7 +493,7 @@
         //////////////////////////////////////////////
         //Buscando a dada de inicio/fim para select //
         //////////////////////////////////////////////    
-        var splt=document.getElementById("cbMesAno").value.split('|');
+        var splt=document.getElementById("cbIni").value.split('|');
         
         try{        
           clsChecados = objBi.gerarJson("1");
@@ -696,9 +696,9 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-      <div class="campotexto campo15">
-        <select class="campo_input_combo" id="cbMesAno">
-					<!--
+      <!-- <div class="campotexto campo15">
+        <select class="campo_input_combo" id="cbIni">
+					
           <option value="201805|201805">MAI/18</option>
           <option value="201806|201805">JUN/18</option>
           <option value="201807|201805">JUL/18</option>
@@ -707,12 +707,13 @@
           <option value="201810|201805">OUT/18</option>
           <option value="201811|201805">NOV/18</option>
           <option value="201812|201805">DEZ/18</option>
-					-->
+					
         </select>
-        <label class="campo_label campo_required" for="cbMesAno">INICIO</label>
-      </div>
-      
-      
+        <label class="campo_label campo_required" for="cbIni">INICIO</label>
+      </div> -->
+
+      <?php $mesAntigoPipe=true; include 'classPhp/comum/selectMes.class.php';?>
+    
       <div class="campotexto campo15">
         <select class="campo_input_combo" id="cbFrota">
           <option value="LP" selected="selected">Leve/Pesado</option>

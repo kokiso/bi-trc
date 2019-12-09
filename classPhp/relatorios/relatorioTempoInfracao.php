@@ -1,209 +1,16 @@
 <?php
-  session_start();
 
+  require_once("../service/serviceTempoInfracao.php");
+  $servicoTempoInfracao     = new serviceTempoInfracao();
+  
+  
   if( isset($_POST["grdInfracaoTempo"]) ){
-    try{     
-      require("../conectaSqlServer.class.php");
-      require("../validaJSon.class.php");
-      require("../removeAcento.class.php");
-      require("../selectRepetidoTrac.class.php");
-      require("../persistencia/infracaoTempoPersistencia.php");
+    $servicoTempoInfracao->consolidaTempoInfracao('INTEGRAR');
+  }
 
-      
-      function diferenca($parI,$parF){
-        $dtI      = new DateTime($parI); 
-        $dtF      = new DateTime($parF);
-        $dteDiff  = $dtI->diff($dtF); 
-        return $dteDiff->format("%H:%I:%S"); 
-      };  
-
-      $vldr     = new validaJSon();
-
-      $retorno  = "";
-      $retCls   = $vldr->validarJs($_POST["grdInfracaoTempo"]);
-      $atuBd    = false;
-      if($retCls["retorno"] != "OK"){
-        $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
-        unset($retCls,$vldr);      
-      } else {
-        $arrRet  = []; 
-        $jsonObj  = $retCls["dados"];
-        $lote     = $jsonObj->lote;
-        $rotina   = $lote[0]->rotina;
-        if( $rotina=="select" ){
-
-          if( $retCls['retorno'] != "OK" ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-          } else {
-            $linR    = -1;  //Linha do array de retorno
-            $placaOld        = "***9999";
-            $placaAtu        = "***9999";
-            $params   = array();
-            $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
-
-            $persistencia     = new infracaoTempoPersistencia();
-            $consulta = $persistencia->buscaInfracaoTempo($lote[0]->login);
-            $normalizou  = false;
-            while ($linha = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
-              $placaAtu=$linha["MVM_PLACA"];
-
-              if( ($linha["EVE_CODEG"]=="EV") or ($linha["EVE_CODEG"]=="EVC") ){
-
-                $descalibrado="NAO";
-                if( ($linha["VCL_FROTA"]=="L") and ($linha["EVE_CODEG"]=="EV") and ($linha["MVM_VELOCIDADE"]<=110) )
-                  $descalibrado="SIM";  
-                if( ($linha["VCL_FROTA"]=="L") and ($linha["EVE_CODEG"]=="EVC") and ($linha["MVM_VELOCIDADE"]<=90) )
-                  $descalibrado="SIM";  
-                if( ($linha["VCL_FROTA"]=="P") and ($linha["EVE_CODEG"]=="EV") and ($linha["MVM_VELOCIDADE"]<=80) )
-                  $descalibrado="SIM";  
-                if( ($linha["VCL_FROTA"]=="P") and ($linha["EVE_CODEG"]=="EVC") and ($linha["MVM_VELOCIDADE"]<=60) )
-                  $descalibrado="SIM";  
-                
-                
-                if( $placaAtu<>$placaOld  ){
-                  $linR++;
-                  array_push($arrRet,[
-                    "PLACA"         =>  $linha["MVM_PLACA"]
-                    ,"LP"           =>  $linha["VCL_FROTA"]
-                    ,"TURNO"        =>  $linha["MVM_TURNO"]
-                    ,"IDINI"        =>  $linha["MVM_POSICAO"]
-                    ,"DTINI"        =>  $linha["MVM_DATAGPS"]
-					          ,"IDFIM"        =>  "**erro**"
-                    ,"DTFIM"        =>  $linha["MVM_DATAGPS"]
-					          ,"TEMPO"        =>  "**erro**"
-                    ,"VELOC"        =>  $linha["MVM_VELOCIDADE"]
-										,"CODEG"        =>  $linha["EVE_CODEG"]
-                    ,"MAXIMAVELOC"  =>  $linha["MVM_VELOCIDADE"]
-                    ,"MOTORISTA"    =>  $linha["MTR_NOME"]
-                    ,"DESCALIBRADO" =>  $descalibrado
-                    ,"RFID"    			=>  $linha["MTR_RFID"]
-                    ,"ODOMINI"      =>  $linha["MVM_ODOMETRO"]
-                    ,"ODOMFIM"      =>  $linha["MVM_ODOMETRO"]
-                    ,"DISTPERC"     =>  "**erro**"
-                  ]);
-                  $placaOld=$placaAtu;
-									$normalizou  = true;									
-                } else {
-                  $arrRet[$linR]["DTFIM"]=$linha["MVM_DATAGPS"];  
-                  $arrRet[$linR]["ODOMFIM"]=$linha["MVM_ODOMETRO"];  
-                  $arrRet[$linR]["TEMPO"]=diferenca($arrRet[$linR]["DTINI"],$arrRet[$linR]["DTFIM"]);
-                  $arrRet[$linR]["DISTPERC"]=number_format(($arrRet[$linR]["ODOMFIM"]-$arrRet[$linR]["ODOMINI"])*1000, 2, '.', '');
-                  if( $linha["MVM_VELOCIDADE"]>$arrRet[$linR]["MAXIMAVELOC"] )
-                    $arrRet[$linR]["MAXIMAVELOC"]=$linha["MVM_VELOCIDADE"];
-                };
-              };
-
-              if( $linha["EVE_CODEG"]=="VN" ){
-								if($normalizou){
-									$arrRet[$linR]["IDFIM"]=$linha["MVM_POSICAO"];  
-									$arrRet[$linR]["DTFIM"]=$linha["MVM_DATAGPS"];
-                  $arrRet[$linR]["ODOMFIM"]=$linha["MVM_ODOMETRO"];  
-                  $arrRet[$linR]["TEMPO"]=diferenca($arrRet[$linR]["DTINI"],$arrRet[$linR]["DTFIM"]);
-                  $arrRet[$linR]["DISTPERC"]=number_format(($arrRet[$linR]["ODOMFIM"]-$arrRet[$linR]["ODOMINI"])*1000, 2, '.', '');
-                  if($arrRet[$linR]["DISTPERC"] < 0) {
-                    $arrRet[$linR]["DISTPERC"] = "**erro**";
-                  }
-									$placaOld="***9999"; 
-									$normalizou=false;									
-								};									
-              } else {
-                if( $placaAtu==$placaOld  ){
-                  if( $linha["MVM_VELOCIDADE"]>$arrRet[$linR]["MAXIMAVELOC"] )
-                    $arrRet[$linR]["MAXIMAVELOC"]=$linha["MVM_VELOCIDADE"];
-                };  
-              };
-            }; 
-            //////////////////////////////////
-            // Retornando para o JavaScript //
-            //////////////////////////////////  
-            $arrJs=[];
-            $qtos    = count($arrRet);
-            $lin=0;
-            
-            while($lin<$qtos){
-              $gravar=true;  
-              if( $lote[0]->tempo>0 ){
-                $gravar=false;  
-                $numSeg=str_replace(":","",$arrRet[$lin]["TEMPO"]);
-                if( $numSeg>$lote[0]->tempo ){
-                  $gravar=true;    
-                };
-              };
-              //  
-              if( ($gravar) and ($lote[0]->erro=="N") and ($arrRet[$lin]["IDFIM"]=="**erro**") )
-                $gravar=false;    
-							///////////////////////////////////////////////
-              // Aqui para saber ser quer EV_EVC ou EV ou EVC
-              ///////////////////////////////////////////////
-							if( ($gravar) and ($lote[0]->infracao<>"TODOS") ){
-							  if( $lote[0]->infracao<>$arrRet[$lin]["CODEG"] ){
-									$gravar=false; 	
-							  }; 			
-							};
-							
-              if( $gravar ){
-                //////////////////////////////////////////////////////////////////
-                // Se o tempo for maior que 30min considerar erro-01ago2018(Pedro)
-                //////////////////////////////////////////////////////////////////
-								$idfim=$arrRet[$lin]["IDFIM"];
-                if( $arrRet[$lin]["TEMPO"] <> "**erro**" ){
-                  $splTempo=explode(":",$arrRet[$lin]["TEMPO"]);
-                  if( ($splTempo[0]>0) or ($splTempo[1]>30) ){
-                    $idfim="**erro**";  
-                  };
-                };
-                
-                $query = "";
-                $query .= " select MAX(MVM_VELOCIDADE) as MVM_VELOCIDADE from MOVIMENTO ";
-                $query .= " where MVM_DATAGPS between '".$arrRet[$lin]["DTINI"]."' ";
-                $query .= " and '".$arrRet[$lin]["DTFIM"]."' and MVM_PLACA = '".$arrRet[$lin]["PLACA"]."' ";
-                
-                /*$params   = array();
-                $options  = array("Scrollable" => SQLSRV_CURSOR_FORWARD);
-                $consulta = sqlsrv_query($_SESSION['conn'], $query, $params, $options);*/
-
-                $consulta = $persistencia->buscaVelocidadeMaxima($lote[0]->login, $arrRet[$lin]);
-                while ($veloc_maxima = sqlsrv_fetch_array($consulta, SQLSRV_FETCH_ASSOC)) {
-                  if($veloc_maxima["MVM_VELOCIDADE"] != null) {
-                    $arrRet[$lin]["MAXIMAVELOC"] = $veloc_maxima["MVM_VELOCIDADE"];
-                  }
-                }
-								//
-                array_push($arrJs,[
-                  $arrRet[$lin]["PLACA"]
-                  ,$arrRet[$lin]["LP"]
-                  ,$arrRet[$lin]["TURNO"]
-                  ,$arrRet[$lin]["IDINI"]
-                  ,$arrRet[$lin]["DTINI"]
-									,$idfim
-                  ,$arrRet[$lin]["DTFIM"]
-                  ,$arrRet[$lin]["TEMPO"]
-                  ,$arrRet[$lin]["VELOC"]
-                  ,$arrRet[$lin]["MAXIMAVELOC"]
-                  ,$arrRet[$lin]["MOTORISTA"]
-                  ,$arrRet[$lin]["DESCALIBRADO"]
-									,$arrRet[$lin]["CODEG"]
-									,$arrRet[$lin]["RFID"]
-									,$arrRet[$lin]["DISTPERC"]
-                ]);
-              }  
-              $lin++;
-            };  
-            //echo(end($arrJs));
-            foreach ($arrJs as $value) {
-              //echo('placa '.$value[0].'\n');
-            }
-            $persistencia->insereHistoricoConsolidacao($lote[0]->login, end($arrJs));
-            $retorno='[{"retorno":"OK","dados":'.json_encode($arrJs).',"erro":""}]'; 
-          };  
-        };
-      };
-    } catch(Exception $e ){
-      $retorno='[{"retorno":"ERR","dados":"","erro":"'.$e.'"}]'; 
-    };
-    echo $retorno;
-    exit;
-  };  
+  if( isset($_POST["grdConsolidacaoInfracaoTempo"]) ){
+    $servicoTempoInfracao->buscaDadosConsolidados('INTEGRAR', $_POST["grdConsolidacaoInfracaoTempo"]);
+  }
 ?>
 <!DOCTYPE html>
   <head>
@@ -214,7 +21,8 @@
     <title>Infração/tempo</title>
     <link rel="stylesheet" href="../../css/css2017.css">
     <link rel="stylesheet" href="../../css/cssTable2017.css">
-    <link rel="stylesheet" href="../../css/Acordeon.css">    
+    <link rel="stylesheet" href="../../css/Acordeon.css">
+    <script src="../../config/configuracoes.js"></script>
     <script src="../../js/js2017.js"></script>
     <script src="../../js/jsTable2017.js"></script>
     <script language="javascript" type="text/javascript"></script>
@@ -242,6 +50,7 @@
     </style>  
     <script>
       "use strict";
+
       var clsData;
       document.addEventListener("DOMContentLoaded", function(){ 
 				//comboCompetencia("YYYYMM_MMM/YY",document.getElementById("cbIni"));
@@ -402,8 +211,8 @@
           ,"tamBotao"       : "12"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
           ,"codTblUsu"      : "MOVIMENTORESUMO[00]"                          
           ,"codDir"         : intCodDir
-        }; 
-        if( objBi === undefined ){  
+        };
+        if( objBi === undefined ){
           objBi=new clsTable2017("objBi");
         };
         //////////////////////////////////////////////////////////////
@@ -417,7 +226,7 @@
           jsBi.titulo[9].tamGrd="0em";
 					jsBi.titulo[12].tamGrd="0em";
         };
-        objBi.montarHtmlCE2017(jsBi); 
+        objBi.montarHtmlCE2017(jsBi);
         //////////////////////////////////////////////////
         //  Fim objeto clsTable2017 MOVIMENTORESUMO      //
         ////////////////////////////////////////////////// 
@@ -432,7 +241,7 @@
       var clsErro;                    // Classe para erros            
       var fd;                         // Formulario para envio de dados para o PHP
       var msg;                        // Variavel para guardadar mensagens de retorno/erro 
-      var retPhp                      // Retorno do Php para a rotina chamadora
+      var retPhp;                      // Retorno do Php para a rotina chamadora
       var clsChecados;                // Classe para montar Json
       var chkds;                      // Guarda todos registros checados na table 
       var tamC;                       // Guarda a quantidade de registros dentro do vetor chkds
@@ -445,12 +254,10 @@
       /////////////////////////////////
 			function biDesmarcarClick(){
 				tblBi.retiraChecked();
-			};
-      ////////////////////////////
-      // Filtrando os registros //
-      ////////////////////////////
-      function btnFiltrarClick() { 
-				clsJs   = jsString("lote");  
+      };
+
+      function btnFiltrarConsolidacaoClick() {
+        clsJs   = jsString("lote");
 				clsJs.add("rotina"  	, "select"                                  	);
 				clsJs.add("login"   	, jsPub[0].usr_login                        	);
 				clsJs.add("codusu"  	, jsPub[0].usr_codigo                       	);
@@ -492,26 +299,20 @@
 
         if(!obrigaUnidade) {
           fd = new FormData();
-          fd.append("grdInfracaoTempo" , clsJs.fim());
-          msg     = requestPedido("relatorioTempoInfracao.php",fd); 
+          fd.append("grdConsolidacaoInfracaoTempo" , clsJs.fim());
+          msg     = requestPedido("relatorioTempoInfracao.php",fd);
           retPhp  = JSON.parse(msg);
           if( retPhp[0].retorno == "OK" ){
-            //////////////////////////////////////////////////////////////////////////////////
-            // O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
-            // Campo obrigatório se existir rotina de manutenção na table devido Json       //
-            // Esta rotina não tem manutenção via classe clsTable2017                       //
-            // jsCrv.registros=objCrv.addIdUnico(retPhp[0]["dados"]);                       //
-            //////////////////////////////////////////////////////////////////////////////////
-            jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
-            jsBi.relTitulo="BI Infração/Tempo em "+document.getElementById("cbIni").options[document.getElementById("cbIni").selectedIndex].text;
-            objBi.ordenaJSon(jsBi.indiceTable,false);  
-            objBi.montarBody2017();
-          };
+              var dlink = document.createElement('a');
+              dlink.download = new Date().toLocaleString('default', { day: 'numeric', month: 'long', year: 'numeric'});
+              dlink.href = ENDERECO_DOWNLOAD + retPhp[0].data + '.xlsx';
+              dlink.click();
+              dlink.remove();   
+          }
         } else {
           gerarMensagemErro("catch",'É obrigatório escolher uma unidade.',"Atenção");
         }
-  
-      }; 
+      }
 
       function montaUnidade() {
         var cbPoloValue = document.getElementById("cbPolo").value;
@@ -534,10 +335,11 @@
 
         fd = new FormData();
         fd.append("montaSelectUnidade" , clsJs.fim());
-        var selectUnidade = requestPedido("classPhp/comum/selectUnidade.class.php",fd);
+        var selectUnidade = requestPedido("../comum/selectUnidade.class.php",fd);
         document.getElementById('selectUnidadePHP').innerHTML = selectUnidade;
         document.getElementById('cbUnidade').value="TODOS";
       };
+
       ////////////////////////////////
       //          DETALHE           //
       ////////////////////////////////
@@ -907,40 +709,9 @@
       </div>
       
       <div class="campo10" style="float:left;">            
-        <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>
+        <input id="btnFiltrar" onClick="btnFiltrarConsolidacaoClick();" type="button" value="Relatório" class="botaoSobreTable"/>
       </div>
     </div>
-    <div class="divTelaCheia" style="float:left;">
-      <div id="divContabil" class="conteudo" style="display:block;overflow-x:auto;position:relative;float:left;width:110em;height:55em;">
-        <div id="divTopoInicio">
-        </div>
-      </div>
-      <a name="ancoraDetalhe">
-      <button id="btnDetalhe"
-              class="acordeon"
-              style="width:25%;margin-left:0.1em;">Detalhe do registro</button>
-      <div class="acrdnDiv" style="width:90%;margin-left:0.1em;height:42em;">
-        <div id="divDetalhe" class="conteudo" style="position:relative;float:left;height:41em;width:150em;">
-          <div id="divDetalheReg">
-          </div>
-        </div>
-      </div>
-
-      <a name="ancoraMotorista">
-      <button id="btnMotorista"
-              class="acordeon"
-              style="width:25%;margin-left:0.1em;">Motorista</button>
-      <div class="acrdnDiv" style="width:78%;margin-left:0.1em;height:42em;">
-        <div id="divMtr" class="conteudo" style="position:relative;float:left;height:41em;width:78%;">
-          <div id="divMtrReg">
-          </div>
-        </div>
-      </div>
-
-      <form method="post" name="frmScf" class="center" id="frmScf" action="classPhp/imprimirsql.php" target="_newpage" style="position:fixed;top:10em;width:90em;z-index:30;display:none;">
-        <input type="hidden" id="sql" name="sql"/>
-      </form>
-    </div>    
     
     <script>
       var acc = document.getElementsByClassName("acordeon");
