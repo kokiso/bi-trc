@@ -4,7 +4,8 @@
     try{     
       require("classPhp/conectaSqlServer.class.php");
       require("classPhp/validaJson.class.php"); 
-      require("classPhp/removeAcento.class.php"); 
+      require("classPhp/removeAcento.class.php");
+      require("classPhp/selectRepetidoTrac.class.php");  
 
       $vldr     = new validaJSon();          
       $retorno  = "";
@@ -98,39 +99,25 @@
         //     Buscando apenas os polos que usuario tem direito  //
         ///////////////////////////////////////////////////////////
         if( $rotina=="quaisPolo" ){
-          $sql="SELECT P.POL_CODIGO,P.POL_NOME
-                  FROM UNIDADE A
-                  LEFT OUTER JOIN POLO P ON A.UNI_CODPOL=P.POL_CODIGO
-                 LEFT OUTER JOIN USUARIOSISTEMA U ON A.UNI_CODUSR=U.US_CODIGO
-                  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=2
-                 WHERE ((UNI_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S'))
-                GROUP BY P.POL_CODIGO,P.POL_NOME
-                  ORDER BY POL_NOME";
-          $classe->msgSelect(false);
-          $retCls=$classe->selectAssoc($sql);
-          if( $retCls['retorno'] != "OK" ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-          } else { 
-            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
-          };  
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("quaisPolo",$lote[0]->login);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
         };  
         ///////////////////////////////////////////////////////////
         //   Buscando apenas as unidades que usuario tem direito //
         ///////////////////////////////////////////////////////////
         if( $rotina=="quaisUnidade" ){
-          $sql="SELECT UNI_CODIGO,UNI_APELIDO
-                  FROM UNIDADE A
-                  LEFT OUTER JOIN USUARIOSISTEMA U ON A.UNI_CODUSR=U.US_CODIGO
-                  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo']."
-                 WHERE ((UNI_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S'))
-                 ORDER BY UNI_APELIDO";
-          $classe->msgSelect(false);
-          $retCls=$classe->selectAssoc($sql);
-          if( $retCls['retorno'] != "OK" ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-          } else { 
-            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
-          };  
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("quaisUnidade",$lote[0]->login, $lote[0]->poloCodigo);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
+        };  
+        //////////////////////////////////////////////////////////////////////
+        //   Buscando apenas os grupos operacionais que usuario tem direito //
+        //////////////////////////////////////////////////////////////////////
+        if( $rotina=="quaisGpo" ){
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("quaisGpo",$lote[0]->login, $lote[0]->uniCodigo);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
         };  
         ////////////////
         // BI CONTAR  //
@@ -138,76 +125,28 @@
         if( $rotina=="biContar" ){
           $sql="";
           if( $lote[0]->qualSelect=="contarKm" ){  
-            $sql.="SELECT COALESCE(SUM(A.BIKMM_TOTAL),0) AS QTOS";
-            $sql.="  FROM BI_KILOMETROMES A";
-            $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.BIKMM_CODUNI=UNI.UNI_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.BIKMM_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-            if( $lote[0]->coduni >0 ){
-              $sql.="  WHERE ((A.BIKMM_ANOMES=".$codmes.") AND (A.BIKMM_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            } elseif($lote[0]->codpol != "*" ){
-              $sql.="  WHERE ((A.BIKMM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            } else {  
-              $sql.="  WHERE ((A.BIKMM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            };
-          };
+            $cSql = new SelectRepetido();
+            $sql  = $cSql->qualSelect("contarKm",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
+          }
           if( $lote[0]->qualSelect=="contarMotorista" ){  
-            $sql.="SELECT COUNT(A.MTR_CODIGO) AS QTOS";
-            $sql.="  FROM MOTORISTA A";
-            $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.MTR_CODUSR=U.US_CODIGO";
-            $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.MTR_CODUNI=UNI.UNI_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.MTR_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-            if( $lote[0]->coduni >0 ){
-              $sql.="  WHERE ((MTR_ATIVO='S') AND (A.MTR_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            } elseif($lote[0]->codpol != "*" ){
-              $sql.="  WHERE ((MTR_ATIVO='S') AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            } else {  
-              $sql.="  WHERE ((MTR_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            };
+            $cSql = new SelectRepetido();
+            $sql  = $cSql->qualSelect("contarMotorista",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
           };
           if( $lote[0]->qualSelect=="contarVeiculo" ){  
-            $sql.="SELECT COUNT(A.VCL_CODIGO) AS QTOS";
-            $sql.="  FROM VEICULO A";
-            $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.VCL_CODUSR=U.US_CODIGO";
-            $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.VCL_CODUNI=UNI.UNI_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-            switch( $lote[0]->levpes ){
-              case "LP" : $frota=" AND (A.VCL_FROTA IN('L','P'))" ;break;
-              case "L"  : $frota=" AND (A.VCL_FROTA='L')"         ;break;
-              case "P"  : $frota=" AND (A.VCL_FROTA='P')"         ;break;
-            }  
-            if( $lote[0]->coduni >0 ){
-              $sql.="  WHERE ((VCL_ATIVO='S') AND (A.VCL_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            } elseif($lote[0]->codpol != "*" ){
-              $sql.="  WHERE ((VCL_ATIVO='S') AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";                
-            } else {
-              $sql.="  WHERE ((VCL_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };
+            $cSql = new SelectRepetido();
+            $sql  = $cSql->qualSelect("contarVeiculo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
           };
           if( $lote[0]->qualSelect=="contarPolo" ){  
-            $sql.="SELECT COUNT(DISTINCT(P.POL_CODIGO)) AS QTOS";
-            $sql.="  FROM UNIDADE A";
-            $sql.="  LEFT OUTER JOIN POLO P ON A.UNI_CODPOL=P.POL_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.UNI_CODUSR=U.US_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-            if( $lote[0]->codpol =="*" ){            
-              $sql.=" WHERE ((UNI_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S') AND (P.POL_CODGRP IN".$_SESSION['usr_grupos']."))";
-            }else {
-              $sql.=" WHERE ((UNI_ATIVO='S') AND (P.POL_CODIGO='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            };
+            $cSql = new SelectRepetido();
+            $sql  = $cSql->qualSelect("qtosPolo",$lote[0]->login."|".$lote[0]->codpol);
           };
-          
           if( $lote[0]->qualSelect=="contarUnidade" ){  
-            $sql.="SELECT COUNT(A.UNI_CODIGO) AS QTOS";
-            $sql.="  FROM UNIDADE A";
-            $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.UNI_CODUSR=U.US_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-            if( $lote[0]->coduni >0 ){
-              $sql.="  WHERE ((A.UNI_ATIVO='S') AND (A.UNI_CODIGO=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S'))";
-            } elseif($lote[0]->codpol != "*" ){              
-              $sql.="  WHERE ((A.UNI_ATIVO='S') AND (A.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S'))";
-            } else {
-              $sql.="  WHERE ((UNI_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            };
+            $cSql = new SelectRepetido();
+            $sql  = $cSql->qualSelect("qtasUnidade",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol);
+          };
+          if( $lote[0]->qualSelect=="contarGpo" ){  
+            $cSql = new SelectRepetido();
+            $sql  = $cSql->qualSelect("qtosGpo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codgpo);
           };
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
@@ -222,6 +161,9 @@
         ////////////////
         if( $rotina=="biSimples" ){
           $sql="";
+          if( $lote[0]->codgpo != '*' ) {
+            $gpo = " AND (A.VCL_CODGPO=".$lote[0]->codgpo.")";
+          }
           if( $lote[0]->qualSelect=="bisUniKm" ){
             $sql.="SELECT UNI.UNI_APELIDO AS NOME,SUM(A.BIKMM_TOTAL) AS QTOS";
             $sql.="  FROM BI_KILOMETROMES A";
@@ -299,6 +241,7 @@
             } else {
               $sql.="  WHERE ((VCL_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";
             };
+            $sql.=$gpo;
             $sql.="  GROUP BY UNI.UNI_APELIDO";              
           };       
           if( $lote[0]->qualSelect=="bisVeiculoPol" ){
@@ -312,7 +255,8 @@
               case "LP" : $frota=" AND (A.VCL_FROTA IN('L','P'))" ;break;
               case "L"  : $frota=" AND (A.VCL_FROTA='L')"         ;break;
               case "P"  : $frota=" AND (A.VCL_FROTA='P')"         ;break;
-            }  
+            }
+            $sql.=$gpo;
             if( $lote[0]->coduni >0 ){
               $sql.="  WHERE ((A.VCL_ATIVO='S') AND (A.VCL_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";
             } elseif($lote[0]->codpol != "*" ){              
@@ -397,6 +341,9 @@
             case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
           }  
+          if( $lote[0]->codgpo != '*' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->codgpo.")";
+          }
           //
           $sql="";
           if( $lote[0]->qualSelect=="infracao" ){ 
@@ -411,7 +358,8 @@
               $sql.="  WHERE ((BIABM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIABM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.="  UNION ALL";
             $sql.=" SELECT 'CB' AS ID,'CONDUCAO BANGUELA' AS NOME,COALESCE(SUM(A.BICBM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_CONDUCAOBANGMES A";
@@ -424,7 +372,8 @@
               $sql.="  WHERE ((BICBM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BICBM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.=" UNION ALL";
             $sql.=" SELECT 'EV' AS ID,'EXCESSO VELOC' AS NOME,COALESCE(SUM(A.BIEVM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_EXCESSOVELOCMES A";
@@ -437,7 +386,8 @@
               $sql.="  WHERE ((BIEVM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIEVM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.=" UNION ALL";
             $sql.=" SELECT 'EVC' AS ID,'EXCESSO VELOC CHUVA' AS NOME,COALESCE(SUM(A.BIEVCM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_EXCESSOVELCHMES A";
@@ -450,7 +400,8 @@
               $sql.="  WHERE ((BIEVCM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIEVCM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.=" UNION ALL";
             $sql.=" SELECT 'FB' AS ID,'FREADA BRUSCA' AS NOME,COALESCE(SUM(A.BIFBM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_FREADABRUSCAMES A";
@@ -463,7 +414,8 @@
               $sql.="  WHERE ((BIFBM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIFBM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.=" UNION ALL";
             $sql.=" SELECT 'ERPM' AS ID,'EXCESSO RPM' AS NOME,COALESCE(SUM(A.BIRAM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_RPMALTOMES A";
@@ -476,7 +428,8 @@
               $sql.="  WHERE ((BIRAM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIRAM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
           };
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
@@ -604,10 +557,11 @@
     <script>
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
-        buscarCompetencia();
+        // buscarCompetencia();
         buscarUni();
         buscarPol();
-        iniciarBi(0,"Todas unidades","*","Todos polos");
+        buscarGpo();
+        iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       });  
       var clsJs;          // Classe responsavel por montar um Json e eviar PHP
       var clsErro;        // Classe para erros            
@@ -621,6 +575,8 @@
       var pubDesUni = ""; 
       var pubCodPol = "*"; 
       var pubDesPol = "";
+      let pubCodGpo = "*";
+      let pubDesGpo = "";
       var pubLevPes = "LP";   //Buscar por veiculo leve/pesado 
       //////////////////////////////////////
       // Opcoes para grafico              //
@@ -661,33 +617,44 @@
       // Esta function inicia o BI com todas unidades que o usuario tem direito //
       // Tb eh usada qdo selecionado filtro por uma unidade                     //
       ////////////////////////////////////////////////////////////////////////////
-      function iniciarBi(ibCodUni,ibDesUni,ibCodPol,ibDesPol){
-        // document.getElementById("infracaoCompet").innerHTML="Infrações "+document.getElementById("cbCompetencia").options[document.getElementById("cbCompetencia").selectedIndex].text+" ";
+      function iniciarBi(ibCodUni,ibDesUni,ibCodPol,ibDesPol, ibCodGpo, ibDesGpo){
+        document.getElementById("infracaoCompet").innerHTML="Infrações "+document.getElementById("cbCompetencia").options[document.getElementById("cbCompetencia").selectedIndex].text+" ";
         pubCodUni=ibCodUni;
         pubDesUni=ibDesUni;
         pubCodPol=ibCodPol;
         pubDesPol=ibDesPol;
+        pubCodGpo=ibCodGpo;
+        pubDesGpo=ibDesGpo;
         pubLevPes=document.getElementById("cbLevePesado").value;
-        fncContar("contarMotorista" ,"qtosMtr",pubCodUni,pubCodPol,"*");
-        fncContar("contarVeiculo"   ,"qtosVcl",pubCodUni,pubCodPol,pubLevPes);
-        fncContar("contarPolo"      ,"qtosPol",pubCodUni,pubCodPol,"*");
-        fncContar("contarUnidade"   ,"qtosUni",pubCodUni,pubCodPol,"*");
-				fncContar("contarKm"        ,"qtosKm" ,pubCodUni,pubCodPol,"*");
-        
-        fncFiltrarTableSimples("bisMotoristaUni"  ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*");
-        fncFiltrarTableSimples("bisVeiculoUni"    ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes);
-        fncFiltrarTableInfracao("infracao"        ,"tblinf"   ,"divInfracao"  ,"qtosInfracao" ,pubCodUni,pubCodPol,pubLevPes);
+
+        fncContar("contarMotorista" 	,"qtosMtr"	,pubCodUni,pubCodPol,"*", "*");
+        fncContar("contarVeiculo"   	,"qtosVcl"	,pubCodUni,pubCodPol,pubLevPes, "*");
+        fncContar("contarPolo"      	,"qtosPol"	,pubCodUni,pubCodPol,"*","*");
+        fncContar("contarUnidade"   	,"qtosUni"	,pubCodUni,pubCodPol,"*","*");
+        fncContar("contarGpo"   	    ,"qtosGpo"	,pubCodUni,pubCodPol,"*",pubCodGpo);
+				fncContar("contarKm"        	,"qtosKm" 	,pubCodUni,pubCodPol,"*","*");
+        if (pubCodPol != '*') {
+          buscarPol();
+        }
+        if (pubCodUni != '*') {
+          buscarUni();
+          buscarGpo();
+        }
+        fncFiltrarTableSimples("bisMotoristaUni"  ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
+        fncFiltrarTableSimples("bisVeiculoUni"    ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
+        fncFiltrarTableInfracao("infracao"        ,"tblinf"  ,"divInfracao"  ,"qtosInfracao" ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         document.getElementById("smllDesUni").innerHTML=ibDesUni;
       };
       //    
       //  
-      function fncContar(qualSelect,qualSpan,qualCodUni,qualCodPol,qualLevPes){
+      function fncContar(qualSelect,qualSpan,qualCodUni,qualCodPol,qualLevPes,qualCodGpo){
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biContar"                                      );
         clsJs.add("login"       , jsPub[0].usr_login                              );
         clsJs.add("qualSelect"  , qualSelect                                      );
         clsJs.add("coduni"      , qualCodUni                                      );
         clsJs.add("codpol"      , qualCodPol                                      );
+        clsJs.add("codgpo"      , qualCodGpo                                      );
         clsJs.add("levpes"      , qualLevPes                                      );
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
@@ -707,13 +674,14 @@
       //////////////////////////////////////
       // Somente tabelas com duas colunas //  
       //////////////////////////////////////
-      function fncFiltrarTableSimples(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes){
+      function fncFiltrarTableSimples(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes,qualCodGpo){
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biSimples"                                     );
         clsJs.add("login"       , jsPub[0].usr_login                              );
         clsJs.add("qualSelect"  , qualSelect                                      );
         clsJs.add("coduni"      , qualCodUni                                      );      
         clsJs.add("codpol"      , qualCodPol                                      );
+        clsJs.add("codgpo"      , qualCodGpo                                      );
         clsJs.add("levpes"      , qualLevPes                                      );      
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
@@ -841,13 +809,14 @@
       //////////////////////////////////////
       // Somente tabelas infracao         //  
       //////////////////////////////////////
-      function fncFiltrarTableInfracao(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes){
+      function fncFiltrarTableInfracao(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes, qualCodGpo){
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biInfracao"                                    );
         clsJs.add("login"       , jsPub[0].usr_login                              );
         clsJs.add("qualSelect"  , qualSelect                                      );
         clsJs.add("coduni"      , qualCodUni                                      );
         clsJs.add("codpol"      , qualCodPol                                      );
+        clsJs.add("codgpo"      , qualCodGpo                                      );
         clsJs.add("levpes"      , qualLevPes                                      );      
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
@@ -1010,27 +979,80 @@
       ///////////////////////////
       // Buscando competencias //
       ///////////////////////////
-      function buscarCompetencia(){
-        var dias=0;
-        for( var lin=0;lin<4;lin++ ){
-          ceOpt = document.createElement ("option");
-          ceContext = document.createTextNode (jsDatas(dias).retMMMbYY());
-          ceOpt.appendChild (ceContext);
-          ceOpt.setAttribute ("value", jsDatas(dias).retYYYYMM()    );
-          ceOpt.setAttribute ("text", jsDatas(dias).retMMMbYY()     );
-          if( lin==0 )
-            ceOpt.setAttribute ("selected", true   );  
-          document.getElementById("cbCompetencia").appendChild(ceOpt);
-          dias=(dias-30);
-        }
-      };  
+      // function buscarCompetencia(){
+      //   var dias=0;
+      //   for( var lin=0;lin<4;lin++ ){
+      //     ceOpt = document.createElement ("option");
+      //     ceContext = document.createTextNode (jsDatas(dias).retMMMbYY());
+      //     ceOpt.appendChild (ceContext);
+      //     ceOpt.setAttribute ("value", jsDatas(dias).retYYYYMM()    );
+      //     ceOpt.setAttribute ("text", jsDatas(dias).retMMMbYY()     );
+      //     if( lin==0 )
+      //       ceOpt.setAttribute ("selected", true   );  
+      //     document.getElementById("cbCompetencia").appendChild(ceOpt);
+      //     dias=(dias-30);
+      //   }
+      // };  
+      ///////////////////////////////////////////////////////////////////////////////////////////
+      // Buscando apenas as unidades que o usuario tem direito, e se tiver, só as daquele polo //
+      ///////////////////////////////////////////////////////////////////////////////////////////
+      function buscarGpo(){
+        document.getElementById('filtroGpo').innerHTML = '';
+        clsJs   = jsString("lote");  
+        clsJs.add("rotina"      , "quaisGpo"                                  );
+        clsJs.add("login"       , jsPub[0].usr_login                              );
+        clsJs.add("uniCodigo"   , pubCodUni                                       );
+        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
+        fd = new FormData();
+        fd.append("principal" , clsJs.fim());
+        msg     = requestPedido("Trac_BiVeiculos.php",fd); 
+        retPhp  = JSON.parse(msg);
+        if( retPhp[0].retorno == "OK" ){
+          msg=retPhp[0]["dados"].length;  
+          
+          for( var lin=0;lin<msg;lin++ ){
+            ceLi= document.createElement("li"); 
+            ceLi.style.height="25px";
+              ceAnc= document.createElement("a");
+              ceAnc.href="#";
+              ceAnc.setAttribute("onclick",
+              `iniciarBi('${retPhp[0]["dados"][lin]["UNI_CODIGO"] ? retPhp[0]["dados"][lin]["UNI_CODIGO"] : '*'}',
+               '${retPhp[0]["dados"][lin]["UNI_APELIDO"] ? retPhp[0]["dados"][lin]["UNI_APELIDO"] : '*'}',
+                          '${pubCodPol}', 'Todos polos', '${retPhp[0]["dados"][lin]["GPO_CODIGO"]}', 'Todos Grupos Operacionais')`);
+                ceImg= document.createElement("i");
+                ceImg.className="fa fa-object-ungroup text-red";
+                ceAnc.appendChild(ceImg);
+                
+                ceContext = document.createTextNode( " -"+retPhp[0]["dados"][lin]["GPO_NOME"] );  
+              ceAnc.appendChild(ceContext);
+            ceLi.appendChild(ceAnc);
+            document.getElementById("filtroGpo").appendChild(ceLi);
+          };    
+          ceLi= document.createElement("li"); 
+            ceAnc= document.createElement("a");
+            ceAnc.href="#";
+            ceAnc.setAttribute("onclick",
+            `iniciarBi('${pubCodUni}', 'Todas Unidades',
+                          '${pubCodPol}', 'Todos polos', '*', 'Todos Grupos Operacionais')`);
+              ceImg= document.createElement("i");
+              ceImg.className="fa fa-object-ungroup text-red";
+              ceAnc.appendChild(ceImg);
+              
+              ceContext = document.createTextNode( " -TODOS" );  
+            ceAnc.appendChild(ceContext);
+          ceLi.appendChild(ceAnc);
+          document.getElementById("filtroGpo").appendChild(ceLi);
+        };
+      };
       ///////////////////////////////////////////////////////////
       // Buscando apenas as unidades que o usuario tem direito //
       ///////////////////////////////////////////////////////////
       function buscarUni(){
+        document.getElementById('filtroUni').innerHTML = '';
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "quaisUnidade"                                  );
         clsJs.add("login"       , jsPub[0].usr_login                              );
+        clsJs.add("poloCodigo"  , pubCodPol                                       );
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
         fd.append("principal" , clsJs.fim());
@@ -1047,7 +1069,7 @@
               ceAnc.href="#";
               ceAnc.setAttribute("onclick","iniciarBi('"+retPhp[0]["dados"][lin]["UNI_CODIGO"]
                                                         +"','"+retPhp[0]["dados"][lin]["UNI_APELIDO"]+"'"
-                                                        +",'*','Todos polos')");
+                                                        +"," + `'${pubCodPol}'` + ",'Todos polos', '*' , 'Todos Grupos Operacionais')");
                 ceImg= document.createElement("i");
                 ceImg.className="fa fa-object-ungroup text-red";
                 ceAnc.appendChild(ceImg);
@@ -1060,7 +1082,7 @@
           ceLi= document.createElement("li"); 
             ceAnc= document.createElement("a");
             ceAnc.href="#";
-            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos')");
+            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
               ceImg= document.createElement("i");
               ceImg.className="fa fa-object-ungroup text-red";
               ceAnc.appendChild(ceImg);
@@ -1075,6 +1097,7 @@
       //   Buscando apenas os polos que o usuario tem direito  //
       ///////////////////////////////////////////////////////////
       function buscarPol(){
+        document.getElementById('filtroPol').innerHTML = '';
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "quaisPolo"                                     );
         clsJs.add("login"       , jsPub[0].usr_login                              );
@@ -1092,7 +1115,8 @@
             ceLi.style.height="25px";
               ceAnc= document.createElement("a");
               ceAnc.href="#";
-              ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','"+retPhp[0]["dados"][lin]["POL_CODIGO"]+"','"+retPhp[0]["dados"][lin]["POL_NOME"]+"')");
+              ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','"+retPhp[0]["dados"][lin]["POL_CODIGO"]+"','"
+                +retPhp[0]["dados"][lin]["POL_NOME"]+"', '*', 'Todos Grupos Operacionais')");
                 ceImg= document.createElement("i");
                 ceImg.className="fa fa-object-group text-red";
                 ceAnc.appendChild(ceImg);
@@ -1105,7 +1129,7 @@
           ceLi= document.createElement("li"); 
             ceAnc= document.createElement("a");
             ceAnc.href="#";
-            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos')");
+            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
               ceImg= document.createElement("i");
               ceImg.className="fa fa-object-group text-red";
               ceAnc.appendChild(ceImg);
@@ -1380,20 +1404,20 @@
       /////////////////////////////////////////////
       function chngMotUP(){
         if( document.getElementById("cbMotUP").value=="UNI" ){
-          fncFiltrarTableSimples("bisMotoristaUni" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*");
+          fncFiltrarTableSimples("bisMotoristaUni" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
         } else {
-          fncFiltrarTableSimples("bisMotoristaPol" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*");
+          fncFiltrarTableSimples("bisMotoristaPol" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
         }    
-      }; 
+      };
       function chngVeiUP(){
         if( document.getElementById("cbVeiUP").value=="UNI" ){
-          fncFiltrarTableSimples("bisVeiculoUni" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes);
+          fncFiltrarTableSimples("bisVeiculoUni" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         } else {
-          fncFiltrarTableSimples("bisVeiculoPol" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes);
+          fncFiltrarTableSimples("bisVeiculoPol" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         }    
       }; 
       function chngCompetencia(){
-        fncContar("contarKm"        ,"qtosKm" ,pubCodUni,pubCodPol,"*");  
+        iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       };
      </script> 
   </head>
@@ -1449,6 +1473,22 @@
               <li class="footer"><a href="#">Fechar</a></li>
             </ul>
           </li>
+          
+          <li class="dropdown notifications-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <i class="fa fa-filter">&nbsp;Grupo Operacional</i>
+              <span class="label label-warning" style="top:5px;" id="qtosGpo"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="header">Grupos Operacionais</li>
+              <li>
+                <ul id="filtroGpo" class="menu" style="max-height: 500px;">
+                </ul>
+              </li>
+              <li class="footer"><a href="#">Fechar</a></li>
+            </ul>
+          </li>
+
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <span class="hidden-xs">Trac</span>
