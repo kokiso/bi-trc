@@ -980,6 +980,27 @@
       function biFecharClick(){
         window.close();
       };
+      function montaGrupoOperacional() {
+        var cbUnidadeValue = document.getElementById("cbUnidade").value;
+        var divGrupoOperacional = document.getElementById("divCbGrupoOperacional");
+        var uniCodigo;
+
+        if(cbUnidadeValue != "TODOS") {
+          uniCodigo = cbUnidadeValue.split('-')[0];
+
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, uniCodigo                    );
+        } else {
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, ""                    );
+        }
+
+        fd = new FormData();
+        fd.append("montaSelectGrupoOperacional" , clsJs.fim());
+        var selectGrupoOperacional = requestPedido("classPhp/comum/selectGrupoOperacional.class.php",fd);
+        document.getElementById('selectGrupoOperacionalPHP').innerHTML = selectGrupoOperacional;
+        document.getElementById('cbGpo').value="TODOS";
+      };
     </script>
   </head>
   <body>
@@ -1039,7 +1060,9 @@
         <?php include 'classPhp/comum/selectUnidade.class.php';?>
       </div>
 
-      <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
+      <div id="selectGrupoOperacionalPHP">
+        <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
+      </div>
 
       
       <div class="campo10" style="float:left;">            

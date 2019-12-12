@@ -32,11 +32,11 @@
     $retClsUnidade=$classe->selectAssoc($sql);
 ?>
 <div id="divCbUnidade" class="campotexto campo40">
-<select class="campo_input_combo" id="cbUnidade">
+<select class="campo_input_combo" id="cbUnidade" onchange="montaGrupoOperacional()">
     <option value="TODOS" selected="selected">TODOS</option>
     <?php foreach ($retClsUnidade['dados'] as $unidade) { ?>
       <option value="<?php echo $unidade['UNI_CODIGO'].'-'.$unidade['UNI_CODGRP'] ?>">
-      <?php echo $unidade['UNI_NOME'].' - '.$unidade['UNI_CODGRP'] ?></option>
+      <?php echo $unidade['UNI_NOME']?></option>
     <?php } ?>
 </select>
 <label class="campo_label campo_required" for="cbUnidade">UNIDADE</label>

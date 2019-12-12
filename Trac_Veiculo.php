@@ -719,47 +719,66 @@
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )               );
         };
       };
-      function buscarUni(){
-        clsJs   = jsString("lote");
-        clsJs.add("rotina"      , "unidade"           );
-        clsJs.add("login"       , jsPub[0].usr_login  );
-        fd = new FormData();
-        fd.append("veiculo" , clsJs.fim());
-        msg     = requestPedido("Trac_Veiculo.php",fd);
-        retPhp  = JSON.parse(msg);
-        if( retPhp[0].retorno == "OK" ){
-          msg=retPhp[0]["dados"].length;
-          if(msg==0){
-            var ceOpt 	= document.createElement("option");
-            ceOpt.value = "*";
-            ceOpt.text  = "SEM DIREITO"
-            document.getElementById("cbUnidade").appendChild(ceOpt);
-          } else {
-            var ceOpt 	= document.createElement("option");
-            ceOpt.value = "0";
-            ceOpt.text  = "TODOS";
-            document.getElementById("cbUnidade").appendChild(ceOpt);
+      // function buscarUni(){
+      //   clsJs   = jsString("lote");
+      //   clsJs.add("rotina"      , "unidade"           );
+      //   clsJs.add("login"       , jsPub[0].usr_login  );
+      //   fd = new FormData();
+      //   fd.append("veiculo" , clsJs.fim());
+      //   msg     = requestPedido("Trac_Veiculo.php",fd);
+      //   retPhp  = JSON.parse(msg);
+      //   if( retPhp[0].retorno == "OK" ){
+      //     msg=retPhp[0]["dados"].length;
+      //     if(msg==0){
+      //       var ceOpt 	= document.createElement("option");
+      //       ceOpt.value = "*";
+      //       ceOpt.text  = "SEM DIREITO"
+      //       document.getElementById("cbUnidade").appendChild(ceOpt);
+      //     } else {
+      //       var ceOpt 	= document.createElement("option");
+      //       ceOpt.value = "0";
+      //       ceOpt.text  = "TODOS";
+      //       document.getElementById("cbUnidade").appendChild(ceOpt);
 
-            for( var lin=0;lin<msg;lin++ ){
-              var ceOpt 	= document.createElement("option");
-              ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
-              ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
-              document.getElementById("cbUnidade").appendChild(ceOpt);
-            };
-          };
-        };
+      //       for( var lin=0;lin<msg;lin++ ){
+      //         var ceOpt 	= document.createElement("option");
+      //         ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
+      //         ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
+      //         document.getElementById("cbUnidade").appendChild(ceOpt);
+      //       };
+      //     };
+      //   };
+      // };
+      function montaGrupoOperacional() {
+        var cbUnidadeValue = document.getElementById("cbUnidade").value;
+        var divGrupoOperacional = document.getElementById("divCbGrupoOperacional");
+        var uniCodigo;
+
+        if(cbUnidadeValue != "TODOS") {
+          uniCodigo = cbUnidadeValue.split('-')[0];
+
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, uniCodigo                    );
+        } else {
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, ""                    );
+        }
+
+        fd = new FormData();
+        fd.append("montaSelectGrupoOperacional" , clsJs.fim());
+        var selectGrupoOperacional = requestPedido("classPhp/comum/selectGrupoOperacional.class.php",fd);
+        document.getElementById('selectGrupoOperacionalPHP').innerHTML = selectGrupoOperacional;
+        document.getElementById('cbGpo').value="TODOS";
       };
     </script>
   </head>
   <body>
     <div id="divEvento" class="comboSobreTable">
-      <div class="campotexto campo25" style="margin-top:3px;margin-left:3px;">
-        <select class="campo_input_combo" id="cbUnidade">
-        </select>
-        <label class="campo_label campo_required" for="cbAtivo">UNIDADE</label>
-      </div>
 
       <div style="margin-top:3px;margin-left:3px;">
+        <?php include 'classPhp/comum/selectUnidade.class.php';?>
+      </div>
+      <div style="margin-top:3px;margin-left:3px;" id="selectGrupoOperacionalPHP">
         <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
       </div>
       <div class="campo10" style="float:left;">
