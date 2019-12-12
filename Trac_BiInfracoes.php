@@ -185,7 +185,7 @@
           $sql.="       ,U.UNI_APELIDO";
           $sql.="       ,SUM(".$alias."_TOTAL) AS TOTAL";
           $sql.="  FROM ".$table." A";
-          $sql.="  LEFT OUTER JOIN MOTORISTA M ON ".$alias."_CODMTR=M.MTR_CODIGO";
+          $sql.="  INNER JOIN MOTORISTA M ON ".$alias."_CODMTR=M.MTR_CODIGO";
           $sql.="  LEFT OUTER JOIN UNIDADE U ON ".$alias."_CODUNI=U.UNI_CODIGO"; 
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON ".$alias."_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
           if( $lote[0]->coduni >0 ){
