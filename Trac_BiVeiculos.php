@@ -23,6 +23,7 @@
         $lote     = $jsonObj->lote;
         $rotina   = $lote[0]->rotina;
         $codmes   = $lote[0]->compet;
+        $gpo      = "";
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
         ///////////////////////////////////////////////////////////
