@@ -61,74 +61,36 @@
           $sql="";
           if( $lote[0]->qualSelect=="contarKm" ){  
             $cSql = new SelectRepetido();
-            $sql  = $cSql->qualSelect("contarKm",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
-          };
-					/*
-          if( $lote[0]->qualSelect=="contarMotorista" ){  
-            $sql.="SELECT COUNT(A.MTR_CODIGO) AS QTOS";
-            $sql.="  FROM MOTORISTA A";
-            $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.MTR_CODUSR=U.US_CODIGO";
-            $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.MTR_CODUNI=UNI.UNI_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.MTR_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-            if( $lote[0]->coduni >0 ){
-              $sql.="  WHERE ((MTR_ATIVO='S') AND (A.MTR_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            } elseif($lote[0]->codpol != "*" ){
-              $sql.="  WHERE ((MTR_ATIVO='S') AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            } else {  
-              $sql.="  WHERE ((MTR_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S'))";  
-            };
-          };
-					*/
+            $sql  = $cSql->qualSelect("contarKm",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes."|".$lote[0]->codgpo);
+          }
           if( $lote[0]->qualSelect=="contarMotorista" ){  
             $cSql = new SelectRepetido();
             $sql  = $cSql->qualSelect("contarMotorista",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
-          };
-					/*
-          if( $lote[0]->qualSelect=="contarVeiculo" ){  
-            $sql.="SELECT COUNT(A.VCL_CODIGO) AS QTOS";
-            $sql.="  FROM VEICULO A";
-            $sql.="  LEFT OUTER JOIN USUARIOSISTEMA U ON A.VCL_CODUSR=U.US_CODIGO";
-            $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.VCL_CODUNI=UNI.UNI_CODIGO";
-            $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
-            switch( $lote[0]->levpes ){
-              case "LP" : $frota=" AND (A.VCL_FROTA IN('L','P'))" ;break;
-              case "L"  : $frota=" AND (A.VCL_FROTA='L')"         ;break;
-              case "P"  : $frota=" AND (A.VCL_FROTA='P')"         ;break;
             }  
-            if( $lote[0]->coduni >0 ){
-              $sql.="  WHERE ((VCL_ATIVO='S') AND (A.VCL_CODUNI=".$lote[0]->coduni.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            } elseif($lote[0]->codpol != "*" ){
-              $sql.="  WHERE ((VCL_ATIVO='S') AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";                
-            } else {
-              $sql.="  WHERE ((VCL_ATIVO='S') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };
-          };
-					*/
           if( $lote[0]->qualSelect=="contarVeiculo" ){  
             $cSql = new SelectRepetido();
-            $sql  = $cSql->qualSelect("contarVeiculo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
-          };
+            $sql  = $cSql->qualSelect("contarVeiculo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes."|".$lote[0]->codgpo);
+          }
           if( $lote[0]->qualSelect=="contarHoraRodando" ){  
             $cSql = new SelectRepetido();
-            $sql  = $cSql->qualSelect("contarHoraRodando",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
-          };
+            $sql  = $cSql->qualSelect("contarHoraRodando",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes."|".$lote[0]->codgpo);
+          }
           if( $lote[0]->qualSelect=="contarHoraParado" ){  
             $cSql = new SelectRepetido();
-            $sql  = $cSql->qualSelect("contarHoraParado",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
-          };
+            $sql  = $cSql->qualSelect("contarHoraParado",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes."|".$lote[0]->codgpo);
+          }
           if( $lote[0]->qualSelect=="contarPolo" ){  
             $cSql = new SelectRepetido();
             $sql  = $cSql->qualSelect("qtosPolo",$lote[0]->login."|".$lote[0]->codpol);
-          };
-          
+          }
           if( $lote[0]->qualSelect=="contarUnidade" ){  
             $cSql = new SelectRepetido();
             $sql  = $cSql->qualSelect("qtasUnidade",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol);
-          };
+          }
           if( $lote[0]->qualSelect=="contarGpo" ){  
             $cSql = new SelectRepetido();
             $sql  = $cSql->qualSelect("qtosGpo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codgpo);
-          };
+          }
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -745,14 +707,14 @@
         pubCodGpo=ibCodGpo;
         pubDesGpo=ibDesGpo;
         pubLevPes=document.getElementById("cbLevePesado").value;
-        fncContar("contarMotorista" 	,"qtosMtr"	,pubCodUni,pubCodPol,"*", "*");
-        fncContar("contarVeiculo"   	,"qtosVcl"	,pubCodUni,pubCodPol,pubLevPes, "*");
+        fncContar("contarMotorista" 	,"qtosMtr"	,pubCodUni,pubCodPol,"*", pubCodGpo);
+        fncContar("contarVeiculo"   	,"qtosVcl"	,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         fncContar("contarPolo"      	,"qtosPol"	,pubCodUni,pubCodPol,"*","*");
         fncContar("contarUnidade"   	,"qtosUni"	,pubCodUni,pubCodPol,"*","*");
         fncContar("contarGpo"   	    ,"qtosGpo"	,pubCodUni,pubCodPol,"*",pubCodGpo);
-				fncContar("contarKm"        	,"qtosKm" 	,pubCodUni,pubCodPol,"*","*");
-				fncContar("contarHoraRodando"	,"qtosHRod"	,pubCodUni,pubCodPol,"*","*");				
-        fncContar("contarHoraParado"	,"qtosHPar"	,pubCodUni,pubCodPol,"*","*");
+				fncContar("contarKm"        	,"qtosKm" 	,pubCodUni,pubCodPol,"*", pubCodGpo);
+				fncContar("contarHoraRodando"	,"qtosHRod"	,pubCodUni,pubCodPol,"*", pubCodGpo);				
+        fncContar("contarHoraParado"	,"qtosHPar"	,pubCodUni,pubCodPol,"*", pubCodGpo);
         if (pubCodPol != '*') {
           buscarPol();
         }

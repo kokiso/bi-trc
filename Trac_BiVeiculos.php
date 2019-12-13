@@ -127,7 +127,7 @@
           $sql="";
           if( $lote[0]->qualSelect=="contarKm" ){  
             $cSql = new SelectRepetido();
-            $sql  = $cSql->qualSelect("contarKm",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
+            $sql  = $cSql->qualSelect("contarKm",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes."|".$lote[0]->codgpo);
           }
           if( $lote[0]->qualSelect=="contarMotorista" ){  
             $cSql = new SelectRepetido();
@@ -135,7 +135,7 @@
           };
           if( $lote[0]->qualSelect=="contarVeiculo" ){  
             $cSql = new SelectRepetido();
-            $sql  = $cSql->qualSelect("contarVeiculo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes);
+            $sql  = $cSql->qualSelect("contarVeiculo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol."|".$codmes."|".$lote[0]->codgpo);
           };
           if( $lote[0]->qualSelect=="contarPolo" ){  
             $cSql = new SelectRepetido();
@@ -629,11 +629,11 @@
         pubLevPes=document.getElementById("cbLevePesado").value;
 
         fncContar("contarMotorista" 	,"qtosMtr"	,pubCodUni,pubCodPol,"*", "*");
-        fncContar("contarVeiculo"   	,"qtosVcl"	,pubCodUni,pubCodPol,pubLevPes, "*");
-        fncContar("contarPolo"      	,"qtosPol"	,pubCodUni,pubCodPol,"*","*");
-        fncContar("contarUnidade"   	,"qtosUni"	,pubCodUni,pubCodPol,"*","*");
+        fncContar("contarVeiculo"   	,"qtosVcl"	,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
+        fncContar("contarPolo"      	,"qtosPol"	,pubCodUni,pubCodPol,"*",pubCodGpo);
+        fncContar("contarUnidade"   	,"qtosUni"	,pubCodUni,pubCodPol,"*",pubCodGpo);
         fncContar("contarGpo"   	    ,"qtosGpo"	,pubCodUni,pubCodPol,"*",pubCodGpo);
-				fncContar("contarKm"        	,"qtosKm" 	,pubCodUni,pubCodPol,"*","*");
+				fncContar("contarKm"        	,"qtosKm" 	,pubCodUni,pubCodPol,"*",pubCodGpo);
         if (pubCodPol != '*') {
           buscarPol();
         }

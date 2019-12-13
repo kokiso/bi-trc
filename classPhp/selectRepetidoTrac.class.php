@@ -117,6 +117,9 @@
           if($expld[2] != "*" ){
             $sql.="  AND (UNI.UNI_CODPOL='".$expld[2]."')";  
           };
+          if ($expld[4] != "*") {
+            $sql.=" AND VCL.VCL_CODGPO =".$expld[4];
+           }
           return $sql;
           break; 
         case "contarMotorista":        
@@ -141,6 +144,9 @@
           $sql.="SELECT COUNT(A.BIPRDM_CODVCL) AS QTOS"; 
           $sql.="  FROM BI_PRODUTIVIDADEVEIMES A";
           $sql.="  LEFT OUTER JOIN VEICULO VCL ON A.BIPRDM_CODVCL=VCL.VCL_CODIGO";
+          if ($expld[4] != "*") {
+            $sql.=" AND VCL.VCL_CODGPO =".$expld[4];
+           }
           $sql.="  LEFT OUTER JOIN UNIDADE UNI ON VCL.VCL_CODUNI=UNI.UNI_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON UNI.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];          
           $sql.=" WHERE (A.BIPRDM_ANOMES=".$expld[3].")";
@@ -168,6 +174,9 @@
           if($expld[2] != "*" ){
             $sql.="  AND (UNI.UNI_CODPOL='".$expld[2]."')";  
           };
+          if ($expld[4] != "*") {
+            $sql.=" AND VCL.VCL_CODGPO =".$expld[4];
+           }
           return $sql;
           break; 
         case "contarHoraParado":
@@ -185,6 +194,9 @@
           if($expld[2] != "*" ){
             $sql.="  AND (UNI.UNI_CODPOL='".$expld[2]."')";  
           };
+          if ($expld[4] != "*") {
+            $sql.=" AND VCL.VCL_CODGPO =".$expld[4];
+           }
           return $sql;
           break; 
         //////////////////////////////
@@ -225,9 +237,7 @@
 //////////////////////////////////////////////////////////////////////////////
         case "qtosGpo":
           $execSql=false;
-          $sql.="SELECT COUNT(DISTINCT GPO_CODIGO)
-                 from GRUPOOPERACIONAL
-                 INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO";
+          $sql.="SELECT COUNT(DISTINCT GPO_CODIGO from GRUPOOPERACIONAL INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO";
           if ($expld[1] != 0) {
             $sql.=" AND GOU_CODUNI = ".$expld[1];
           }
@@ -244,9 +254,7 @@
            $sql.=", U.UNI_CODIGO, U.UNI_APELIDO ";
           }
           
-          $sql.=" FROM GRUPOOPERACIONAL
-          INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO AND
-          GOU_CODUNI";
+          $sql.=" FROM GRUPOOPERACIONAL INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO AND GOU_CODUNI";
           if ($busca != 0) {
             $sql.=" = ".$busca." INNER JOIN UNIDADE U ON U.UNI_CODIGO=GOU_CODUNI";
           } else {
