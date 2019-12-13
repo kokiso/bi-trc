@@ -591,7 +591,7 @@
         objExc.montarHtmlCE2017(jsExc);
         //
         //
-        buscarUni();
+        // buscarUni();
       });
       //
       var objVcl;                     // Obrigatório para instanciar o JS TFormaCob

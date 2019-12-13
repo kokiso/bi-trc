@@ -182,11 +182,11 @@
           $table  = $retSql[0]["tabela"];
           
           $sql="";  
-          $sql.="SELECT M.MTR_NOME";
+          $sql.="SELECT COALESCE(M.MTR_NOME, 'MOTORISTAS NAO IDENTIFICADOS') AS MTR_NOME";
           $sql.="       ,U.UNI_APELIDO";
           $sql.="       ,SUM(".$alias."_TOTAL) AS TOTAL";
           $sql.="  FROM ".$table." A";
-          $sql.="  INNER JOIN MOTORISTA M ON ".$alias."_CODMTR=M.MTR_CODIGO";
+          $sql.="  LEFT OUTER JOIN MOTORISTA M ON ".$alias."_CODMTR=M.MTR_CODIGO";
           $sql.="  LEFT OUTER JOIN UNIDADE U ON ".$alias."_CODUNI=U.UNI_CODIGO"; 
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON ".$alias."_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
           if( $lote[0]->coduni >0 ){
