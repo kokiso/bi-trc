@@ -46,7 +46,24 @@
         //   Buscando apenas as unidades que usuario tem direito //
         ///////////////////////////////////////////////////////////
         if( $rotina=="grupoOperacional" ){
-          $sql="SELECT A.GPO_CODIGO AS CODIGO, A.GPO_NOME AS NOME FROM GRUPOOPERACIONAL A";
+          $sql.="SELECT GPO_CODIGO AS CODIGO, GPO_NOME AS NOME";
+          
+          if ($lote[0]->codUni != 0) {
+           $sql.=", U.UNI_CODIGO, U.UNI_APELIDO ";
+          }
+          
+          $sql.=" FROM GRUPOOPERACIONAL
+          INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO AND
+          GOU_CODUNI";
+          if ($lote[0]->codUni != 0) {
+            $sql.=" = ".$lote[0]->codUni." INNER JOIN UNIDADE U ON U.UNI_CODIGO=GOU_CODUNI";
+          } else {
+            $sql.=" IN (SELECT UU_CODUNI FROM USUARIOUNIDADE WHERE UU_CODUSR =".$_SESSION['usr_codigo']." AND UU_ATIVO = 'S')";
+          }                                               
+          $sql.=" GROUP BY GPO_CODIGO, GPO_NOME, GPO_CODUSR";
+          if ($lote[0]->codUni != 0) {
+            $sql.=", U.UNI_CODIGO, U.UNI_APELIDO ";
+          }
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -698,7 +715,10 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value);
       };
       function uniF10Click(){ fUnidadeF10(0,"edtCodUni","cbAtivo","soAtivo"); };
-      function gpoF10Click(){ fGrupoOperacionalF10("cbAtivo"); };
+      function gpoF10Click(){
+        let codUni = document.getElementById('edtCodUni').value;
+         fGrupoOperacionalF10("cbAtivo", codUni);
+         };
       function RetF10tblUni(arr){
         document.getElementById("edtCodUni").value   = arr[0].CODIGO;
         document.getElementById("edtDesUni").value   = arr[0].APELIDO;
