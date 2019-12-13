@@ -35,7 +35,7 @@
 <select class="campo_input_combo" id="cbUnidade" onchange="montaGrupoOperacional()">
     <option value="TODOS" selected="selected">TODOS</option>
     <?php foreach ($retClsUnidade['dados'] as $unidade) { ?>
-      <option value="<?php echo $unidade['UNI_CODIGO'].'-'.$unidade['UNI_CODGRP'] ?>">
+      <option value="<?php echo $unidade['UNI_CODIGO']?>">
       <?php echo $unidade['UNI_NOME']?></option>
     <?php } ?>
 </select>
