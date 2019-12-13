@@ -237,7 +237,7 @@
 //////////////////////////////////////////////////////////////////////////////
         case "qtosGpo":
           $execSql=false;
-          $sql.="SELECT COUNT(DISTINCT GPO_CODIGO from GRUPOOPERACIONAL INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO";
+          $sql.="SELECT COUNT(DISTINCT GPO_CODIGO) from GRUPOOPERACIONAL INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO";
           if ($expld[1] != 0) {
             $sql.=" AND GOU_CODUNI = ".$expld[1];
           }
