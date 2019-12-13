@@ -24,6 +24,7 @@
         $rotina   = $lote[0]->rotina;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
+        $sql="";
         ///////////////////////////////////////////////////////////
         //   Buscando apenas as unidades que usuario tem direito //
         ///////////////////////////////////////////////////////////
