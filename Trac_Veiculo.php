@@ -24,6 +24,7 @@
         $rotina   = $lote[0]->rotina;
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
+        $sql="";
         ///////////////////////////////////////////////////////////
         //   Buscando apenas as unidades que usuario tem direito //
         ///////////////////////////////////////////////////////////
@@ -46,7 +47,24 @@
         //   Buscando apenas as unidades que usuario tem direito //
         ///////////////////////////////////////////////////////////
         if( $rotina=="grupoOperacional" ){
-          $sql="SELECT A.GPO_CODIGO AS CODIGO, A.GPO_NOME AS NOME FROM GRUPOOPERACIONAL A";
+          $sql.="SELECT GPO_CODIGO AS CODIGO, GPO_NOME AS NOME";
+          
+          if ($lote[0]->codUni != 0) {
+           $sql.=", U.UNI_CODIGO, U.UNI_APELIDO ";
+          }
+          
+          $sql.=" FROM GRUPOOPERACIONAL
+          INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO AND
+          GOU_CODUNI";
+          if ($lote[0]->codUni != 0) {
+            $sql.=" = ".$lote[0]->codUni." INNER JOIN UNIDADE U ON U.UNI_CODIGO=GOU_CODUNI";
+          } else {
+            $sql.=" IN (SELECT UU_CODUNI FROM USUARIOUNIDADE WHERE UU_CODUSR =".$_SESSION['usr_codigo']." AND UU_ATIVO = 'S')";
+          }                                               
+          $sql.=" GROUP BY GPO_CODIGO, GPO_NOME, GPO_CODUSR";
+          if ($lote[0]->codUni != 0) {
+            $sql.=", U.UNI_CODIGO, U.UNI_APELIDO ";
+          }
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -591,7 +609,7 @@
         objExc.montarHtmlCE2017(jsExc);
         //
         //
-        buscarUni();
+        // buscarUni();
       });
       //
       var objVcl;                     // Obrigatório para instanciar o JS TFormaCob
@@ -698,7 +716,10 @@
         document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value);
       };
       function uniF10Click(){ fUnidadeF10(0,"edtCodUni","cbAtivo","soAtivo"); };
-      function gpoF10Click(){ fGrupoOperacionalF10("cbAtivo"); };
+      function gpoF10Click(){
+        let codUni = document.getElementById('edtCodUni').value;
+         fGrupoOperacionalF10("cbAtivo", codUni);
+         };
       function RetF10tblUni(arr){
         document.getElementById("edtCodUni").value   = arr[0].CODIGO;
         document.getElementById("edtDesUni").value   = arr[0].APELIDO;
@@ -719,47 +740,66 @@
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )               );
         };
       };
-      function buscarUni(){
-        clsJs   = jsString("lote");
-        clsJs.add("rotina"      , "unidade"           );
-        clsJs.add("login"       , jsPub[0].usr_login  );
-        fd = new FormData();
-        fd.append("veiculo" , clsJs.fim());
-        msg     = requestPedido("Trac_Veiculo.php",fd);
-        retPhp  = JSON.parse(msg);
-        if( retPhp[0].retorno == "OK" ){
-          msg=retPhp[0]["dados"].length;
-          if(msg==0){
-            var ceOpt 	= document.createElement("option");
-            ceOpt.value = "*";
-            ceOpt.text  = "SEM DIREITO"
-            document.getElementById("cbUnidade").appendChild(ceOpt);
-          } else {
-            var ceOpt 	= document.createElement("option");
-            ceOpt.value = "0";
-            ceOpt.text  = "TODOS";
-            document.getElementById("cbUnidade").appendChild(ceOpt);
+      // function buscarUni(){
+      //   clsJs   = jsString("lote");
+      //   clsJs.add("rotina"      , "unidade"           );
+      //   clsJs.add("login"       , jsPub[0].usr_login  );
+      //   fd = new FormData();
+      //   fd.append("veiculo" , clsJs.fim());
+      //   msg     = requestPedido("Trac_Veiculo.php",fd);
+      //   retPhp  = JSON.parse(msg);
+      //   if( retPhp[0].retorno == "OK" ){
+      //     msg=retPhp[0]["dados"].length;
+      //     if(msg==0){
+      //       var ceOpt 	= document.createElement("option");
+      //       ceOpt.value = "*";
+      //       ceOpt.text  = "SEM DIREITO"
+      //       document.getElementById("cbUnidade").appendChild(ceOpt);
+      //     } else {
+      //       var ceOpt 	= document.createElement("option");
+      //       ceOpt.value = "0";
+      //       ceOpt.text  = "TODOS";
+      //       document.getElementById("cbUnidade").appendChild(ceOpt);
 
-            for( var lin=0;lin<msg;lin++ ){
-              var ceOpt 	= document.createElement("option");
-              ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
-              ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
-              document.getElementById("cbUnidade").appendChild(ceOpt);
-            };
-          };
-        };
+      //       for( var lin=0;lin<msg;lin++ ){
+      //         var ceOpt 	= document.createElement("option");
+      //         ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
+      //         ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
+      //         document.getElementById("cbUnidade").appendChild(ceOpt);
+      //       };
+      //     };
+      //   };
+      // };
+      function montaGrupoOperacional() {
+        var cbUnidadeValue = document.getElementById("cbUnidade").value;
+        var divGrupoOperacional = document.getElementById("divCbGrupoOperacional");
+        var uniCodigo;
+
+        if(cbUnidadeValue != "TODOS") {
+          uniCodigo = cbUnidadeValue.split('-')[0];
+
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, uniCodigo                    );
+        } else {
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, ""                    );
+        }
+
+        fd = new FormData();
+        fd.append("montaSelectGrupoOperacional" , clsJs.fim());
+        var selectGrupoOperacional = requestPedido("classPhp/comum/selectGrupoOperacional.class.php",fd);
+        document.getElementById('selectGrupoOperacionalPHP').innerHTML = selectGrupoOperacional;
+        document.getElementById('cbGpo').value="TODOS";
       };
     </script>
   </head>
   <body>
     <div id="divEvento" class="comboSobreTable">
-      <div class="campotexto campo25" style="margin-top:3px;margin-left:3px;">
-        <select class="campo_input_combo" id="cbUnidade">
-        </select>
-        <label class="campo_label campo_required" for="cbAtivo">UNIDADE</label>
-      </div>
 
       <div style="margin-top:3px;margin-left:3px;">
+        <?php include 'classPhp/comum/selectUnidade.class.php';?>
+      </div>
+      <div style="margin-top:3px;margin-left:3px;" id="selectGrupoOperacionalPHP">
         <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
       </div>
       <div class="campo10" style="float:left;">

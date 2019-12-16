@@ -53,6 +53,9 @@
             case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
           };
+
+          $gpo="";
+
           if( $lote[0]->grupoOperacional != 'TODOS' ) {
             $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
           }

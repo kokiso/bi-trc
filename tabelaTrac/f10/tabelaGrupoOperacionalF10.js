@@ -4,15 +4,17 @@
 // foco  - Onde vai o foco quando confirmar                               //
 // jsPub[0].usr_grupos sao os grupos que o usuario pode ver               //
 ////////////////////////////////////////////////////////////////////////////
-function fGrupoOperacionalF10(foco) {
+function fGrupoOperacionalF10(foco, codUni) {
   var sql =
     "SELECT A.GPO_CODIGO AS CODIGO,A.GPO_NOME AS NOME FROM GRUPOOPERACIONAL A";
+
   //////////////////////////////////////////////////////////////////////////////
   // localStorage eh o arquivo .php onde estao os select/insert/update/delete //
   //////////////////////////////////////////////////////////////////////////////
   clsJs = jsString("lote");
   clsJs.add("rotina", "grupoOperacional");
   clsJs.add("login", jsPub[0].usr_login);
+  clsJs.add("codUni", codUni);
   fd = new FormData();
   fd.append("veiculo", clsJs.fim());
   msg = requestPedido("Trac_Veiculo.php", fd);

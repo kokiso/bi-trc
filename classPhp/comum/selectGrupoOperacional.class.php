@@ -11,10 +11,26 @@
     $classe->conecta($_SESSION['login']);
 
     $sql="";
-    $sql.=" SELECT ";
-    $sql.="  GPO_CODIGO, ";
-    $sql.="  GPO_NOME ";
-    $sql.="  FROM GRUPOOPERACIONAL ";
+    $sql.="SELECT GPO_CODIGO, GPO_NOME from GRUPOOPERACIONAL
+    INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO=GRUPOOPERACIONAL.GPO_CODIGO AND
+    GOU_CODUNI";
+    if( isset($_POST["montaSelectGrupoOperacional"]) ){
+        $vldr     = new validaJSon();          
+        $retCls   = $vldr->validarJs($_POST["montaSelectGrupoOperacional"]);
+    
+        $jsonObj  = $retCls["dados"];
+        $lote     = $jsonObj->lote;
+
+        if($lote[0]->uniCodigo != "") {
+            $sql.="=".$lote[0]->uniCodigo;
+        } else {
+           $sql.=" IN (SELECT UU_CODUNI FROM USUARIOUNIDADE WHERE UU_CODUSR=".$_SESSION['usr_codigo']." AND UU_ATIVO='S')";
+        }
+    } else {
+        $sql.=" IN (SELECT UU_CODUNI FROM USUARIOUNIDADE WHERE UU_CODUSR=".$_SESSION['usr_codigo']." AND UU_ATIVO='S')";
+    }
+    $sql.=" GROUP BY GPO_CODIGO, GPO_NOME";
+     
     $classe->msgSelect(false);
     $retCls=$classe->selectAssoc($sql);
 ?>

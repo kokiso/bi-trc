@@ -109,6 +109,20 @@ create table dbo.GRUPOOPERACIONAL
 )
 go
 
+alter table VEICULO
+	add constraint VEICULO_GRUPOOPERACIONAL_GPO_CODIGO_fk
+		foreign key (VCL_CODGPO) references GRUPOOPERACIONAL
+			on delete set null
+go
+
+CREATE TABLE GRUPOOPERACIONALUNIDADE (
+    GOU_CODGPO int not null,
+    GOU_CODUNI int not null,
+	constraint PKGRUPOOPERACIONALUNIDADE
+		primary key (GOU_CODGPO, GOU_CODUNI)
+)
+go
+
 alter table dbo.VEICULO
 	add VCL_CODGPO int NULL
 go

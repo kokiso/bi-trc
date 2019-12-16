@@ -31,7 +31,7 @@
         ///////////////////////////////////////////////////////////
         if( $rotina=="quaisUnidade" ){
           $cSql   = new SelectRepetido();
-          $retSql = $cSql->qualSelect("quaisUnidade",$lote[0]->login);
+          $retSql = $cSql->qualSelect("quaisUnidade",$lote[0]->login, $lote[0]->poloCodigo);
           $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
         };  
         ///////////////////////////////////////////////////////////
@@ -454,6 +454,7 @@
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "quaisUnidade"                                  );
         clsJs.add("login"       , jsPub[0].usr_login                              );
+        clsJs.add("poloCodigo"  , pubCodPol                                       );
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
         fd.append("principal" , clsJs.fim());

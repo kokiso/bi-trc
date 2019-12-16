@@ -44,6 +44,83 @@
             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
           };  
         };
+        if( $rotina=="verificaInstrucao" ){
+          $sql="";
+          $sql.="SELECT GPO_CODIGO FROM GRUPOOPERACIONAL WHERE GPO_CODIGO =".$lote[0]->gpoCodigo;
+          $classe->msgSelect(false);
+          $retCls=$classe->select($sql);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="buscarUnidadesGpo" ){
+          $sql="";
+          $sql.="SELECT U.UNI_CODIGO AS CODIGO, U.UNI_NOME AS DESCRICAO FROM GRUPOOPERACIONALUNIDADE GOU
+          INNER JOIN UNIDADE U ON U.UNI_CODIGO=GOU_CODUNI WHERE GOU_CODGPO =".$lote[0]->grupoOperacional;
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="insertGpo" ){
+          $arrUpdt = [];
+          $sql="";
+          $somasql="";
+          $sql.="INSERT INTO GRUPOOPERACIONAL (GPO_NOME, GPO_CODUSR) VALUES(UPPER('".$lote[0]->gpoNome."'),".$lote[0]->usrCodigo.")";
+          array_push($arrUpdt, $sql);
+          $arrUnidades = explode("|",$lote[0]->unidades );
+          foreach ($arrUnidades as $codigo) {
+              $sql="INSERT INTO GRUPOOPERACIONALUNIDADE (GOU_CODGPO, GOU_CODUNI) VALUES (".$lote[0]->gpoCodigo.",".$codigo.")";
+              array_push($arrUpdt, $sql);
+            }
+          $retCls=$classe->cmd($arrUpdt);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="updateGpo" ){
+          $arrUpdt = [];
+          $sql="";
+          $somasql="";
+          $sql.="UPDATE GRUPOOPERACIONAL SET GPO_NOME =UPPER('".$lote[0]->gpoNome."'),"
+                 ."GPO_CODUSR = ".$lote[0]->usrCodigo." WHERE GPO_CODIGO =".$lote[0]->gpoCodigo;
+          array_push($arrUpdt, $sql);
+          $sql="DELETE FROM GRUPOOPERACIONALUNIDADE WHERE GOU_CODGPO =".$lote[0]->gpoCodigo;
+          array_push($arrUpdt, $sql);  
+          $arrUnidades = explode("|",$lote[0]->unidades );
+          foreach ($arrUnidades as $codigo) {
+              $sql="INSERT INTO GRUPOOPERACIONALUNIDADE (GOU_CODGPO, GOU_CODUNI) VALUES (".$lote[0]->gpoCodigo.",".$codigo.")";
+              array_push($arrUpdt, $sql);
+            }
+          $retCls=$classe->cmd($arrUpdt);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="deleteGpo" ){
+          $arrUpdt = [];
+          $sql="";
+          $somasql="";
+          $sql.="DELETE FROM GRUPOOPERACIONAL WHERE GPO_CODIGO =".$lote[0]->gpoCodigo;
+          array_push($arrUpdt, $sql);
+          $sql="DELETE FROM GRUPOOPERACIONALUNIDADE WHERE GOU_CODGPO =".$lote[0]->gpoCodigo;
+          array_push($arrUpdt, $sql); 
+          $retCls=$classe->cmd($arrUpdt);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
         ///////////////////////////////////////////////////
         // Passou pela rotina de importação mas deu erro //
         ///////////////////////////////////////////////////
@@ -91,6 +168,7 @@
     <link rel="stylesheet" href="../../../css/cssFaTable.css">
     <script src="../../../js/js2017.js"></script>
     <script src="../../../js/jsTable2017.js"></script>
+    <script src="../../../tabelaTrac/f10/tabelaUnidadeMultipleF10.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <script>
       "use strict";
@@ -167,7 +245,7 @@
           ,"registros"      : []                        // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
           ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
-          ,"idBtnConfirmarAtualizar" : "idBtnConfirmarAtualizar"            // Se existir executa o confirmar do form/fieldSet
+          ,"idBtnConfirmarCustom" : "idBtnConfirmarCustom"            // Se existir executa o confirmar do form/fieldSet
           ,"idBtnCancelar"  : "btnCancelar"             // Se existir executa o cancelar do form/fieldSet
           ,"div"            : "frmGpo"                  // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaGpo"               // Para fechar a div onde estão os fieldset ao cadastrar
@@ -187,7 +265,7 @@
           ,"relFonte"       : "8"                       // Fonte do relatório
           ,"foco"           : ["edtDescricao"
                               ,"edtDescricao"
-                              ,"idBtnConfirmarAtualizar"]          // Foco qdo Cad/Alt/Exc
+                              ,"idBtnConfirmarCustom"]          // Foco qdo Cad/Alt/Exc
           ,"formPassoPasso" : "/Trac_Espiao.php"         // Enderço da pagina PASSO A PASSO
           ,"indiceTable"    : "DESCRICAO"               // Indice inicial da table
           ,"tamBotao"       : "15"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
@@ -212,7 +290,7 @@
           ,"codDir"         : intCodDir
         }; 
         if( objGpo === undefined ){  
-          objGpo=new clsTable2017("objGpo");
+          objGpo=new clsTable2017("objGpo", true);
         };  
         objGpo.montarHtmlCE2017(jsGpo); 
         //////////////////////////////////////////////////
@@ -267,6 +345,8 @@
       //
       var objGpo;                     // Obrigatório para instanciar o JS TFormaCob
       var jsGpo;                      // Obj principal da classe clsTable2017
+      var objUniF10;                  // Obrigatório para instanciar o JS CidadeF10
+      var dadosUnidade = [];          // Unidades escolhidas no multiple select
       //var objExc;                     // Obrigatório para instanciar o JS Importar excel
       //var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
@@ -355,6 +435,132 @@
           gerarMensagemErro("Gpo",retPhp[0].erro,"AVISO");    
         };  
       };
+      function uniFocus(obj){
+        document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value);
+      };
+      function limparCampos(){
+        document.getElementById('unidadeSelect').innerHTML = '';
+      }
+
+      function preencherSelect(chkds){
+        clsJs   = jsString("lote");  
+        clsJs.add("rotina"      , "buscarUnidadesGpo"         );
+        clsJs.add("login"       , jsPub[0].usr_login  );
+        clsJs.add("grupoOperacional", chkds[0]['CODIGO']  );          
+        fd = new FormData();
+        fd.append("grupoOperacional" , clsJs.fim());
+        msg     = requestPedido("grupoOperacional.php",fd); 
+        retPhp  = JSON.parse(msg);
+        dadosUnidade = retPhp[0]["dados"];
+        document.getElementById('unidadeSelect').innerHTML = '';
+        dadosUnidade.forEach(element => {
+          var campo = document.createElement('option')
+          campo.value = element['CODIGO'];
+          campo.label = element['DESCRICAO'];
+          document.getElementById('unidadeSelect').appendChild(campo);
+      });
+    }
+
+    function verificaTipoInstrucao(status) {
+      if (status == 0) {
+        // inserindo
+        salvarDados();
+      } else if (status == 1) {
+        //update
+        updateDados();
+      } else if (status == 2){
+        //delete
+        deleteDados();
+      }
+    }
+
+    function updateDados() {
+      clsJs   = jsString("lote");  
+      clsJs.add("rotina"      , "updateGpo"         );
+      clsJs.add("login"       , jsPub[0].usr_login  );
+      clsJs.add("usrCodigo"       , jsPub[0].usr_codigo  );
+      clsJs.add("gpoCodigo", document.getElementById('edtCodigo').value);   
+      clsJs.add("gpoNome", document.getElementById('edtDescricao').value);   
+      let unidadesString = "";       
+      dadosUnidade.forEach(element => {
+        unidadesString+=(element['CODIGO']+"|"); 
+      });
+      unidadesString = unidadesString.substring(0, unidadesString.length - 1)
+  
+      clsJs.add("unidades", unidadesString);          
+      fd = new FormData();
+      fd.append("grupoOperacional" , clsJs.fim());
+      msg     = requestPedido("grupoOperacional.php",fd); 
+      retPhp  = JSON.parse(msg);
+      document.getElementById('unidadeSelect').innerHTML = '';
+
+    }
+    function deleteDados() {
+      clsJs   = jsString("lote");  
+      clsJs.add("rotina"      , "deleteGpo"         );
+      clsJs.add("login"       , jsPub[0].usr_login  );
+      clsJs.add("usrCodigo"       , jsPub[0].usr_codigo  );
+      clsJs.add("gpoCodigo", document.getElementById('edtCodigo').value);        
+      fd = new FormData();
+      fd.append("grupoOperacional" , clsJs.fim());
+      msg     = requestPedido("grupoOperacional.php",fd); 
+      retPhp  = JSON.parse(msg);
+      document.getElementById('unidadeSelect').innerHTML = '';
+    }
+
+    
+    function salvarDados() {
+      clsJs   = jsString("lote");  
+      clsJs.add("rotina"      , "insertGpo"         );
+      clsJs.add("login"       , jsPub[0].usr_login  );
+      clsJs.add("usrCodigo"       , jsPub[0].usr_codigo  );
+      clsJs.add("gpoCodigo", document.getElementById('edtCodigo').value);   
+      clsJs.add("gpoNome", document.getElementById('edtDescricao').value);   
+      let unidadesString = "";       
+      dadosUnidade.forEach(element => {
+        unidadesString+=(element['CODIGO']+"|"); 
+      });
+      unidadesString = unidadesString.substring(0, unidadesString.length - 1)
+
+      clsJs.add("unidades", unidadesString);          
+      fd = new FormData();
+      fd.append("grupoOperacional" , clsJs.fim());
+      msg     = requestPedido("grupoOperacional.php",fd); 
+      retPhp  = JSON.parse(msg);
+      document.getElementById('unidadeSelect').innerHTML = '';
+    }
+      function uniF10Click(){
+        fUnidadeF10(0,"edtCodUni","soAtivo");
+      };
+      function gpoF10Click(){ fGrupoOperacionalF10("cbAtivo"); };
+      function RetF10tblUni(arr){
+        document.getElementById('unidadeSelect').innerHTML = '';
+        dadosUnidade = arr;
+        arr.forEach(element => {
+          var campo = document.createElement('option')
+          campo.value = element.CODIGO;
+          campo.label = element.DESCRICAO;
+          document.getElementById('unidadeSelect').appendChild(campo);
+        });
+        // document.getElementById("edtCodUni").value   = arr[0].CODIGO;
+        // document.getElementById("edtDesUni").value   = arr[0].APELIDO;
+        // document.getElementById("edtCodUni").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function RetF10tblGpo(arr){
+        document.getElementById("edtCodGpo").value   = arr[0].CODIGO;
+        document.getElementById("edtDesGpo").value   = arr[0].NOME;
+        document.getElementById("edtCodGpo").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function codUniBlur(obj){
+        var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
+        var elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          var ret = fUnidadeF10(1,obj.id,"cbAtivo","soAtivo");
+          document.getElementById(obj.id).value          = ( ret.length == 0 ? "0000"    : jsNmrs(ret[0].CODIGO).emZero(4).ret()  );
+          document.getElementById("edtDesUni").value     = ( ret.length == 0 ? ""        : ret[0].APELIDO                       );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )               );
+        };
+      };
     </script>
   </head>
   <body>
@@ -372,7 +578,7 @@
           <p class="frmCampoTit">
           <input class="informe" type="text" name="titulo" value="Grupo Operacional" disabled="" style="color: white; text-align: left;">
           </p>
-          <div style="height: 160px; overflow-y: auto;">
+          <div style="height: 360px; overflow-y: auto;">
             <input type="hidden" id="sql" name="sql"/>
             <div class="campotexto campo100">
               <div class="campotexto campo50">
@@ -384,8 +590,16 @@
                 <label class="campo_label campo_required" for="edtUsuario">USUARIO</label>
               </div>
               <div class="campotexto campo100">
-                <input class="campo_input" id="edtDescricao" type="text" maxlength="60" />
+                <input class="campo_input" id="edtDescricao" upper type="text" maxlength="60" />
                 <label class="campo_label campo_required" for="edtDescricao">DESCRICAO</label>
+              </div>
+              <div class="campotexto campo100">
+                <button class="campo100 tableBotao botaoHorizontal" type="button" id="edtCodUni" onClick="uniF10Click('edtCodUni');">ESCOLHER UNIDADES </button>
+                <label for="edtCodUni">UNIDADES SELECIONADAS</label>
+              </div>
+              <div class="campotexto campo100">
+                <select id="unidadeSelect" multiple size="8" class="campo100">
+                </select>              
               </div>
               <div class="inactive">
                 <input id="edtCodUsu" type="text" />
@@ -396,7 +610,7 @@
                   <label class="campo_labelSombra">Campo obrigatório</label>
                 </div>              
                 <div class="campo20" style="float:right;">            
-                  <input id="idBtnConfirmarAtualizar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
+                  <input id="idBtnConfirmarCustom" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
                   <i class="faBtn fa-check icon-large"></i>
                 </div>
                 <div class="campo20" style="float:right;">            
