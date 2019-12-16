@@ -47,9 +47,9 @@
           $sqlEv.="SELECT A.BIEV_POSICAO AS POSICAO";
           $sqlEv.="       ,A.BIEV_CODUNI AS CODUNI";
           $sqlEv.="       ,A.BIEV_CODMTR AS CODMTR";          
-          $sqlEv.="       ,MTR.MTR_RFID AS RFID";                    
+          $sqlEv.="       ,COALESCE(MTR.MTR_RFID, '-') AS RFID";                    
           $sqlEv.="       ,COALESCE(MTR.MTR_NOME,'...') AS MOTORISTA";          
-          $sqlEv.="       ,MVM.MVM_VELOCIDADE AS VELOCIDADE";
+          $sqlEv.="       ,COALESCE(MVM.MVM_VELOCIDADE, 0) AS VELOCIDADE";
           $sqlEv.="       ,A.BIEV_ANOMES AS ANOMES";
           $sqlEv.="       ,'EV' AS INFRACAO";
           $sqlEv.="       ,UNI.UNI_APELIDO AS UNIDADE";
@@ -69,9 +69,9 @@
           $sqlEvc.="SELECT A.BIEVC_POSICAO AS POSICAO";
           $sqlEvc.="       ,A.BIEVC_CODUNI AS CODUNI";
           $sqlEvc.="       ,A.BIEVC_CODMTR AS CODMTR";          
-          $sqlEvc.="       ,MTR.MTR_RFID AS RFID";
+          $sqlEvc.="       ,COALESCE(MTR.MTR_RFID, '-') AS RFID";
           $sqlEvc.="       ,COALESCE(MTR.MTR_NOME,'...') AS MOTORISTA";          
-          $sqlEvc.="       ,MVM.MVM_VELOCIDADE AS VELOCIDADE";
+          $sqlEvc.="       ,COALESCE(MVM.MVM_VELOCIDADE, 0) AS VELOCIDADE";
           $sqlEvc.="       ,A.BIEVC_ANOMES AS ANOMES";
           $sqlEvc.="       ,'EVC' AS INFRACAO";
           $sqlEvc.="       ,UNI.UNI_APELIDO AS UNIDADE";

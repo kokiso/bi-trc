@@ -74,7 +74,7 @@
           $sql="";
           $sql.="SELECT TOP 10000";
           $sql.="  MVM_POSICAO";
-          $sql.="  ,MTR_NOME";
+          $sql.="  ,COALESCE(MTR_NOME, 'NÃO INFORMADO') as MTR_NOME";
           $sql.="  ,MVM_PLACA";
           $sql.="  ,VCL.VCL_FROTA";
           $sql.="  ,MVM_TURNO";
@@ -84,7 +84,7 @@
           $sql.="  ,MVM_VELOCIDADE";
           $sql.="  ,CONVERT(VARCHAR(23),MVM_DATAGPS,127) AS MVM_DATAGPS";
           $sql.="  ,MVM_HORAGPS";
-          $sql.="  ,MTR_RFID";
+          $sql.="  ,COALESCE(MTR_RFID, '-') AS MTR_RFID";
           $sql.="  ,MVM_ODOMETRO";
           $sql.="  FROM MOVIMENTO";
           $sql.="  LEFT OUTER JOIN EVENTO EVE ON MVM_CODEVE=EVE.EVE_CODIGO";

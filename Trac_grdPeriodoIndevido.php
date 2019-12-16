@@ -355,61 +355,75 @@
                       ,"padrao":0}
             ,{"id":5  ,"labelCol"       : "DTINI"
                       ,"fieldType"      : "str"
-                      ,"tamGrd"         : "12em"
+                      ,"tamGrd"         : "7em"
                       ,"tamImp"         : "35"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":6  ,"labelCol"       : "IDFIM"
+            ,{"id":6  ,"labelCol"       : "HRINI"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "6em"
+                      ,"tamImp"         : "35"
+                      ,"excel"          : "S"
+                      ,"ordenaColuna"   : "S"
+                      ,"padrao":0}
+            ,{"id":7  ,"labelCol"       : "IDFIM"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "7em"
                       ,"tamImp"         : "18"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":7  ,"labelCol"       : "DTFIM"
+            ,{"id":8  ,"labelCol"       : "DTFIM"
                       ,"fieldType"      : "str"
-                      ,"tamGrd"         : "12em"
+                      ,"tamGrd"         : "7em"
                       ,"tamImp"         : "35"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":8  ,"labelCol"       : "TEMPO"
+            ,{"id":9  ,"labelCol"       : "HRFIM"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "6em"
+                      ,"tamImp"         : "35"
+                      ,"excel"          : "S"
+                      ,"ordenaColuna"   : "S"
+                      ,"padrao":0}
+            ,{"id":10  ,"labelCol"       : "TEMPO"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "18"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":9 ,"labelCol"       : "MOTORISTA"
+            ,{"id":11 ,"labelCol"       : "MOTORISTA"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "20em"
                       ,"tamImp"         : "60"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":10 ,"labelCol"       : "EVE"
+            ,{"id":12 ,"labelCol"       : "EVE"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":11 ,"labelCol"       : "RFID"
+            ,{"id":13 ,"labelCol"       : "RFID"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "0"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-						,{"id":12 ,"labelCol"       : "UNIDADE"
+						,{"id":14 ,"labelCol"       : "UNIDADE"
 											,"fieldType"      : "str"
 											,"obj"            : "edtUnidade"
 											,"tamGrd"         : "10em"
 											,"tamImp"         : "25"
 											,"ajudaCampo"     : ["Unidade"]
 											,"padrao":0}
-						,{"id":13 ,"labelCol"       : "POLO"
+						,{"id":14 ,"labelCol"       : "POLO"
 											,"fieldType"      : "str"
 											,"tamGrd"         : "4em"
 											,"tamImp"         : "15"
@@ -522,6 +536,14 @@
   			msg     = requestPedido("Trac_grdPeriodoIndevido.php",fd); 
 				retPhp  = JSON.parse(msg);
 				if( retPhp[0].retorno == "OK" ){
+          retPhp[0].dados.forEach(arr => {
+              const dataHoraInicial = converterData(arr[4]);
+              const dataHoraFinal = converterData(arr[6]);
+              arr[4] = dataHoraInicial.dataConvertida;
+              arr.splice(5, 0, dataHoraInicial.horaConvertida); 
+              arr[7] = dataHoraFinal.dataConvertida;
+              arr.splice(8, 0, dataHoraFinal.horaConvertida);
+            });
 					//////////////////////////////////////////////////////////////////////////////////
 					// O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
 					// Campo obrigatório se existir rotina de manutenção na table devido Json       //
