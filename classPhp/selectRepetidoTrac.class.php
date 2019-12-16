@@ -110,6 +110,7 @@
           $sql.="  LEFT OUTER JOIN UNIDADE UNI ON VCL.VCL_CODUNI=UNI.UNI_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON UNI.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];					
           $sql.=" WHERE (A.BIPRDM_ANOMES=".$expld[3].")";
+	  $sql.=" AND A.BIPRDM_ODOMETROFIM-BIPRDM_ODOMETROINI < 300";	      
           $sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";
           if( $expld[1] >0 ){
             $sql.="  AND (UNI.UNI_CODIGO=".$expld[1].")";  
@@ -167,6 +168,7 @@
           $sql.="  LEFT OUTER JOIN UNIDADE UNI ON VCL.VCL_CODUNI=UNI.UNI_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON UNI.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];					
           $sql.=" WHERE (A.BIPRDM_ANOMES=".$expld[3].")";
+	  $sql.=" AND A.BIPRDM_ODOMETROFIM-BIPRDM_ODOMETROINI < 300";
           $sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";
           if( $expld[1] >0 ){
             $sql.="  AND (UNI.UNI_CODIGO=".$expld[1].")";  
