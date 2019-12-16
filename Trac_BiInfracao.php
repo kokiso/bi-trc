@@ -122,6 +122,12 @@
         //          Select completo       //
         ////////////////////////////////////
         if( $rotina=="selectBi" ){
+
+          $gpo="";
+
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
           ////////////////////////////////////////////////
           // Aqui tem individual e uma opcao todos="**" //
           ////////////////////////////////////////////////
@@ -152,6 +158,7 @@
             if($lote[0]->frota != "*" ){
               $sql.="  AND (VCL.VCL_FROTA='".$lote[0]->frota."')";
             };
+            $sql.=$gpo;
             $sql.="  AND (COALESCE(UU.UU_ATIVO,'')='S')";
             $sql.=" GROUP BY ".$alias."_CODUNI,UNI.UNI_APELIDO,UNI.UNI_CODPOL,".$alias."_CODVCL,VCL.VCL_FROTA,".$alias."_TURNO,".$alias."_CODMTR,MTR.MTR_NOME";
             $sql.="  HAVING (SUM(".$alias."_TOTAL)>".$lote[0]->qtos.")"; 
@@ -191,6 +198,7 @@
               if($lote[0]->frota != "*" ){
                 $sql.="  AND (VCL.VCL_FROTA='".$lote[0]->frota."')";
               };
+              $sql.=$gpo;
               $sql.="  AND (COALESCE(UU.UU_ATIVO,'')='S')";
               $sql.=" GROUP BY ".$alias."_CODUNI,UNI.UNI_APELIDO,UNI.UNI_CODPOL,".$alias."_CODVCL,VCL.VCL_FROTA,".$alias."_TURNO,".$alias."_CODMTR,MTR.MTR_NOME";
               $sql.="  HAVING (SUM(".$alias."_TOTAL)>".$lote[0]->qtos.")"; 
@@ -528,6 +536,7 @@
         clsJs.add("infracao", document.getElementById("cbInfracao").value );
         clsJs.add("frota"   , document.getElementById("cbFrota").value    );
         clsJs.add("qtos"    , document.getElementById("cbqtos").value     );
+        clsJs.add("grupoOperacional"   	, document.getElementById("cbGpo").value  	);
 // debugger;				
         
         fd = new FormData();
@@ -1122,6 +1131,9 @@
         </select>
         <label class="campo_label campo_required" for="cbFrota">Qtos1</label>
       </div>
+
+      <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
+
       <div class="campo10" style="float:left;">            
         <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>
       </div>

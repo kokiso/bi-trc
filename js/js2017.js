@@ -1956,6 +1956,9 @@ function clsMensagem(cabec) {
     if (typeof valor == "number") valor = valor.toFixed(0);
     //
     str = valor.soNumeros();
+    if (campo === "GRUPO OPERACIONAL") {
+      return 0;
+    }
     if (str.length != valor.length) {
       this.strLista +=
         "<tr><td>CAMPO <b>" + campo + "</b> NÃO É UM INTEIRO VALIDO!</td></tr>";
@@ -2972,4 +2975,16 @@ function comboCompetencia(qual, el) {
       el.appendChild(ceOpt);
     }
   }
+}
+
+function converterObjeto(objeto) {
+  var novoArray = [];
+  objeto.forEach(element => {
+    var arrayElemento = [];
+    for (let key in element) {
+      arrayElemento.push(element[key]);
+    }
+    novoArray.push(arrayElemento);
+  });
+  return novoArray;
 }

@@ -55,6 +55,7 @@
                        ,U.US_APELIDO
                        ,A.UP_CODUSR
                        ,CASE WHEN A.CONSULTAR_RELATORIO='S' THEN 'PERMITIDO' ELSE 'NAO PERMITIDO' END AS CONSULTAR_USUARIO
+                       ,CASE WHEN A.GRUPO_OPERACIONAL='S' THEN 'PERMITIDO' ELSE 'NAO PERMITIDO' END AS CONSULTAR_USUARIO
                   FROM USUARIOPERFIL A
                   LEFT OUTER JOIN USUARIOSISTEMA U ON A.UP_CODUSR=U.US_CODIGO
                  WHERE (A.UP_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";                 
@@ -482,6 +483,7 @@
                 .",UP_REG"
                 .",UP_CODUSR"
                 .",UP_ATIVO"
+                .",GRUPO_OPERACIONAL"
                 .",CONSULTAR_RELATORIO) VALUES("
                 ."'".$descricao."'"             // UP_NOME
                 .",".$d01                       // UP_D01
@@ -507,6 +509,7 @@
                 .",'P'"                         // UP_REG
                 .",".$_SESSION["usr_codigo"]    // UP_CODUSR
                 .",'S'"                         // UP_ATIVO
+                .",'".$GRUPO_OPERACIONAL."'"    // GRUPO_OPERACIONAL
                 .",'".$CONSULTAR_RELATORIO."'"  // CONSULTAR_RELATORIO
               .")";
               array_push($arrUpdt,$sql);
@@ -888,6 +891,12 @@
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "10"
                       ,"padrao":10}   
+            ,{"id":29 ,"field"          : "GRUPO_OPERACIONAL"  
+                      ,"labelCol"       : "GRUPO OPERACIONAL"   
+                      ,"obj"            : "cbGrupoOperacional"
+                      ,"tamGrd"         : "10em"
+                      ,"tamImp"         : "10"
+                      ,"padrao":10}   
           ]
           ,
           "detalheRegistro":
@@ -920,6 +929,7 @@
           ,"tabelaBKP"      : "BKPUSUARIOPERFIL"    // Nome da tabela no banco de dados  
           ,"fieldAtivo"     : "UP_ATIVO"            // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
           ,"fieldConsultarRelatorio"     : "CONSULTAR_RELATORIO"            // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
+          ,"fieldGrupoOperacional"     : "GRUPO_OPERACIONAL"            // SE EXISITIR - Nome do campo ATIVO(S/N) na tabela BD
           ,"fieldReg"       : "UP_REG"              // SE EXISITIR - Nome do campo SYS(P/A) na tabela BD            
           ,"fieldCodUsu"    : "UP_CODUSR"           // SE EXISITIR - Nome do campo CODIGO USUARIO na tabela BD                        
           ,"iFrame"         : "iframeCorpo"         // Se a table vai ficar dentro de uma tag iFrame
@@ -1380,6 +1390,13 @@
                   <option value="N" selected>NAO PERMITIDO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbConsultaRelatorio">CONSULT. RELATÓRIO</label>
+              </div>
+              <div class="campotexto campo20">
+                <select class="campo_input_combo" name="cbGrupoOperacional" id="cbGrupoOperacional">
+                  <option value="S">PERMITIDO</option>
+                  <option value="N" selected>NAO PERMITIDO</option>
+                </select>
+                <label class="campo_label campo_required" for="cbGrupoOperacional">GRUPO OPERACIONAL</label>
               </div>
               <div class="campotexto campo20">
                 <input class="campo_input_titulo" disabled name="edtUsuario" id="edtUsuario" type="text" />

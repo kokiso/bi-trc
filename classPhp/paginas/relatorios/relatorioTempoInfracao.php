@@ -1,12 +1,7 @@
 <?php
 
-  require_once("../service/serviceTempoInfracao.php");
+  require_once("../../service/serviceTempoInfracao.php");
   $servicoTempoInfracao     = new serviceTempoInfracao();
-  
-  
-  if( isset($_POST["grdInfracaoTempo"]) ){
-    $servicoTempoInfracao->consolidaTempoInfracao('INTEGRAR');
-  }
 
   if( isset($_POST["grdConsolidacaoInfracaoTempo"]) ){
     $servicoTempoInfracao->buscaDadosConsolidados('INTEGRAR', $_POST["grdConsolidacaoInfracaoTempo"]);
@@ -19,12 +14,12 @@
     <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
     <link rel="icon" type="image/png" href="imagens/logo_aba.png" />
     <title>Infração/tempo</title>
-    <link rel="stylesheet" href="../../css/css2017.css">
-    <link rel="stylesheet" href="../../css/cssTable2017.css">
-    <link rel="stylesheet" href="../../css/Acordeon.css">
-    <script src="../../config/configuracoes.js"></script>
-    <script src="../../js/js2017.js"></script>
-    <script src="../../js/jsTable2017.js"></script>
+    <link rel="stylesheet" href="../../../css/css2017.css">
+    <link rel="stylesheet" href="../../../css/cssTable2017.css">
+    <link rel="stylesheet" href="../../../css/Acordeon.css">
+    <script src="../../../config/configuracoes.js"></script>
+    <script src="../../../js/js2017.js"></script>
+    <script src="../../../js/jsTable2017.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -218,15 +213,15 @@
         //////////////////////////////////////////////////////////////
         // Usuarios externos não tem a opção de selecionar sem erro //
         //////////////////////////////////////////////////////////////
-        if(jsPub[0].usr_interno=="E"){
-          document.getElementById("divCbErro").style.display="none";
-          document.getElementById("cbErro").value="N";
-          jsBi.titulo[4].tamGrd="0em";
-          jsBi.titulo[6].tamGrd="0em";
-          jsBi.titulo[9].tamGrd="0em";
-					jsBi.titulo[12].tamGrd="0em";
-        };
-        objBi.montarHtmlCE2017(jsBi);
+        // if(jsPub[0].usr_interno=="E"){
+        //   document.getElementById("divCbErro").style.display="none";
+        //   document.getElementById("cbErro").value="N";
+        //   jsBi.titulo[4].tamGrd="0em";
+        //   jsBi.titulo[6].tamGrd="0em";
+        //   jsBi.titulo[9].tamGrd="0em";
+				// 	jsBi.titulo[12].tamGrd="0em";
+        // };
+        // objBi.montarHtmlCE2017(jsBi);
         //////////////////////////////////////////////////
         //  Fim objeto clsTable2017 MOVIMENTORESUMO      //
         ////////////////////////////////////////////////// 
@@ -249,12 +244,6 @@
       var cmp       = new clsCampo(); // Abrindo a classe campos
       var jsPub     = JSON.parse(localStorage.getItem("lsPublico"));
       var intCodDir = parseInt(jsPub[0].usr_d04);
-      /////////////////////////////////
-      // Desmarcando todos registros //
-      /////////////////////////////////
-			function biDesmarcarClick(){
-				tblBi.retiraChecked();
-      };
 
       function btnFiltrarConsolidacaoClick() {
         clsJs   = jsString("lote");
@@ -335,319 +324,9 @@
 
         fd = new FormData();
         fd.append("montaSelectUnidade" , clsJs.fim());
-        var selectUnidade = requestPedido("../comum/selectUnidade.class.php",fd);
+        var selectUnidade = requestPedido("../../comum/selectUnidade.class.php",fd);
         document.getElementById('selectUnidadePHP').innerHTML = selectUnidade;
         document.getElementById('cbUnidade').value="TODOS";
-      };
-
-      ////////////////////////////////
-      //          DETALHE           //
-      ////////////////////////////////
-      function biDetalheClick(){
-        try{        
-          clsChecados = objBi.gerarJson("1");
-          chkds       = clsChecados.gerar();
-          clsJs       = jsString("lote");  
-          
-          var pI=chkds[0].IDINI;
-          var pF=chkds[0].IDFIM;
-          if( pF=="**erro**" ){
-            pF=(pI+10000);
-          };
-          clsJs.add("rotina"  , "detalhe"             );
-          clsJs.add("login"   , jsPub[0].usr_login    );
-          clsJs.add("codusu"  , jsPub[0].usr_codigo   );
-          clsJs.add("frota"   , chkds[0].LP           );          
-          clsJs.add("placa"   , chkds[0].PLACA        ); 
-          clsJs.add("dtini"   , chkds[0].DTINI        );					
-          clsJs.add("idIni"   , pI        );
-          clsJs.add("idFim"   , pF        );          
-          fd          = new FormData();
-          fd.append("grdInfracaoTempo" , clsJs.fim());          
-          var req = requestPedido("Trac_grdInfracaoTempo.php",fd);
-          var ret = JSON.parse(req);
-          if( ret[0].dados.length==0 ){
-            gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
-          } else {
-            if( ret[0].retorno == "OK" ){
-              jsDet={
-                "titulo":[
-                  {"id":0   ,"labelCol"       : "OPC"     
-                            ,"padrao"         : 1}            
-                  ,{"id":1  ,"field"          : "MVM_POSICAO" 
-                            ,"labelCol"       : "ID"
-                            ,"fieldType"      : "str"
-                            ,"obj"            : "edtPosicao"
-                            ,"tamGrd"         : "10em"
-                            ,"tamImp"         : "15"
-                            ,"pk"             : "S"
-                            ,"ajudaCampo"     : ["Id sistemsat."]
-                            ,"padrao":0}
-                  ,{"id":2  ,"field"          : "MVM_PLACA"   
-                            ,"fieldType"      : "str"
-                            ,"labelCol"       : "PLACA"
-                            ,"obj"            : "edtPlaca"
-                            ,"tamGrd"         : "7em"
-                            ,"tamImp"         : "15"
-                            ,"ajudaCampo"     : ["Placa do veiculo"]
-                            ,"padrao":0}
-                  ,{"id":3  ,"field"          : "MVM_TURNO"   
-                            ,"fieldType"      : "str"
-                            ,"labelCol"       : "T"
-                            ,"obj"            : "edtFrota"
-                            ,"tamGrd"         : "2em"
-                            ,"tamImp"         : "5"
-                            ,"ajudaCampo"     : ["Veiculo pesado/leve"]
-                            ,"padrao":0}
-                  ,{"id":4  ,"field"          : "EVE_NOME"   
-                            ,"fieldType"      : "str"
-                            ,"labelCol"       : "EVENTO"
-                            ,"obj"            : "edtFrota"
-                            ,"tamGrd"         : "20em"
-                            ,"tamImp"         : "40"
-                            ,"ajudaCampo"     : ["Veiculo pesado/leve"]
-                            ,"padrao":0}
-                  ,{"id":5  ,"field"          : "MVM_VELOCIDADE"   
-                            ,"fieldType"      : "int"
-                            ,"align"          : "center"
-                            ,"labelCol"       : "VEL"
-                            ,"obj"            : "edtVelocidade"
-                            ,"tamGrd"         : "5em"
-                            ,"tamImp"         : "10"
-                            ,"ajudaCampo"     : ["Velocidade"]
-                            ,"padrao":0}
-                  ,{"id":6  ,"field"          : "MVM_DATAGPS"   
-                            ,"fieldType"      : "str"
-                            ,"labelCol"       : "DATA"
-                            ,"obj"            : "edtDataGps"
-                            ,"tamGrd"         : "15em"
-                            ,"tamImp"         : "30"
-                            ,"ajudaCampo"     : ["Data."]
-                            ,"padrao":0}
-                  ,{"id":7  ,"field"          : "UNI_APELIDO"   
-                            ,"fieldType"      : "str"
-                            ,"labelCol"       : "UNIDADE"
-                            ,"obj"            : "edtUnidade"
-                            ,"tamGrd"         : "10em"
-                            ,"tamImp"         : "25"
-                            ,"ajudaCampo"     : ["Unidade"]
-                            ,"padrao":0}
-                  ,{"id":8  ,"field"          : "UNI_CODPOL"   
-                            ,"fieldType"      : "str"
-                            ,"labelCol"       : "POLO"
-                            ,"obj"            : "edtCodPol"
-                            ,"tamGrd"         : "4em"
-                            ,"tamImp"         : "15"
-                            ,"ajudaCampo"     : ["Polo"]
-                            ,"padrao":0}
-                  ,{"id":9 ,"labelCol"       : "LATITUDE"
-                            ,"fieldType"      : "flo8" 
-                            ,"tamGrd"         : "0em"
-                            ,"tamImp"         : "0"
-                            ,"excel"          : "S"                      
-                            ,"padrao":0}
-                  ,{"id":10 ,"labelCol"       : "LONGITUDE"
-                            ,"fieldType"      : "flo8" 
-                            ,"tamGrd"         : "0em"
-                            ,"tamImp"         : "0"
-                            ,"excel"          : "S"                      
-                            ,"padrao":0}
-                  ,{"id":11 ,"fieldType"      : "str"
-                            ,"labelCol"       : "LOCALIZACAO"
-                            ,"obj"            : "edtCodPol"
-                            ,"tamGrd"         : "0em"
-                            ,"tamImp"         : "15"
-                            ,"ajudaCampo"     : ["Polo"]
-                            ,"padrao":0}
-														
-                ]  
-                , 
-                "botoesH":[
-                   {"texto":"Excel"     ,"name":"detExcel"  ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o"     ,"ajuda":"Exportar para excel" }
-									,{"texto":"Mapa"      ,"name":"detMapa"   ,"onClick":"7"  ,"enabled":true,"imagem":"fa fa-map-marker"     ,"ajuda":"Exportar para excel" }        
-                  ,{"texto":"Retornar"  ,"name":"detVoltar" ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-plus","ajuda":"Retorna a tela anterior" }
-                ] 
-                ,"registros"      : ret[0].dados              // Recebe um Json vindo da classe clsBancoDados
-                ,"refazClasse"    : "S"
-                ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
-                ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
-                ,"div"            : "frmDet"                  // Onde vai ser gerado a table
-                ,"divFieldSet"    : "tabela"                  // Para fechar a div onde estão os fieldset ao cadastrar
-                ,"form"           : "frm"                     // Onde vai ser gerado o fieldSet       
-                ,"divModal"       : "divDetalheReg"           // Onde vai se appendado abaixo deste a table 
-                ,"tbl"            : "tblDet"                  // Nome da table
-                ,"prefixo"        : "es"                      // Prefixo para elementos do HTML em jsTable2017.js
-                ,"width"          : "110em"                   // Tamanho da table
-                ,"height"         : "40em"                    // Altura da table
-                ,"iFrame"         : "iframeCorpo"             // Se a table vai ficar dentro de uma tag iFrame
-                ,"tableLeft"      : "sim"                     // Se tiver menu esquerdo
-                ,"relTitulo"      : "DETALHE EVENTO"          // Titulo do relatório
-                ,"relOrientacao"  : "P"                       // Paisagem ou retrato
-                ,"relFonte"       : "8"                       // Fonte do relatório
-                ,"indiceTable"    : "DATA"                    // Indice inicial da table
-                ,"tamBotao"       : "12"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
-                ,"tamMenuTable"   : ["10em","20em"]                                
-                ,"codTblUsu"      : "USUARIO[01]"                          
-                ,"codDir"         : intCodDir
-              }; 
-              if( objDet === undefined ){  
-                objDet=new clsTable2017("objDet");
-              };
-              objDet.montarHtmlCE2017(jsDet); 
-              window.location.href="#ancoraMovimento";
-              var el = document.getElementsByClassName("acordeon");
-              for( var lin=0;lin<el.length;lin++ ){
-                if( (el[lin].id=="btnDetalhe") && (el[lin].className != "acordeon acrdnAtivo") ){
-                  document.getElementById("btnDetalhe").click();  
-                  window.location.href="#ancoraDetalhe";
-                };  
-              }; 
-            } else {
-              throw ret[0].erro;
-            };
-          };
-        }catch(e){
-          gerarMensagemErro("catch",e.message,"Erro");
-        };
-      };
-      //////////////////////////////////////////////
-      // Filtrando motoristas com tempo acumulado //
-      //////////////////////////////////////////////
-      function biMotoristaClick(){
-        try{
-          //////////////////////////////
-          // CRIANDO UM JSON DA TABLE //
-          //////////////////////////////
-          clsChecados = objBi.gerarJson();
-          clsChecados.retornarQtos("n");        
-          clsChecados.temColChk(false);
-          var json    = clsChecados.gerar();
-          var tam     = json.length;
-          var addTbl  = new Array();  //Array somente para buscar unidades
-          var tbl     = new Array();
-          var intSeek = 0;        
-          var strSeek = "";
-          var parte;  
-          var tempo;
-
-          for(var fc=0; fc<tam;fc++){
-            strSeek=json[fc].MOTORISTA;
-            intSeek=addTbl.indexOf(strSeek);
-            if( json[fc].TEMPO=="**erro**" ){
-              tempo=0;
-            } else {
-              parte = json[fc].TEMPO.split(":");
-              tempo = (parseInt(parte[2]) + (parseInt(parte[1])*60) + (parseInt(parte[0])*3600) );
-            };  
-            
-            if( intSeek==-1 ){
-              addTbl.push(strSeek);
-              tbl.push([
-                strSeek
-                ,parseInt(tempo)
-              ]);
-            } else {
-              tbl[intSeek][1]+=parseInt(tempo); 
-            };
-          };  
-          //
-          //
-          if( tbl.length==0 ){
-            gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
-          } else {
-            //
-            jsMtr={
-              "titulo":[
-                {"id":0   ,"labelCol"       : "MOTORISTA"
-                          ,"fieldType"      : "str"
-                          ,"tamGrd"         : "35em"
-                          ,"tamImp"         : "70"
-                          ,"excel"          : "S"
-                          ,"ordenaColuna"   : "S"
-                          ,"padrao":0}
-                ,{"id":1  ,"labelCol"       : "TEMPO Seg"
-                          ,"fieldType"      : "int"
-                          ,"align"          : "center"
-                          ,"tamGrd"         : "8em"
-                          ,"tamImp"         : "10"
-                          ,"excel"          : "S"
-                          ,"ordenaColuna"   : "S"
-                          ,"padrao":0}
-              ]  
-              , 
-              "botoesH":[
-                 {"texto":"Excel"     ,"name":"eveExcel"  ,"onClick":"5"  ,"enabled":true,"imagem":"fa fa-file-excel-o"     ,"ajuda":"Exportar para excel" }
-                ,{"texto":"Retornar"  ,"name":"eveVoltar" ,"onClick":"7"  ,"enabled":true ,"imagem":"fa fa-plus"            ,"ajuda":"Retorna a tela anterior" }
-              ] 
-              ,"registros"      : tbl                       // Recebe um Json vindo da classe clsBancoDados
-              ,"refazClasse"    : "S"
-              ,"opcRegSeek"     : true                      // Opção para numero registros/botão/procurar                     
-              ,"checarTags"     : "S"                       // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
-              ,"div"            : "frmMtr"                  // Onde vai ser gerado a table
-              ,"divFieldSet"    : "tabela"                  // Para fechar a div onde estão os fieldset ao cadastrar
-              ,"form"           : "frm"                     // Onde vai ser gerado o fieldSet       
-              ,"divModal"       : "divMtrReg"               // Onde vai se appendado abaixo deste a table 
-              ,"tbl"            : "tblMtr"                  // Nome da table
-              ,"prefixo"        : "es"                      // Prefixo para elementos do HTML em jsTable2017.js
-              ,"tabelaBD"       : "BI_EXCESSOVELOC"         // Nome da tabela no banco de dados  
-              ,"tableLeft"      : "sim"                     // Se tiver menu esquerdo              
-              ,"iFrame"         : "iframeCorpo"             // Se a table vai ficar dentro de uma tag iFrame
-              ,"width"          : "56em"                    // Tamanho da table
-              ,"height"         : "40em"                    // Altura da table
-              ,"relTitulo"      : "DETALHE MOTORISTA"       // Titulo do relatório
-              ,"relOrientacao"  : "P"                       // Paisagem ou retrato
-              ,"relFonte"       : "8"                       // Fonte do relatório
-              ,"indiceTable"    : "MOTORISTA"               // Indice inicial da table
-              ,"tamBotao"       : "30"                      // Tamanho botoes defalt 12 [12/25/50/75/100]
-              ,"tamMenuTable"   : ["10em","20em"]                                
-              ,"codTblUsu"      : "USUARIO[01]"                          
-              ,"codDir"         : intCodDir
-            }; 
-            if( objMtr === undefined ){  
-              objMtr=new clsTable2017("objMtr");
-            };
-            objMtr.montarHtmlCE2017(jsMtr); 
-             var el = document.getElementsByClassName("acordeon");
-            for( var lin=0;lin<el.length;lin++ ){
-              if( (el[lin].id=="btnMotorista") && (el[lin].className != "acordeon acrdnAtivo") ){
-                document.getElementById("btnMotorista").click();  
-                window.location.href="#ancoraMotorista";
-              };  
-            }; 
-          };
-        }catch( e ){
-          gerarMensagemErro("Composição do evento",e,"Erro");
-        };
-      };
-			//
-      function detMapaClick(){
-        try{        
-          clsChecados = objDet.gerarJson("1");
-          chkds       = clsChecados.gerar();
-          clsJs       = jsString("lote");  
-        
-          msg='['
-              + '{"lat":"' +jsNmrs(chkds[0].LATITUDE).dec(8).dolar().ret()
-              +'","lon":"' +jsNmrs(chkds[0].LONGITUDE).dec(8).dolar().ret()
-              +'","loc":"' +chkds[0].LOCALIZACAO+'"}'
-              +']';
-          localStorage.setItem("addMapa",msg);
-          window.open("mapa/Trac_Mapa.php");
-        }catch(e){
-          gerarMensagemErro("catch",e.message,"Erro");
-        };
-      };
-      //
-      //
-      function detVoltarClick(){
-        document.getElementById("btnDetalhe").click();
-        window.location.href="#ancoraCabec";
-      };
-      ///////////////////////////
-      // Fechando o formulario //
-      ///////////////////////////
-      function biFecharClick(){
-        window.close();
       };
     </script>
   </head>
@@ -661,7 +340,7 @@
         <label class="campo_label campo_required" for="cbIni">MÊS</label>
       </div>-->
 
-      <?php include '../comum/selectMes.class.php';?>
+      <?php include '../../comum/selectMes.class.php';?>
       
       <div class="campotexto campo15">
         <select class="campo_input_combo" id="cbFrota">
@@ -702,10 +381,10 @@
         <label class="campo_label campo_required" for="cbInfracao">INFRAÇÃO</label>
       </div>
 
-      <?php include '../comum/selectPolo.class.php';?>
+      <?php include '../../comum/selectPolo.class.php';?>
 
       <div id="selectUnidadePHP">        
-        <?php include '../comum/selectUnidade.class.php';?>
+        <?php include '../../comum/selectUnidade.class.php';?>
       </div>
       
       <div class="campo10" style="float:left;">            

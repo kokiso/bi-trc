@@ -54,6 +54,12 @@
             case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
           };
+
+          $gpo="";
+
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
           ///////////////////////////////////////////////////////////////
           // Buscando um facilitador para indice devido tamanho da tabela
           ///////////////////////////////////////////////////////////////  
@@ -104,6 +110,7 @@
             if($lote[0]->unidadeCodigo != "") {
               $sql.="   AND (UNI.UNI_CODIGO = ".$lote[0]->unidadeCodigo.")";
             }
+            $sql.=$gpo;
             $sql.=" ORDER BY MVM_CODVEI,CONVERT(VARCHAR(23),MVM_DATAGPS,127)";
           //};
           if( $retCls['retorno'] != "OK" ){
@@ -599,6 +606,7 @@
 				clsJs.add("tempo"   	, document.getElementById("cbTempo").value  	);
 				clsJs.add("erro"    	, document.getElementById("cbErro").value   	);
         clsJs.add("infracao"	, document.getElementById("cbInfracao").value	);
+        clsJs.add("grupoOperacional"   	, document.getElementById("cbGpo").value  	);
 
         var cbPoloValue = document.getElementById("cbPolo").value;
         var poloCodigo;
@@ -995,6 +1003,27 @@
       function biFecharClick(){
         window.close();
       };
+      function montaGrupoOperacional() {
+        var cbUnidadeValue = document.getElementById("cbUnidade").value;
+        var divGrupoOperacional = document.getElementById("divCbGrupoOperacional");
+        var uniCodigo;
+
+        if(cbUnidadeValue != "TODOS") {
+          uniCodigo = cbUnidadeValue.split('-')[0];
+
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, uniCodigo                    );
+        } else {
+          clsJs   = jsString("lote");
+          clsJs.add("uniCodigo"  	, ""                    );
+        }
+
+        fd = new FormData();
+        fd.append("montaSelectGrupoOperacional" , clsJs.fim());
+        var selectGrupoOperacional = requestPedido("classPhp/comum/selectGrupoOperacional.class.php",fd);
+        document.getElementById('selectGrupoOperacionalPHP').innerHTML = selectGrupoOperacional;
+        document.getElementById('cbGpo').value="TODOS";
+      };
     </script>
   </head>
   <body>
@@ -1053,6 +1082,11 @@
       <div id="selectUnidadePHP">        
         <?php include 'classPhp/comum/selectUnidade.class.php';?>
       </div>
+
+      <div id="selectGrupoOperacionalPHP">
+        <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
+      </div>
+
       
       <div class="campo10" style="float:left;">            
         <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>

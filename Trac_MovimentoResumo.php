@@ -505,7 +505,7 @@
             }
           };
         }catch( e ){
-          console.log(req);
+          // console.log(req);
           gerarMensagemErro("Composição do movimentoresumo",e,"Erro");
         }
       };

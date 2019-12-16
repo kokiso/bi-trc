@@ -1,4 +1,4 @@
 /vendor
 /.idea
-/classPhp/relatorios/*.xlsx
+/classPhp/paginas/relatorios/*.xlsx
 /config

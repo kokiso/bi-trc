@@ -713,36 +713,36 @@
           document.getElementById("edtVcl").classList.add('inputF10');
         }
       };
-      function buscarUni(){
-        clsJs   = jsString("lote");  
-        clsJs.add("rotina"      , "unidade"           );
-        clsJs.add("login"       , jsPub[0].usr_login  );
-        fd = new FormData();
-        fd.append("motorista" , clsJs.fim());
-        msg     = requestPedido("Trac_Motorista.php",fd); 
-        retPhp  = JSON.parse(msg);
-        if( retPhp[0].retorno == "OK" ){
-          msg=retPhp[0]["dados"].length;
-          if(msg==0){
-            var ceOpt 	= document.createElement("option");        
-            ceOpt.value = "*";
-            ceOpt.text  = "SEM DIREITO"
-            document.getElementById("cbUnidade").appendChild(ceOpt);
-          } else {
-            var ceOpt 	= document.createElement("option");        
-            ceOpt.value = "0";
-            ceOpt.text  = "TODAS";
-            document.getElementById("cbUnidade").appendChild(ceOpt);
+      // function buscarUni(){
+      //   clsJs   = jsString("lote");  
+      //   clsJs.add("rotina"      , "unidade"           );
+      //   clsJs.add("login"       , jsPub[0].usr_login  );
+      //   fd = new FormData();
+      //   fd.append("motorista" , clsJs.fim());
+      //   msg     = requestPedido("Trac_Motorista.php",fd); 
+      //   retPhp  = JSON.parse(msg);
+      //   if( retPhp[0].retorno == "OK" ){
+      //     msg=retPhp[0]["dados"].length;
+      //     if(msg==0){
+      //       var ceOpt 	= document.createElement("option");        
+      //       ceOpt.value = "*";
+      //       ceOpt.text  = "SEM DIREITO"
+      //       document.getElementById("cbUnidade").appendChild(ceOpt);
+      //     } else {
+      //       var ceOpt 	= document.createElement("option");        
+      //       ceOpt.value = "0";
+      //       ceOpt.text  = "TODAS";
+      //       document.getElementById("cbUnidade").appendChild(ceOpt);
             
-            for( var lin=0;lin<msg;lin++ ){
-              var ceOpt 	= document.createElement("option");        
-              ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
-              ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
-              document.getElementById("cbUnidade").appendChild(ceOpt);
-            };  
-          };
-        };  
-      };  
+      //       for( var lin=0;lin<msg;lin++ ){
+      //         var ceOpt 	= document.createElement("option");        
+      //         ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
+      //         ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
+      //         document.getElementById("cbUnidade").appendChild(ceOpt);
+      //       };  
+      //     };
+      //   };  
+      // };  
 
       function vclF10Click(){
         if (document.getElementById("edtCodUni").value !== '0000'){
@@ -764,11 +764,11 @@
   </head>
   <body>
     <div id="divEvento" class="comboSobreTable">
-      <div class="campotexto campo25" style="margin-top:3px;margin-left:3px;">
-        <select class="campo_input_combo" id="cbUnidade">
-        </select>
-        <label class="campo_label campo_required" for="cbAtivo">UNIDADE</label>
+
+      <div style="margin-top:3px;margin-left:3px;">
+        <?php include 'classPhp/comum/selectUnidade.class.php';?>
       </div>
+
       <div class="campo10" style="float:left;">            
         <input id="btnFilttrar" onClick="btnFiltrarClick('S');" type="button" value="Filtrar" class="botaoSobreTable"/>
       </div>

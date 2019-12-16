@@ -39,6 +39,13 @@
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')";
                         break;
           };
+
+          $gpo = "";
+
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
+
           $sql="";          
           $sql.="SELECT A.BIPRDM_ANOMES AS ANOMES";
           $sql.="       ,UNI.UNI_CODIGO AS CODUNI";
@@ -58,6 +65,7 @@
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON UNI.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codusu;            
           $sql.=" WHERE (A.BIPRDM_ANOMES BETWEEN ".$lote[0]->dtini." AND ".$lote[0]->dtfim.")";
           $sql.=$frota;
+          $sql.=$gpo;
           $sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";   
 //file_put_contents("aaa.xml",$sql);					
           $classe->msgSelect(false);
@@ -133,7 +141,6 @@
     <link rel="stylesheet" href="css/Acordeon.css">    
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
-    <script src="js/biblioteca.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -385,6 +392,7 @@
         clsJs.add("dtini"   	, document.getElementById("cbIni").value   );
         clsJs.add("dtfim"   	, document.getElementById("cbIni").value   );
         clsJs.add("frota"   	, document.getElementById("cbFrota").value  	);
+        clsJs.add("grupoOperacional"   	, document.getElementById("cbGpo").value  	);
         fd = new FormData();
         fd.append("grdProdutividadevei" , clsJs.fim());
         msg     = requestPedido("Trac_grdProdutividadeVei.php",fd); 
@@ -910,6 +918,8 @@
         </select>
         <label class="campo_label campo_required" for="cbFrota">FROTA</label>
       </div>
+
+      <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
 
       <div class="campo10" style="float:left;">            
         <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>

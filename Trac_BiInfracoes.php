@@ -24,6 +24,7 @@
         $lote     = $jsonObj->lote;
         $rotina   = $lote[0]->rotina;
         $codmes   = ( isset($lote[0]->compet) ? $lote[0]->compet : "" );
+        $gpo      = "";
         $classe   = new conectaBd();
         $classe->conecta($lote[0]->login);
         ///////////////////////////////////////////////////////////
@@ -181,7 +182,7 @@
           $table  = $retSql[0]["tabela"];
           
           $sql="";  
-          $sql.="SELECT M.MTR_NOME";
+          $sql.="SELECT COALESCE(M.MTR_NOME, 'MOTORISTAS NAO IDENTIFICADOS') AS MTR_NOME";
           $sql.="       ,U.UNI_APELIDO";
           $sql.="       ,SUM(".$alias."_TOTAL) AS TOTAL";
           $sql.="  FROM ".$table." A";
@@ -217,7 +218,15 @@
         ///////////////////////////////////////////////////////////
         if( $rotina=="quaisUnidade" ){
           $cSql   = new SelectRepetido();
-          $retSql = $cSql->qualSelect("quaisUnidade",$lote[0]->login);
+          $retSql = $cSql->qualSelect("quaisUnidade",$lote[0]->login, $lote[0]->poloCodigo);
+          $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
+        };  
+        //////////////////////////////////////////////////////////////////////
+        //   Buscando apenas os grupos operacionais que usuario tem direito //
+        //////////////////////////////////////////////////////////////////////
+        if( $rotina=="quaisGpo" ){
+          $cSql   = new SelectRepetido();
+          $retSql = $cSql->qualSelect("quaisGpo",$lote[0]->login, $lote[0]->uniCodigo);
           $retorno='[{"retorno":"'.$retSql["retorno"].'","dados":'.$retSql["dados"].',"erro":"'.$retSql["erro"].'"}]';
         };  
         ////////////////
@@ -232,6 +241,10 @@
           if( $lote[0]->qualSelect=="contarUnidade" ){ 
             $cSql = new SelectRepetido();
             $sql  = $cSql->qualSelect("qtasUnidade",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codpol);
+          };
+          if( $lote[0]->qualSelect=="contarGpo" ){  
+            $cSql = new SelectRepetido();
+            $sql  = $cSql->qualSelect("qtosGpo",$lote[0]->login."|".$lote[0]->coduni."|".$lote[0]->codgpo);
           };
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
@@ -349,6 +362,9 @@
             case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
           }  
+          if( $lote[0]->codgpo != '*' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->codgpo.")";
+          }
           //
           $sql="";
           if( $lote[0]->qualSelect=="infracao" ){ 
@@ -364,6 +380,7 @@
             } else {
               $sql.="  WHERE ((BIABM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
             };  
+            $sql.=$gpo;
             $sql.="  UNION ALL";
             $sql.=" SELECT 'CB' AS ID,'CONDUCAO BANGUELA' AS NOME,COALESCE(SUM(A.BICBM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_CONDUCAOBANGMES A";
@@ -376,7 +393,8 @@
               $sql.="  WHERE ((BICBM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BICBM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.=" UNION ALL";
             $sql.=" SELECT 'EV' AS ID,'EXCESSO VELOC' AS NOME,COALESCE(SUM(A.BIEVM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_EXCESSOVELOCMES A";
@@ -402,7 +420,8 @@
               $sql.="  WHERE ((BIEVCM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIEVCM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.=" UNION ALL";
             $sql.=" SELECT 'FB' AS ID,'FREADA BRUSCA' AS NOME,COALESCE(SUM(A.BIFBM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_FREADABRUSCAMES A";
@@ -415,7 +434,8 @@
               $sql.="  WHERE ((BIFBM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIFBM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
             $sql.=" UNION ALL";
             $sql.=" SELECT 'ERPM' AS ID,'EXCESSO RPM' AS NOME,COALESCE(SUM(A.BIRAM_TOTAL),0) AS QTOS";
             $sql.="  FROM BI_RPMALTOMES A";
@@ -428,7 +448,8 @@
               $sql.="  WHERE ((BIRAM_ANOMES=".$codmes.") AND (UNI.UNI_CODPOL='".$lote[0]->codpol."') AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";    
             } else {
               $sql.="  WHERE ((BIRAM_ANOMES=".$codmes.") AND (COALESCE(UU.UU_ATIVO,'')='S') ".$frota.")";  
-            };  
+            };
+            $sql.=$gpo;
           };
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
@@ -560,7 +581,8 @@
         window.parent.document.getElementById("iframeCorpo").height="50em";
         buscarUni();
         buscarPol();
-        iniciarBi(0,"Todas unidades","*","Todos polos");
+        buscarGpo();
+        iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       });  
       var clsJs;          // Classe responsavel por montar um Json e eviar PHP
       var clsErro;        // Classe para erros            
@@ -574,6 +596,8 @@
       var pubDesUni = ""; 
       var pubCodPol = "*"; 
       var pubDesPol = "";
+      let pubCodGpo = "*";
+      let pubDesGpo = "";
       var pubLevPes = "LP";   //Buscar por veiculo leve/pesado
       var pubCompetencia="*";  
       //////////////////////////////////////
@@ -639,17 +663,28 @@
       // Esta function inicia o BI com todas unidades que o usuario tem direito //
       // Tb eh usada qdo selecionado filtro por uma unidade                     //
       ////////////////////////////////////////////////////////////////////////////
-      function iniciarBi(ibCodUni,ibDesUni,ibCodPol,ibDesPol){
+      function iniciarBi(ibCodUni,ibDesUni,ibCodPol,ibDesPol, ibCodGpo, ibDesGpo){
         pubCompetencia=(document.getElementById("cbCompetencia").value).split("|");
         document.getElementById("infracaoCompet").innerHTML="Infrações "+document.getElementById("cbCompetencia").options[document.getElementById("cbCompetencia").selectedIndex].text+" ";
         pubCodUni=ibCodUni;
         pubDesUni=ibDesUni;
         pubCodPol=ibCodPol;
         pubDesPol=ibDesPol;
+        pubCodGpo=ibCodGpo;
+        pubDesGpo=ibDesGpo;
         pubLevPes=document.getElementById("cbLevePesado").value;
-        fncContar("contarPolo"      ,"qtosPol",pubCodUni,pubCodPol,"*");
-        fncContar("contarUnidade"   ,"qtosUni",pubCodUni,pubCodPol,"*");
-        fncFiltrarTableInfracao("infracao"        ,"tblinf"   ,"divInfracao"  ,"qtosInfracao" ,pubCodUni,pubCodPol,pubLevPes);
+
+        fncContar("contarPolo"      	,"qtosPol"	,pubCodUni,pubCodPol,"*","*");
+        fncContar("contarUnidade"   	,"qtosUni"	,pubCodUni,pubCodPol,"*","*");
+        fncContar("contarGpo"   	    ,"qtosGpo"	,pubCodUni,pubCodPol,"*",pubCodGpo);
+        if (pubCodPol != '*') {
+          buscarPol();
+        }
+        if (pubCodUni != '*') {
+          buscarUni();
+          buscarGpo();
+        }
+        fncFiltrarTableInfracao("infracao"        ,"tblinf"  ,"divInfracao"  ,"qtosInfracao" ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         document.getElementById("smllDesUni").innerHTML=ibDesUni;
 				fncInfracaoTop('EV');
 				fncInfracaoTurno('EV');
@@ -657,13 +692,14 @@
       };
       //    
       //  
-      function fncContar(qualSelect,qualSpan,qualCodUni,qualCodPol,qualLevPes){
+      function fncContar(qualSelect,qualSpan,qualCodUni,qualCodPol,qualLevPes,qualCodGpo){
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biContar"          );
         clsJs.add("login"       , jsPub[0].usr_login  );
         clsJs.add("qualSelect"  , qualSelect          );
         clsJs.add("coduni"      , qualCodUni          );
         clsJs.add("codpol"      , qualCodPol          );
+        clsJs.add("codgpo"      , qualCodGpo          );
         clsJs.add("levpes"      , qualLevPes          );
         clsJs.add("compet"      , pubCompetencia[0]   );      
         fd = new FormData();
@@ -679,13 +715,14 @@
       //////////////////////////////////////
       // Somente tabelas infracao         //  
       //////////////////////////////////////
-      function fncFiltrarTableInfracao(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes){
+      function fncFiltrarTableInfracao(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes, qualCodGpo){
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biInfracao"        );
         clsJs.add("login"       , jsPub[0].usr_login  );
         clsJs.add("qualSelect"  , qualSelect          );
         clsJs.add("coduni"      , qualCodUni          );
         clsJs.add("codpol"      , qualCodPol          );
+        clsJs.add("codgpo"      , qualCodGpo                                      );
         clsJs.add("levpes"      , qualLevPes          );      
         clsJs.add("compet"      , pubCompetencia[0]   );      
         fd = new FormData();
@@ -853,14 +890,65 @@
           pieChart.Doughnut(arrPieData, pieOptions)
         };
       };
+
+      function buscarGpo(){
+        document.getElementById('filtroGpo').innerHTML = '';
+        clsJs   = jsString("lote");  
+        clsJs.add("rotina"      , "quaisGpo"                                  );
+        clsJs.add("login"       , jsPub[0].usr_login                              );
+        clsJs.add("uniCodigo"   , pubCodUni                                       );
+        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
+        fd = new FormData();
+        fd.append("principal" , clsJs.fim());
+        msg     = requestPedido("Trac_BiInfracoes.php",fd); 
+        retPhp  = JSON.parse(msg);
+        if( retPhp[0].retorno == "OK" ){
+          msg=retPhp[0]["dados"].length;  
+          
+          for( var lin=0;lin<msg;lin++ ){
+            ceLi= document.createElement("li"); 
+            ceLi.style.height="25px";
+              ceAnc= document.createElement("a");
+              ceAnc.href="#";
+              ceAnc.setAttribute("onclick",
+              `iniciarBi('${retPhp[0]["dados"][lin]["UNI_CODIGO"] ? retPhp[0]["dados"][lin]["UNI_CODIGO"] : '*'}',
+               '${retPhp[0]["dados"][lin]["UNI_APELIDO"] ? retPhp[0]["dados"][lin]["UNI_APELIDO"] : '*'}',
+                          '${pubCodPol}', 'Todos polos', '${retPhp[0]["dados"][lin]["GPO_CODIGO"]}', 'Todos Grupos Operacionais')`);
+                ceImg= document.createElement("i");
+                ceImg.className="fa fa-object-ungroup text-red";
+                ceAnc.appendChild(ceImg);
+                
+                ceContext = document.createTextNode( " -"+retPhp[0]["dados"][lin]["GPO_NOME"] );  
+              ceAnc.appendChild(ceContext);
+            ceLi.appendChild(ceAnc);
+            document.getElementById("filtroGpo").appendChild(ceLi);
+          };    
+          ceLi= document.createElement("li"); 
+            ceAnc= document.createElement("a");
+            ceAnc.href="#";
+            ceAnc.setAttribute("onclick",
+            `iniciarBi('${pubCodUni}', 'Todas Unidades',
+                          '${pubCodPol}', 'Todos polos', '*', 'Todos Grupos Operacionais')`);
+              ceImg= document.createElement("i");
+              ceImg.className="fa fa-object-ungroup text-red";
+              ceAnc.appendChild(ceImg);
+              
+              ceContext = document.createTextNode( " -TODOS" );  
+            ceAnc.appendChild(ceContext);
+          ceLi.appendChild(ceAnc);
+          document.getElementById("filtroGpo").appendChild(ceLi);
+        };
+      };
       ///////////////////////////////////////////////////////////
       // Buscando apenas as unidades que o usuario tem direito //
       ///////////////////////////////////////////////////////////
       function buscarUni(){
+        document.getElementById('filtroUni').innerHTML = '';
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "quaisUnidade"      );
         clsJs.add("login"       , jsPub[0].usr_login  );
-        clsJs.add("compet"      , pubCompetencia[0]   );      
+        clsJs.add("poloCodigo"  , pubCodPol           );
+        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
         fd.append("principal" , clsJs.fim());
         msg     = requestPedido("Trac_BiInfracoes.php",fd); 
@@ -875,7 +963,7 @@
               ceAnc.href="#";
               ceAnc.setAttribute("onclick","iniciarBi('"+retPhp[0]["dados"][lin]["UNI_CODIGO"]
                                                         +"','"+retPhp[0]["dados"][lin]["UNI_APELIDO"]+"'"
-                                                        +",'*','Todos polos')");
+                                                        +"," + `'${pubCodPol}'` + ",'Todos polos', '*' , 'Todos Grupos Operacionais')");
                 ceImg= document.createElement("i");
                 ceImg.className="fa fa-object-ungroup text-red";
                 ceAnc.appendChild(ceImg);
@@ -888,7 +976,7 @@
           ceLi= document.createElement("li"); 
             ceAnc= document.createElement("a");
             ceAnc.href="#";
-            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos')");
+            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
               ceImg= document.createElement("i");
               ceImg.className="fa fa-object-ungroup text-red";
               ceAnc.appendChild(ceImg);
@@ -903,10 +991,11 @@
       //   Buscando apenas os polos que o usuario tem direito  //
       ///////////////////////////////////////////////////////////
       function buscarPol(){
-        clsJs   = jsString("lote");  
+        clsJs   = jsString("lote");
+        document.getElementById('filtroPol').innerHTML = '';  
         clsJs.add("rotina"      , "quaisPolo"         );
         clsJs.add("login"       , jsPub[0].usr_login  );
-        clsJs.add("compet"      , pubCompetencia[0]   );      
+        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
         fd.append("principal" , clsJs.fim());
         msg     = requestPedido("Trac_BiInfracoes.php",fd); 
@@ -919,7 +1008,8 @@
             ceLi.style.height="25px";
               ceAnc= document.createElement("a");
               ceAnc.href="#";
-              ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','"+retPhp[0]["dados"][lin]["POL_CODIGO"]+"','"+retPhp[0]["dados"][lin]["POL_NOME"]+"')");
+              ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','"+retPhp[0]["dados"][lin]["POL_CODIGO"]+"','"
+                +retPhp[0]["dados"][lin]["POL_NOME"]+"', '*', 'Todos Grupos Operacionais')");
                 ceImg= document.createElement("i");
                 ceImg.className="fa fa-object-group text-red";
                 ceAnc.appendChild(ceImg);
@@ -932,7 +1022,7 @@
           ceLi= document.createElement("li"); 
             ceAnc= document.createElement("a");
             ceAnc.href="#";
-            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos')");
+            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
               ceImg= document.createElement("i");
               ceImg.className="fa fa-object-group text-red";
               ceAnc.appendChild(ceImg);
@@ -1292,7 +1382,7 @@
     }
 
     function chngCompetencia(){
-        iniciarBi(0,"Todas unidades","*","Todos polos");
+        iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       };
     
     </script> 
@@ -1354,6 +1444,20 @@
               <li class="header">Opções para Unidade</li>
               <li>
                 <ul id="filtroUni" class="menu" style="max-height: 500px;">
+                </ul>
+              </li>
+              <li class="footer"><a href="#">Fechar</a></li>
+            </ul>
+          </li>
+          <li class="dropdown notifications-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <i class="fa fa-filter">&nbsp;Grupo Operacional</i>
+              <span class="label label-warning" style="top:5px;" id="qtosGpo"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="header">Grupos Operacionais</li>
+              <li>
+                <ul id="filtroGpo" class="menu" style="max-height: 500px;">
                 </ul>
               </li>
               <li class="footer"><a href="#">Fechar</a></li>

@@ -53,6 +53,12 @@
             case "L"  : $frota=" AND (VCL.VCL_FROTA='L')"         ;break;
             case "P"  : $frota=" AND (VCL.VCL_FROTA='P')"         ;break;
           };
+
+          $gpo="";
+
+          if( $lote[0]->grupoOperacional != 'TODOS' ) {
+            $gpo = " AND (VCL.VCL_CODGPO=".$lote[0]->grupoOperacional.")";
+          }
           ///////////////////////////////////////////////////////////////
           // Buscando um facilitador para indice devido tamanho da tabela
           ///////////////////////////////////////////////////////////////  
@@ -92,6 +98,7 @@
           $sql.="   AND (EVE_MOVIMENTO='S')";
           $sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";   					
           $sql.="   AND (VCL.VCL_ENTRABI='S') ".$frota.")";
+          $sql.=$gpo;
           $sql.=" ORDER BY MVM_PLACA,CONVERT(VARCHAR(23),MVM_DATAGPS,127)";
 					//file_put_contents("aaa.xml",$sql);					
           if( $retCls['retorno'] != "OK" ){
@@ -507,7 +514,8 @@
 				clsJs.add("dtini"   	, document.getElementById("cbIni").value    	);
 				clsJs.add("frota"   	, document.getElementById("cbFrota").value  	);
 				clsJs.add("tempo"   	, document.getElementById("cbTempo").value  	);
-				clsJs.add("erro"    	, document.getElementById("cbErro").value   	);
+        clsJs.add("erro"    	, document.getElementById("cbErro").value   	);
+        clsJs.add("grupoOperacional"   	, document.getElementById("cbGpo").value  	);
 				//clsJs.add("infracao"	, document.getElementById("cbInfracao").value	);
 				fd = new FormData();
 				fd.append("grdPeriodoIndevido" , clsJs.fim());
@@ -892,6 +900,9 @@
         </select>
         <label class="campo_label campo_required" for="cbErro">ERRO</label>
       </div>
+
+      <?php include 'classPhp/comum/selectGrupoOperacional.class.php';?>
+
       <div class="campo10" style="float:left;">            
         <input id="btnFilttrar" onClick="btnFiltrarClick();" type="button" value="Filtrar" class="botaoSobreTable"/>
       </div>
