@@ -135,5 +135,3 @@ BEGIN
     RETURN;
   END CATCH
 END
-go
-
