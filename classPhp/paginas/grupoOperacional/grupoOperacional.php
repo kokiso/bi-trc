@@ -29,13 +29,12 @@
         /////////////////////////////////////////////////
         if( $rotina=="selectGpo" ){
           $sql="";
-          $sql.="SELECT";
-          $sql.="   GPO_CODIGO";
-          $sql.="  ,GPO_NOME";
-          $sql.="  ,US_APELIDO";
-          $sql.="  ,GPO_CODUSR";
-          $sql.="  FROM GRUPOOPERACIONAL GPO";
-          $sql.="   LEFT OUTER JOIN USUARIOSISTEMA U ON GPO.GPO_CODUSR=U.US_CODIGO";
+          $sql.="SELECT GPO_CODIGO, GPO_NOME, US_APELIDO, GPO_CODUSR";
+          $sql.=" FROM GRUPOOPERACIONAL GPO INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GPO.GPO_CODIGO AND GOU_CODUNI";
+          $sql.=" IN (SELECT UU_CODUNI FROM USUARIOUNIDADE WHERE UU_CODUSR =".$_SESSION['usr_codigo']." AND UU_ATIVO = 'S')";                                 
+          $sql.=" LEFT OUTER JOIN USUARIOSISTEMA U ON GPO.GPO_CODUSR=U.US_CODIGO";
+          $sql.=" GROUP BY GPO_CODIGO, GPO_NOME, GPO_CODUSR, US_APELIDO";
+
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
