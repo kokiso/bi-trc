@@ -142,6 +142,7 @@
             $sql.="       ,UNI.UNI_APELIDO AS UNIDADE";
             $sql.="       ,UNI.UNI_CODPOL AS POLO";
             $sql.="       ,".$alias."_CODVCL AS PLACA";
+            $sql.="       ,VCL.VCL_NOME AS NOME";
             $sql.="       ,CASE WHEN VCL.VCL_FROTA='L' THEN 'LEVE'";
             $sql.="             WHEN VCL.VCL_FROTA='P' THEN 'PESADA'"; 
             $sql.="        ELSE '*' END AS FROTA";
@@ -160,7 +161,7 @@
             };
             $sql.=$gpo;
             $sql.="  AND (COALESCE(UU.UU_ATIVO,'')='S')";
-            $sql.=" GROUP BY ".$alias."_CODUNI,UNI.UNI_APELIDO,UNI.UNI_CODPOL,".$alias."_CODVCL,VCL.VCL_FROTA,".$alias."_TURNO,".$alias."_CODMTR,MTR.MTR_NOME";
+            $sql.=" GROUP BY ".$alias."_CODUNI,UNI.UNI_APELIDO,UNI.UNI_CODPOL,".$alias."_CODVCL,VCL.VCL_FROTA,".$alias."_TURNO,".$alias."_CODMTR,MTR.MTR_NOME,VCL.VCL_NOME";
             $sql.="  HAVING (SUM(".$alias."_TOTAL)>".$lote[0]->qtos.")"; 
 //file_put_contents("aaa.xml",$sql);																			
           } else {
@@ -182,6 +183,7 @@
               $sql.="       ,UNI.UNI_APELIDO AS UNIDADE";
               $sql.="       ,UNI.UNI_CODPOL AS POLO";
               $sql.="       ,".$alias."_CODVCL AS PLACA";
+              $sql.="       ,VCL.VCL_NOME AS NOME";
               $sql.="       ,CASE WHEN VCL.VCL_FROTA='L' THEN 'LEVE'";
               $sql.="             WHEN VCL.VCL_FROTA='P' THEN 'PESADA'"; 
               $sql.="        ELSE '*' END AS FROTA";
@@ -200,7 +202,7 @@
               };
               $sql.=$gpo;
               $sql.="  AND (COALESCE(UU.UU_ATIVO,'')='S')";
-              $sql.=" GROUP BY ".$alias."_CODUNI,UNI.UNI_APELIDO,UNI.UNI_CODPOL,".$alias."_CODVCL,VCL.VCL_FROTA,".$alias."_TURNO,".$alias."_CODMTR,MTR.MTR_NOME";
+              $sql.=" GROUP BY ".$alias."_CODUNI,UNI.UNI_APELIDO,UNI.UNI_CODPOL,".$alias."_CODVCL,VCL.VCL_FROTA,".$alias."_TURNO,".$alias."_CODMTR,MTR.MTR_NOME,VCL.VCL_NOME";
               $sql.="  HAVING (SUM(".$alias."_TOTAL)>".$lote[0]->qtos.")"; 
               if($arrAll[$lin]["UNION"]=="S" )
                 $sql.=" UNION ALL ";
@@ -245,6 +247,7 @@
                 ,"UNIDADE"   =>  $linTbl["UNIDADE"]
                 ,"POLO"      =>  $linTbl["POLO"]
                 ,"PLACA"     =>  $linTbl["PLACA"]
+                ,"NOME"      =>  $linTbl["NOME"]
                 ,"FROTA"     =>  $linTbl["FROTA"]
                 ,"MANHA"     =>  $manha
                 ,"TARDE"     =>  $tarde
@@ -263,6 +266,7 @@
               ,$lin["UNIDADE"]
               ,$lin["POLO"]
               ,$lin["PLACA"]
+              ,$lin["NOME"]
               ,$lin["FROTA"]
               ,$lin["MANHA"]
               ,$lin["TARDE"]
@@ -392,14 +396,21 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":5  ,"labelCol"       : "FROTA"
+            ,{"id":5  ,"labelCol"       : "NOME"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "20em"
+                      ,"tamImp"         : "0"
+                      ,"excel"          : "S"
+                      ,"ordenaColuna"   : "S"
+                      ,"padrao":0}
+            ,{"id":6  ,"labelCol"       : "FROTA"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "8em"
                       ,"tamImp"         : "20"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":6  ,"labelCol"       : "MAN"
+            ,{"id":7  ,"labelCol"       : "MAN"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
@@ -407,7 +418,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":7  ,"labelCol"       : "TAR"
+            ,{"id":8  ,"labelCol"       : "TAR"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
@@ -415,7 +426,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":8  ,"labelCol"       : "NOI"
+            ,{"id":9  ,"labelCol"       : "NOI"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
@@ -423,7 +434,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":9  ,"labelCol"       : "CODMTR"
+            ,{"id":10  ,"labelCol"       : "CODMTR"
                       ,"fieldType"      : "int"
                       ,"align"          : "center"                                      
                       ,"tamGrd"         : "0em"
@@ -431,14 +442,14 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":10 ,"labelCol"       : "MOTORISTA"
+            ,{"id":11 ,"labelCol"       : "MOTORISTA"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "25em"
                       ,"tamImp"         : "60"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":11 ,"labelCol"       : "QTOS"
+            ,{"id":12 ,"labelCol"       : "QTOS"
                       ,"fieldType"      : "int"
                       ,"align"          : "center"                                      
                       ,"tamGrd"         : "5em"
@@ -553,7 +564,7 @@
           jsBi.registros=objBi.addIdUnico(retPhp[0]["dados"]);
           jsBi.relTitulo="BI "+document.getElementById("cbInfracao").options[document.getElementById("cbInfracao").selectedIndex].text
                          +" NO PERIODO DE "+document.getElementById("cbIni").value;//+" A "+document.getElementById("edtFim").value;
-          objBi.ordenaJSon(jsBi.indiceTable,false);  
+          objBi.ordenaJSon(jsBi.indiceTable,false); 
           objBi.montarBody2017();
         };  
       }; 
