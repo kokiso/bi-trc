@@ -49,6 +49,7 @@ BEGIN
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   DECLARE @consultarRelatorioNew VARCHAR(1);
+  DECLARE @grupoOperacionalNew VARCHAR(1);
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
@@ -81,6 +82,7 @@ BEGIN
          ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')         
          ,@direitoNew    = UP.UP_D04
          ,@consultarRelatorioNew    = UPPER(i.CONSULTAR_RELATORIO)
+         ,@grupoOperacionalNew      = UPPER(i.GRUPO_OPERACIONAL)
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.UP_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
@@ -121,6 +123,7 @@ BEGIN
       ,UP_ATIVO
       ,UP_REG
       ,UP_CODUSR
+      ,GRUPO_OPERACIONAL
       ,CONSULTAR_RELATORIO) VALUES(
       @upNomeNew    -- UP_NOME
       ,@upD01New,@upD02New,@upD03New,@upD04New,@upD05New,@upD06New,@upD07New,@upD08New,@upD09New,@upD10New
@@ -128,6 +131,7 @@ BEGIN
       ,@upAtivoNew   -- UP_ATIVO
       ,@upRegNew     -- UP_REG
       ,@upCodUsrNew  -- UP_CODUSR
+      ,@grupoOperacionalNew  -- GRUPO_OPERACIONAL
       ,@consultarRelatorioNew  -- CONSULTAR_RELATORIO
     );
     ---------------
@@ -142,6 +146,7 @@ BEGIN
       ,UP_ATIVO
       ,UP_REG
       ,UP_CODUSR
+      ,GRUPO_OPERACIONAL
       ,CONSULTAR_RELATORIO) VALUES(
       'I'                              -- UP_ACAO
       ,IDENT_CURRENT('USUARIOPERFIL')  -- UP_CODIGO
@@ -151,6 +156,7 @@ BEGIN
       ,@upAtivoNew                     -- UP_ATIVO
       ,@upRegNew                       -- UP_REG
       ,@upCodUsrNew                    -- UP_CODUSR
+      ,@grupoOperacionalNew            -- GRUPO_OPERACIONAL
       ,@consultarRelatorioNew          -- CONSULTAR_RELATORIO
     );  
   END TRY
