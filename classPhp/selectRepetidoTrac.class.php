@@ -242,6 +242,8 @@
           $sql.="SELECT COUNT(DISTINCT GPO_CODIGO) from GRUPOOPERACIONAL INNER JOIN GRUPOOPERACIONALUNIDADE on GOU_CODGPO = GRUPOOPERACIONAL.GPO_CODIGO";
           if ($expld[1] != 0) {
             $sql.=" AND GOU_CODUNI = ".$expld[1];
+          } else {
+            $sql.=" AND GOU_CODUNI IN (SELECT UU_CODUNI FROM USUARIOUNIDADE WHERE UU_CODUSR =".$_SESSION['usr_codigo']." AND UU_ATIVO = 'S')";
           }
           if ($expld[2] != "*") {
             $sql.=" AND GPO_CODIGO = ".$expld[2];
