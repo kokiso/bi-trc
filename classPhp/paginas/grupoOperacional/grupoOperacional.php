@@ -66,6 +66,24 @@
             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
           };  
         };
+                
+        if( $rotina=="selectUnidade" ){
+          $sql="";
+          $sql.= "SELECT A.UNI_CODIGO AS CODIGO,A.UNI_NOME AS DESCRICAO,A.UNI_APELIDO AS APELIDO";
+          $sql.= "  FROM UNIDADE A ";
+          $sql.= "  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codUsr;
+          $sql.= "  LEFT OUTER JOIN POLO P ON A.UNI_CODPOL=P.POL_CODIGO";
+          $sql.= "  LEFT OUTER JOIN GRUPO G ON P.POL_CODGRP=G.GRP_CODIGO";
+          $sql.= "  GROUP BY A.UNI_CODIGO, A.UNI_NOME, A.UNI_APELIDO";
+           $classe->msgSelect(false);
+           $retCls=$classe->select($sql);
+           if( $retCls['retorno'] != "OK" ){
+             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+           } else { 
+             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+           };  
+         };
+         
         if( $rotina=="insertGpo" ){
           $arrUpdt = [];
           $sql="";
@@ -529,7 +547,7 @@
       document.getElementById('unidadeSelect').innerHTML = '';
     }
       function uniF10Click(){
-        fUnidadeF10(0,"edtCodUni","soAtivo");
+        fUnidadeF10("grupoOperacional.php", "grupoOperacional");
       };
       function gpoF10Click(){ fGrupoOperacionalF10("cbAtivo"); };
       function RetF10tblUni(arr){
@@ -541,9 +559,6 @@
           campo.label = element.DESCRICAO;
           document.getElementById('unidadeSelect').appendChild(campo);
         });
-        // document.getElementById("edtCodUni").value   = arr[0].CODIGO;
-        // document.getElementById("edtDesUni").value   = arr[0].APELIDO;
-        // document.getElementById("edtCodUni").setAttribute("data-oldvalue",arr[0].CODIGO);
       };
       function RetF10tblGpo(arr){
         document.getElementById("edtCodGpo").value   = arr[0].CODIGO;
@@ -592,9 +607,9 @@
                 <input class="campo_input" id="edtDescricao" upper type="text" maxlength="60" />
                 <label class="campo_label campo_required" for="edtDescricao">DESCRICAO</label>
               </div>
-              <div class="campotexto campo100">
-                <button class="campo100 tableBotao botaoHorizontal" type="button" id="edtCodUni" onClick="uniF10Click('edtCodUni');">ESCOLHER UNIDADES </button>
-                <label for="edtCodUni">UNIDADES SELECIONADAS</label>
+              <div id="edtSelecionarUnidadeDiv" class="campotexto campo100">
+                <button class="campo100 tableBotao botaoHorizontal" type="button" id="edtSelecionarUnidade" onClick="uniF10Click('edtSelecionarUnidade');">ESCOLHER UNIDADES </button>
+                <label for="edtSelecionarUnidade">UNIDADES SELECIONADAS</label>
               </div>
               <div class="campotexto campo100">
                 <select id="unidadeSelect" multiple size="8" class="campo100">

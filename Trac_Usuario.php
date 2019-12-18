@@ -36,7 +36,7 @@
                        ,A.USR_CODCRG
                        ,C.CRG_NOME
                        ,A.USR_EMAIL
-                       ,A.USR_SENHA
+                       ,''
                        ,CASE WHEN A.USR_INTERNO='I' THEN CAST('INTERNO' AS VARCHAR(7)) 
                              WHEN A.USR_INTERNO='E' THEN CAST('EXTERNO' AS VARCHAR(7)) 
                              WHEN A.USR_INTERNO='D' THEN CAST('DEDICADO' AS VARCHAR(8)) END AS USR_INTERNO
@@ -53,6 +53,151 @@
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="buscarUnidade" ){
+          $sql="";
+          $sql.="SELECT U.UNI_CODIGO AS CODIGO, U.UNI_NOME AS DESCRICAO FROM UNIDADE U";
+          $sql.=" LEFT OUTER JOIN USUARIOUNIDADE UU ON U.UNI_CODIGO=UU.UU_CODUNI AND UU_CODUSR =".$_SESSION['usr_codigo']." GROUP BY U.UNI_CODIGO, U.UNI_NOME";
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="selectUnidade" ){
+          $sql="";
+          $sql.= "SELECT A.UNI_CODIGO AS CODIGO,A.UNI_NOME AS DESCRICAO,A.UNI_APELIDO AS APELIDO";
+          $sql.= "  FROM UNIDADE A ";
+          $sql.= "  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codUsr;
+          $sql.= "  LEFT OUTER JOIN POLO P ON A.UNI_CODPOL=P.POL_CODIGO";
+          $sql.= "  LEFT OUTER JOIN GRUPO G ON P.POL_CODGRP=G.GRP_CODIGO";
+          $sql.= "  GROUP BY A.UNI_CODIGO, A.UNI_NOME, A.UNI_APELIDO";
+           $classe->msgSelect(false);
+           $retCls=$classe->select($sql);
+           if( $retCls['retorno'] != "OK" ){
+             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+           } else { 
+             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+           };  
+         };
+         if( $rotina=="buscarUnidadesUsuario" ){
+          $sql="";
+          $sql.="SELECT U.UNI_CODIGO AS CODIGO, U.UNI_NOME AS DESCRICAO FROM USUARIOUNIDADE UU";
+          $sql.=" INNER JOIN UNIDADE U ON U.UNI_CODIGO=UU_CODUNI AND UU_CODUSR =".$lote[0]->usuarioSelecionado;
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="insertUsuario" ){
+          $arrUpdt = [];
+          $sql="";
+          $sql.="INSERT INTO USUARIO (
+            USR_CPF,
+            USR_APELIDO,
+            USR_CODUP,
+            USR_CODCRG,
+            USR_EMAIL,
+            USR_SENHA,
+            USR_INTERNO,
+            USR_ATIVO,
+            USR_REG,
+            USR_ADMPUB,
+            USR_CODUSR) VALUES('"
+            .$lote[0]->cpf."',UPPER('"
+            .$lote[0]->apelido."'),"
+            .$lote[0]->codup.",'"
+            .$lote[0]->codcrg."','"
+            .$lote[0]->email."','"
+            .$lote[0]->senha."','"
+            .$lote[0]->interno."','"
+            .$lote[0]->ativo."','"
+            .$lote[0]->reg."','"
+            .$lote[0]->admpub."',"
+            .$_SESSION['usr_codigo'].")";
+          array_push($arrUpdt, $sql);
+          $arrUnidades = explode("|",$lote[0]->unidades );
+          foreach ($arrUnidades as $codigo) {
+              $sql="INSERT INTO USUARIOUNIDADE (
+                UU_CODUSR,
+                UU_CODUNI,
+                UU_ATIVO,
+                UU_REG,
+                SIS_CODUSR) VALUES ("
+                .$lote[0]->usuarioCodigo.","
+                .$codigo.","
+                ."'S',"
+                ."'P',"
+                .$_SESSION['usr_codigo'].")";
+              array_push($arrUpdt, $sql);
+            }
+          $retCls=$classe->cmd($arrUpdt);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="updateUsuario" ){
+          $arrUpdt = [];
+          $sql="";
+          $sql.="UPDATE USUARIO SET";
+          $sql.=" USR_CPF ='".$lote[0]->cpf."',";
+          $sql.=" USR_APELIDO = UPPER('".$lote[0]->apelido."'),";
+          $sql.=" USR_CODUP = '".$lote[0]->codup."',";
+          $sql.=" USR_CODCRG = '".$lote[0]->codcrg."',";
+          $sql.=" USR_EMAIL = '".$lote[0]->email."',";
+          $sql.=" USR_SENHA = '".$lote[0]->senha."',";
+          $sql.=" USR_INTERNO = '".$lote[0]->interno."',";
+          $sql.=" USR_ATIVO = '".$lote[0]->ativo."',";
+          $sql.=" USR_REG = '".$lote[0]->reg."',";
+          $sql.=" USR_ADMPUB = '".$lote[0]->admpub."',";
+          $sql.=" USR_CODUSR = ".$_SESSION['usr_codigo'];
+          $sql.=" WHERE USR_CODIGO = ".$lote[0]->usuarioCodigo;
+          array_push($arrUpdt, $sql);
+          $sql="DELETE FROM USUARIOUNIDADE WHERE UU_CODUSR=".$lote[0]->usuarioCodigo;
+          array_push($arrUpdt, $sql);
+          $arrUnidades = explode("|",$lote[0]->unidades );
+          foreach ($arrUnidades as $codigo) {
+              $sql="INSERT INTO USUARIOUNIDADE (
+                UU_CODUSR,
+                UU_CODUNI,
+                UU_ATIVO,
+                UU_REG,
+                SIS_CODUSR) VALUES ("
+                .$lote[0]->usuarioCodigo.","
+                .$codigo.","
+                ."'S',"
+                ."'P',"
+                .$_SESSION['usr_codigo'].")";
+              array_push($arrUpdt, $sql);
+            }
+          $retCls=$classe->cmd($arrUpdt);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
+        };
+        if( $rotina=="deleteUsuario" ){
+          $arrUpdt = [];
+          $sql="";
+          $somasql="";
+          $sql.="DELETE FROM USUARIO WHERE USR_CODIGO =".$lote[0]->usuarioCodigo;
+          array_push($arrUpdt, $sql);
+          $sql="DELETE FROM USUARIOUNIDADE WHERE UU_CODUSR =".$lote[0]->usuarioCodigo;
+          array_push($arrUpdt, $sql); 
+          $retCls=$classe->cmd($arrUpdt);
+          if( $retCls['retorno'] != "OK"){
             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
           } else { 
             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
@@ -323,7 +468,8 @@
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaUsuarioPerfilF10.js"></script>
-    <script src="tabelaTrac/f10/tabelaCargoF10.js"></script>    
+    <script src="tabelaTrac/f10/tabelaCargoF10.js"></script>
+    <script src="tabelaTrac/f10/tabelaUnidadeMultipleF10.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <script>
       "use strict";
@@ -515,7 +661,7 @@
           ,"registros"      : []                    // Recebe um Json vindo da classe clsBancoDados
           ,"opcRegSeek"     : true                  // Opção para numero registros/botão/procurar                     
           ,"checarTags"     : "S"                   // Somente em tempo de desenvolvimento(olha as pricipais tags)                  
-          ,"idBtnConfirmar" : "btnConfirmar"        // Se existir executa o confirmar do form/fieldSet
+          ,"idBtnConfirmarCustom" : "idBtnConfirmarCustom"            // Se existir executa o confirmar do form/fieldSet
           ,"idBtnCancelar"  : "btnCancelar"         // Se existir executa o cancelar do form/fieldSet
           ,"div"            : "frmUsr"              // Onde vai ser gerado a table
           ,"divFieldSet"    : "tabelaUsr"           // Para fechar a div onde estão os fieldset ao cadastrar
@@ -539,7 +685,7 @@
           ,"relFonte"       : "8"                   // Fonte do relatório
           ,"foco"           : ["edtCpf"
                               ,"edtCpf"
-                              ,"btnConfirmar"]      // Foco qdo Cad/Alt/Exc
+                              ,"idBtnConfirmarCustom"]      // Foco qdo Cad/Alt/Exc
           ,"formPassoPasso" : "Trac_Espiao.php"     // Enderço da pagina PASSO A PASSO
           ,"indiceTable"    : "DESCRICAO"           // Indice inicial da table
           ,"tamBotao"       : "15"                  // Tamanho botoes defalt 12 [12/25/50/75/100]
@@ -564,7 +710,7 @@
           ,"codDir"         : intCodDir
         }; 
         if( objUsr === undefined ){  
-          objUsr=new clsTable2017("objUsr");
+          objUsr=new clsTable2017("objUsr", true);
         };  
         objUsr.montarHtmlCE2017(jsUsr); 
         ////////////////////////////////////////
@@ -629,6 +775,8 @@
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var objUpF10;                   // Obrigatório para instanciar o JS UsuarioPerfilF10          
       var objCrgF10;                  // Obrigatório para instanciar o JS CargoF10          
+      var objUniF10;                  // Obrigatório para instanciar o JS UnidadeF10          
+      var dadosUnidade = [];          // Unidades escolhidas no multiple select
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
       var clsErro;                    // Classe para erros            
       var fd;                         // Formulario para envio de dados para o PHP
@@ -715,6 +863,125 @@
           gerarMensagemErro("UP",retPhp[0].erro,"AVISO");    
         };  
       };
+      function verificaTipoInstrucao(status) {
+      if (status == 0) {
+        // inserindo
+        salvarDados();
+      } else if (status == 1) {
+        //update
+        updateDados();
+      } else if (status == 2){
+        //delete
+        deleteDados();
+      }
+    }
+    function limparCampos(){
+        document.getElementById('unidadeSelect').innerHTML = '';
+      }
+    function preencherSelect(){
+        clsJs   = jsString("lote");  
+        clsJs.add("rotina", "buscarUnidadesUsuario");
+        clsJs.add("login", jsPub[0].usr_login  );
+        clsJs.add("usuarioSelecionado", document.getElementById('edtCodigo').value);
+        fd = new FormData();
+        fd.append("usuario" , clsJs.fim());
+        msg     = requestPedido("Trac_Usuario.php",fd); 
+        retPhp  = JSON.parse(msg);
+        dadosUnidade = retPhp[0]["dados"];
+        document.getElementById('unidadeSelect').innerHTML = '';
+        dadosUnidade.forEach(element => {
+          var campo = document.createElement('option')
+          campo.value = element['CODIGO'];
+          campo.label = element['DESCRICAO'];
+          document.getElementById('unidadeSelect').appendChild(campo);
+      });
+    }
+
+    function updateDados() {
+      clsJs   = jsString("lote");
+      clsJs.add("rotina", "updateUsuario");
+      clsJs.add("login", jsPub[0].usr_login  );
+      clsJs.add("usrCodigo", jsPub[0].usr_codigo  );
+      clsJs.add("usuarioCodigo", document.getElementById('edtCodigo').value);   
+      clsJs.add("cpf", document.getElementById('edtCpf').value);   
+      clsJs.add("apelido", document.getElementById('edtApelido').value);   
+      clsJs.add("codup", document.getElementById('edtCodUp').value);   
+      clsJs.add("codcrg", document.getElementById('edtCodCrg').value);   
+      clsJs.add("email", document.getElementById('edtEmail').value);   
+      clsJs.add("senha", document.getElementById('edtSenha').value);   
+      clsJs.add("interno", document.getElementById('cbInterno').value);   
+      clsJs.add("ativo", document.getElementById('cbAtivo').value);   
+      clsJs.add("reg", document.getElementById('cbReg').value);   
+      clsJs.add("admpub", document.getElementById('cbAdmPub').value); 
+      let unidadesString = "";
+      dadosUnidade.forEach(element => {
+        unidadesString+=(element['CODIGO']+"|"); 
+      });
+      unidadesString = unidadesString.substring(0, unidadesString.length - 1)
+  
+      clsJs.add("unidades", unidadesString);
+      fd = new FormData();
+      fd.append("usuario" , clsJs.fim());
+      msg     = requestPedido("Trac_Usuario.php",fd); 
+      retPhp  = JSON.parse(msg);
+      document.getElementById('unidadeSelect').innerHTML = '';
+    }
+    function deleteDados() {
+      clsJs   = jsString("lote");  
+      clsJs.add("rotina"      , "deleteUsuario"         );
+      clsJs.add("login"       , jsPub[0].usr_login  );
+      clsJs.add("usrCodigo"       , jsPub[0].usr_codigo  );
+      clsJs.add("usuarioCodigo", document.getElementById('edtCodigo').value);   
+      fd = new FormData();
+      fd.append("usuario" , clsJs.fim());
+      msg     = requestPedido("Trac_Usuario.php",fd); 
+      retPhp  = JSON.parse(msg);
+      document.getElementById('unidadeSelect').innerHTML = '';
+    }
+    
+    function salvarDados() {
+      clsJs   = jsString("lote");
+      clsJs.add("rotina"      , "insertUsuario"         );
+      clsJs.add("login"       , jsPub[0].usr_login  );
+      clsJs.add("usrCodigo"       , jsPub[0].usr_codigo  );
+      clsJs.add("usuarioCodigo", document.getElementById('edtCodigo').value);   
+      clsJs.add("cpf", document.getElementById('edtCpf').value);   
+      clsJs.add("apelido", document.getElementById('edtApelido').value);   
+      clsJs.add("codup", document.getElementById('edtCodUp').value);   
+      clsJs.add("codcrg", document.getElementById('edtCodCrg').value);   
+      clsJs.add("email", document.getElementById('edtEmail').value);   
+      clsJs.add("senha", document.getElementById('edtSenha').value);   
+      clsJs.add("interno", document.getElementById('cbInterno').value);   
+      clsJs.add("ativo", document.getElementById('cbAtivo').value);   
+      clsJs.add("reg", document.getElementById('cbReg').value);   
+      clsJs.add("admpub", document.getElementById('cbAdmPub').value); 
+      let unidadesString = "";       
+      dadosUnidade.forEach(element => {
+        unidadesString+=(element['CODIGO']+"|"); 
+      });
+      unidadesString = unidadesString.substring(0, unidadesString.length - 1)
+
+      clsJs.add("unidades", unidadesString);          
+      fd = new FormData();
+      fd.append("usuario" , clsJs.fim());
+      msg     = requestPedido("Trac_Usuario.php",fd); 
+      retPhp  = JSON.parse(msg);
+      document.getElementById('unidadeSelect').innerHTML = '';
+    }
+    function uniF10Click(){
+        fUnidadeF10("Trac_Usuario.php", "usuario");
+    };
+      function gpoF10Click(){ fGrupoOperacionalF10("cbAtivo"); };
+      function RetF10tblUni(arr){
+        document.getElementById('unidadeSelect').innerHTML = '';
+        dadosUnidade = arr;
+        arr.forEach(element => {
+          var campo = document.createElement('option')
+          campo.value = element.CODIGO;
+          campo.label = element.DESCRICAO;
+          document.getElementById('unidadeSelect').appendChild(campo);
+        });
+      };
       ///////////////////////
       // AJUDA PARA PERFIL //
       ///////////////////////
@@ -772,11 +1039,11 @@
               class="frmTable" 
               action="classPhp/imprimirsql.php" 
               target="_newpage"
-              style="top: 5em; width:90em; height:40em; position: absolute; z-index:30;display:none;">
+              style="top: 5em; width:90em; height:40m; position: absolute; z-index:30;display:none;">
           <p class="frmCampoTit">
           <input class="informe" type="text" name="titulo" value="Usuario" disabled="" style="color: white; text-align: left;">
           </p>
-          <div style="height: 30em; overflow-y: auto;">
+          <div style="height: 48em; overflow-y: auto;">
             <input type="hidden" id="sql" name="sql"/>
             <div class="campotexto campo100">
               <div class="campotexto campo25">
@@ -862,6 +1129,14 @@
               <div class="inactive">
                 <input id="edtCodUsu" type="text" />
               </div>
+              <div id="edtSelecionarUnidadeDiv" class="campotexto campo100">
+                <button class="campo100 tableBotao botaoHorizontal" type="button" id="edtSelecionarUnidade" onClick="uniF10Click('edtSelecionarUnidade');">ESCOLHER UNIDADES </button>
+                <label for="edtSelecionarUnidade">UNIDADES SELECIONADAS</label>
+              </div>
+              <div class="campotexto campo100">
+                <select id="unidadeSelect" multiple size="8" class="campo100">
+                </select>              
+              </div>
               <div class="campotexto campo100"></div>
               <div class="campotexto campo100">
                 <div class="campotexto campo50" style="margin-top:1em;">
@@ -869,7 +1144,7 @@
                   <label class="campo_labelSombra">Campo obrigatório</label>
                 </div>              
                 <div class="campo15" style="float:right;">            
-                  <input id="btnConfirmar" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
+                  <input id="idBtnConfirmarCustom" type="button" value="Confirmar" class="campo100 tableBotao botaoForaTable"/>            
                   <i class="faBtn fa-check icon-large"></i>
                 </div>
                 <div class="campo15" style="float:right;">            

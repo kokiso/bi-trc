@@ -2030,6 +2030,15 @@ function clsTable2017(obj, opt) {
             ); //21jun2018
             obj.classList.add("campo_input_titulo");
             obj.disabled = true;
+            if (parVet == 2) {
+              document.getElementById("edtSelecionarUnidadeDiv").style.display =
+                "none";
+              document.getElementById("edtSelecionarUnidade").disabled = true;
+            } else if (document.getElementById("edtSelecionarUnidade")) {
+              document.getElementById("edtSelecionarUnidadeDiv").style.display =
+                "";
+              document.getElementById("edtSelecionarUnidade").disabled = false;
+            }
           }
         }
       }

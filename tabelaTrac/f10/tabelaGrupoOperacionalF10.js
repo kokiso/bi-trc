@@ -1,16 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////
-// opc=0 - Abre a janela F10                                              //
-// opc=1 - Retorna somente o select para Janela F10 ou para blur do campo //
 // foco  - Onde vai o foco quando confirmar                               //
 // jsPub[0].usr_grupos sao os grupos que o usuario pode ver               //
 ////////////////////////////////////////////////////////////////////////////
 function fGrupoOperacionalF10(foco, codUni) {
-  var sql =
-    "SELECT A.GPO_CODIGO AS CODIGO,A.GPO_NOME AS NOME FROM GRUPOOPERACIONAL A";
-
-  //////////////////////////////////////////////////////////////////////////////
-  // localStorage eh o arquivo .php onde estao os select/insert/update/delete //
-  //////////////////////////////////////////////////////////////////////////////
   clsJs = jsString("lote");
   clsJs.add("rotina", "grupoOperacional");
   clsJs.add("login", jsPub[0].usr_login);
@@ -19,9 +11,6 @@ function fGrupoOperacionalF10(foco, codUni) {
   fd.append("veiculo", clsJs.fim());
   msg = requestPedido("Trac_Veiculo.php", fd);
   retPhp = JSON.parse(msg);
-  // var bdGpo = new clsBancoDados(localStorage.getItem("lsPathPhp"));
-  // bdGpo.Assoc = false;
-  // bdGpo.select(sql);
   if (retPhp[0].retorno == "OK") {
     retPhp[0].dados = converterObjeto(retPhp[0].dados);
     var jsGpoF10 = {

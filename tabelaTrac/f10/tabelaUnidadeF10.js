@@ -5,7 +5,6 @@
 ////////////////////////////////////////////////////////////////////////////
 function fUnidadeF10(opc,codUni,foco,todos){
   var sql="SELECT A.UNI_CODIGO AS CODIGO,A.UNI_NOME AS DESCRICAO,A.UNI_APELIDO AS APELIDO"
-         +"       ,A.UNI_CODPOL AS POLO,G.GRP_APELIDO AS GRUPO" 
          +"  FROM UNIDADE A "
          +"  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR="+jsPub[0].usr_codigo
          +"  LEFT OUTER JOIN POLO P ON A.UNI_CODPOL=P.POL_CODIGO"
@@ -19,6 +18,7 @@ function fUnidadeF10(opc,codUni,foco,todos){
     } else {
       sql+=" WHERE (A.UNI_ATIVO='S')";   
     }; 
+    sql+=" GROUP BY A.UNI_CODIGO, A.UNI_NOME, A.UNI_APELIDO"
     //////////////////////////////////////////////////////////////////////////////
     // localStorage eh o arquivo .php onde estao os select/insert/update/delete //
     //////////////////////////////////////////////////////////////////////////////
