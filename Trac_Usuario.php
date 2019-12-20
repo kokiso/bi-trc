@@ -28,7 +28,7 @@
         //    Dados para JavaScript USUARIO //
         //////////////////////////////////////
         if( $rotina=="selectUsr" ){
-          $sql="SELECT A.USR_CODIGO
+          $sql="SELECT DISTINCT(A.USR_CODIGO)
                        ,A.USR_CPF
                        ,A.USR_APELIDO
                        ,A.USR_CODUP
@@ -47,9 +47,11 @@
                        ,A.USR_CODUSR
                   FROM USUARIO A
                   LEFT OUTER JOIN USUARIOSISTEMA U ON A.USR_CODUSR=U.US_CODIGO
-                  LEFT OUTER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO                  
-                  LEFT OUTER JOIN CARGO C ON A.USR_CODCRG=C.CRG_CODIGO                                    
-                 WHERE (A.USR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')"; 
+                  LEFT OUTER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO
+                  LEFT OUTER JOIN CARGO C ON A.USR_CODCRG=C.CRG_CODIGO
+                  INNER JOIN USUARIOUNIDADE UU ON A.USR_CODUSR = UU.UU_CODUSR
+                 WHERE ((A.USR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')) 
+                 AND A.USR_CODIGO IN ( SELECT USRUNI.UU_CODUSR FROM USUARIOUNIDADE USRUNI WHERE USRUNI.UU_ATIVO = 'S' AND USRUNI.UU_CODUNI IN (SELECT UNIUSR.UU_CODUNI FROM USUARIOUNIDADE UNIUSR WHERE UNIUSR.UU_CODUSR =".$_SESSION['usr_codigo']."))";
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
