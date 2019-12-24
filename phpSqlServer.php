@@ -39,7 +39,7 @@ if( $opcao=='executeSql'){
                 $message  = str_replace('column','coluna',$message); 
                 
                 $int      = strpos($message,"[SQL Server]");
-                $str      = '"erronull'.str_replace('"','|',trim(substr($message,($int+12),strlen($message)))).'"';
+                $str      = '"'.str_replace('"','|',trim(substr($message,($int+12),strlen($message)))).'"';
                 $commitar = false;      
                 break;
               };
