@@ -1532,7 +1532,6 @@
             <div class="info-box-content">
               <span class="info-box-text">Motoristas</span>
               <span id="qtosMtr" class="info-box-number"></span>
-
             </div>
            </div>
          </div>
@@ -1546,7 +1545,6 @@
               <span id="qtosVcl" class="info-box-number"></span>
               <div class="progress">
                 <div class="progress-bar" style="width: 30%"></div>
-              </div>
             </div>
            </div>
          </div>

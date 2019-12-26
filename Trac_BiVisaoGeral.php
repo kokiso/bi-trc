@@ -1757,7 +1757,6 @@ function criarElemento(elem,attr,app){
             <div class="info-box-content">
               <span class="info-box-text">Veículos</span>
               <span id="qtosVcl" class="info-box-number"></span>
-
             </div>
            </div>
          </div>
@@ -1769,7 +1768,6 @@ function criarElemento(elem,attr,app){
             <div class="info-box-content">
               <span class="info-box-text">KM Percorrido</span>
               <span id="qtosKm" class="info-box-number"></span>
-
             </div>
            </div>
          </div>
@@ -1808,7 +1806,6 @@ function criarElemento(elem,attr,app){
             <div class="info-box-content">
               <span class="info-box-text">Velocidade Média</span>
               <span id="qtosVclMed" class="info-box-number"></span>
-
             </div>
            </div>
          </div>
@@ -1822,6 +1819,7 @@ function criarElemento(elem,attr,app){
               <span id="qtosInfra" class="info-box-number"></span>
               <div class="progress">
                 <div class="progress-bar" style="width: 20%"></div>
+              </div>
             </div>
            </div>
          </div>

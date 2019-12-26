@@ -3,6 +3,9 @@ session_start();
 $opcao = $_POST['opcao'];
 if( $opcao=='executeSql'){
   //https://docs.microsoft.com/pt-br/sql/connect/php/sqlsrv-errors
+  $deadlock = true;
+  while($deadlock) {
+  $deadlock = false;
   $retorno = 'OK';
   $str     = ''; 
   try{
@@ -62,7 +65,14 @@ if( $opcao=='executeSql'){
     $retorno = 'ERR';
     $str     = '"'.str_replace('"','|',$e->getMessage()).'"';    
   }
-  echo '[{"retorno":"'.$retorno.'","dados":'.$str.'}]'; 
+  if (strpos($str, 'deadlock')) {
+    $str = 'Falha ao executar a operação. Tente novamente.';
+    $deadlock = true;
+  } else {
+    echo '[{"retorno":"'.$retorno.'","dados":'.$str.'}]'; 
+    exit;
+  }
+}
   exit;
 };
 ///////////////////////////////////////////////

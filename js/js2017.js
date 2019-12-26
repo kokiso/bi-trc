@@ -1710,14 +1710,42 @@ function clsBancoDados(url) {
     form.append("sql", sql);
     self.xhttp.send(form);
   };
-  this.execute = function(js) {
-    self.xhttp.open(self.metodo, self.url, self.sync);
-    self.xhttp.setRequestHeader(
-      "Content-type",
-      "application/x-www-form-urlencoded"
-    );
-    self.xhttp.send("opcao=executeSql&sql=" + js);
+  this.execute = async function(js) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open(self.metodo, self.url, true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    exibeLoading();
+    xhttp.send("opcao=executeSql&sql=" + js);
+
+    var promise = new Promise(function(resolve, reject) {
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          self.retPHP = this.responseText;
+          if (self.retDefault == true) {
+            eval("tblRet=" + self.retPHP);
+            self.retorno = tblRet[0].retorno;
+            if (tblRet.length > 0 && tblRet[0].retorno == "OK") {
+              self.dados = tblRet[0].dados;
+            } else {
+              var help = new clsMensagem("Retorno");
+              help.mensagem = tblRet[0].dados;
+              help.Show();
+            }
+          }
+          ocultaLoading();
+          resolve();
+        }
+        if (this.status == 404) {
+          var help = new clsMensagem("Retorno");
+          help.mensagem = "URL NÃO LOCALIZADA!";
+          help.Show();
+          reject();
+        }
+      };
+    });
+    return promise;
   };
+
   this.cadtit = function(js) {
     self.xhttp.open(self.metodo, self.url, self.sync);
     self.xhttp.setRequestHeader(
@@ -1726,6 +1754,27 @@ function clsBancoDados(url) {
     );
     self.xhttp.send("opcao=cadtit&xml=" + js);
   };
+}
+
+function exibeLoading() {
+  var x = document.getElementById("loading");
+  var y = document.getElementById("loader");
+  if (x && y) {
+    x.classList.toggle("fade-out", false);
+    x.classList.toggle("fade-in", true);
+    y.classList.toggle("loader-out", false);
+    y.classList.toggle("loader-in", true);
+  }
+}
+function ocultaLoading() {
+  var x = document.getElementById("loading");
+  var y = document.getElementById("loader");
+  if (x && y) {
+    x.classList.toggle("fade-out", true);
+    x.classList.toggle("fade-in", false);
+    y.classList.toggle("loader-out", true);
+    y.classList.toggle("loader-in", false);
+  }
 }
 // CLASSE MENSAGEM
 // CLASSE PARA EXIBER MENSAGEM DE ERRO E HELP
