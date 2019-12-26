@@ -584,7 +584,7 @@
         //
         //  
         //btnFiltrarClick("S");  
-        buscarUni()
+        // buscarUni()
       });
       //
       var objMtr;                     // Obrigatório para instanciar o JS TFormaCob
@@ -763,6 +763,10 @@
     </script>
   </head>
   <body>
+    <div id="loader" class="loader-out">
+    </div>
+    <div id="loading" class="fade-out">
+  
     <div id="divEvento" class="comboSobreTable">
 
       <div style="margin-top:3px;margin-left:3px;">
@@ -900,5 +904,6 @@
       </div>
       <!-- Fim Importar excel -->
     </div>       
+    </div>
   </body>
 </html>
