@@ -772,8 +772,9 @@ function clsTable2017(obj, opt) {
         document
           .getElementById(self.Js.idBtnConfirmarAtualizar)
           .addEventListener("click", function() {
-            self.gravar();
-            btnFiltrarClick("S");
+            self.gravar().then(function() {
+              btnFiltrarClick("S");
+            });
           });
       }
     } else if (tagValida(self.Js.idBtnConfirmarCustom)) {
@@ -1552,7 +1553,7 @@ function clsTable2017(obj, opt) {
     }
   };
   //
-  this.gravar = function() {
+  this.gravar = async function() {
     var cmp = new clsCampo(); // Classe para retornar campos formatados
     var erro = new clsMensagem("Erro"); // Classe para validação dos campos
     if (self.status == 0 || self.status == 1) {
@@ -1708,11 +1709,12 @@ function clsTable2017(obj, opt) {
         sql += ',{"comando":"' + this.cmdDelete("edt") + '"}';
       }
       sql = '{"lote":[' + sql + "]}";
-      console.log(sql);
+      // console.log(sql);
       //return false;
       //debugger;
       var bd = new clsBancoDados(localStorage.getItem("lsPathPhp"));
-      bd.execute(sql);
+
+      await bd.execute(sql);
       ////////////////////////////////////////////////////////////////////////
       // SE DER CERTO O COMMIT ATUALIZO A GRADE(TABLE) CONFORMA self.status //
       // 0=Novo  1=Atualizar  2=Excluir                                     //
@@ -1824,6 +1826,10 @@ function clsTable2017(obj, opt) {
           gerarMensagemErro("catch", e.message, "Erro");
         }
       }
+      return new Promise(function(resolve, reject) {
+        // resolvendo imediatamente
+        resolve();
+      });
     }
   };
   //

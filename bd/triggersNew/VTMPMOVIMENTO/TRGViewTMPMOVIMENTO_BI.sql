@@ -708,5 +708,3 @@ BEGIN
     END
   END
 END
-go
-

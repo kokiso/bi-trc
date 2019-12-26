@@ -64,6 +64,7 @@
           $sql.="  LEFT OUTER JOIN UNIDADE UNI ON VCL.VCL_CODUNI=UNI.UNI_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON UNI.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codusu;            
           $sql.=" WHERE (A.BIPRDM_ANOMES BETWEEN ".$lote[0]->dtini." AND ".$lote[0]->dtfim.")";
+          $sql.=" AND A.BIPRDM_ODOMETROFIM-A.BIPRDM_ODOMETROINI < 3000";
           $sql.=$frota;
           $sql.=$gpo;
           $sql.="   AND (COALESCE(UU.UU_ATIVO,'')='S')";   
