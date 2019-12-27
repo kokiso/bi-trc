@@ -10,8 +10,9 @@ BEGIN
    -- UP_ATIVO       |   |   |   | VC(1) NN check     | S|N     Se o registro pode ser usado em tabelas auxiliares
    -- UP_REG         |   |   |   | VC(1) NN check     | P|A|S   P=Publico  A=Administrador S=Sistema 
    -- UP_CODUSR      |   |   |   | INT NN             | Codigo do Usuario em USUARIO que esta tentando INC/ALT/EXC
+   -- UP_GRUPO       |   |   |   | INT                | Codigo do Grupo que o USUARIO está vinculado
    -- USR_APELIDO    |   |   |   | VC(15) NN          | Campo relacionado (USUARIO)
-   -- ---------------|---|---|---|--------------------|----------------------------------------------------------   
+   -- ---------------|---|---|---|--------------------|----------------------------------------------------------
    -- O Direito desta tabela em USUARIOPERFEIL(Ver select) 
   SET NOCOUNT ON;  
   DECLARE @direitoNew INTEGER;        -- Recupera o direito de usuario para esta tabela
@@ -50,6 +51,7 @@ BEGIN
   DECLARE @usrAdmPubNew VARCHAR(1);
   DECLARE @consultarRelatorioNew VARCHAR(1);
   DECLARE @grupoOperacionalNew VARCHAR(1);
+  DECLARE @upGrupoNew INTEGER;
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
@@ -83,6 +85,7 @@ BEGIN
          ,@direitoNew    = UP.UP_D04
          ,@consultarRelatorioNew    = UPPER(i.CONSULTAR_RELATORIO)
          ,@grupoOperacionalNew      = UPPER(i.GRUPO_OPERACIONAL)
+         ,@upGrupoNew = i.UP_GRUPO
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.UP_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
@@ -124,7 +127,9 @@ BEGIN
       ,UP_REG
       ,UP_CODUSR
       ,GRUPO_OPERACIONAL
-      ,CONSULTAR_RELATORIO) VALUES(
+      ,CONSULTAR_RELATORIO
+      ,UP_GRUPO
+      ) VALUES(
       @upNomeNew    -- UP_NOME
       ,@upD01New,@upD02New,@upD03New,@upD04New,@upD05New,@upD06New,@upD07New,@upD08New,@upD09New,@upD10New
       ,@upD11New,@upD12New,@upD13New,@upD14New,@upD15New,@upD16New,@upD17New,@upD18New,@upD19New,@upD20New
@@ -133,6 +138,7 @@ BEGIN
       ,@upCodUsrNew  -- UP_CODUSR
       ,@grupoOperacionalNew  -- GRUPO_OPERACIONAL
       ,@consultarRelatorioNew  -- CONSULTAR_RELATORIO
+      ,@upGrupoNew -- UP_GRUPO
     );
     ---------------
     -- Gravando LOG
@@ -147,7 +153,8 @@ BEGIN
       ,UP_REG
       ,UP_CODUSR
       ,GRUPO_OPERACIONAL
-      ,CONSULTAR_RELATORIO) VALUES(
+      ,CONSULTAR_RELATORIO
+      ,UP_GRUPO) VALUES(
       'I'                              -- UP_ACAO
       ,IDENT_CURRENT('USUARIOPERFIL')  -- UP_CODIGO
       ,@upNomeNew                      -- UP_NOME
@@ -158,6 +165,7 @@ BEGIN
       ,@upCodUsrNew                    -- UP_CODUSR
       ,@grupoOperacionalNew            -- GRUPO_OPERACIONAL
       ,@consultarRelatorioNew          -- CONSULTAR_RELATORIO
+      ,@upGrupoNew                     -- UP_GRUPO
     );  
   END TRY
   BEGIN CATCH
@@ -169,3 +177,5 @@ BEGIN
     RETURN;
   END CATCH
 END
+go
+

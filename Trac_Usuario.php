@@ -47,11 +47,13 @@
                        ,A.USR_CODUSR
                   FROM USUARIO A
                   LEFT OUTER JOIN USUARIOSISTEMA U ON A.USR_CODUSR=U.US_CODIGO
-                  LEFT OUTER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO
-                  LEFT OUTER JOIN CARGO C ON A.USR_CODCRG=C.CRG_CODIGO
+                  INNER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO";
+                  if ($_SESSION['usr_grupoPerfil'] != "0") {
+                     $sql.=" AND P.UP_GRUPO =".$_SESSION['usr_grupoPerfil'];
+                  }
+          $sql.=" LEFT OUTER JOIN CARGO C ON A.USR_CODCRG=C.CRG_CODIGO
                   INNER JOIN USUARIOUNIDADE UU ON A.USR_CODUSR = UU.UU_CODUSR
-                 WHERE ((A.USR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')) 
-                 AND A.USR_CODIGO IN ( SELECT USRUNI.UU_CODUSR FROM USUARIOUNIDADE USRUNI WHERE USRUNI.UU_ATIVO = 'S' AND USRUNI.UU_CODUNI IN (SELECT UNIUSR.UU_CODUNI FROM USUARIOUNIDADE UNIUSR WHERE UNIUSR.UU_CODUSR =".$_SESSION['usr_codigo']."))";
+                 WHERE ((A.USR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."'))";
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -63,7 +65,7 @@
         if( $rotina=="buscarUnidade" ){
           $sql="";
           $sql.="SELECT U.UNI_CODIGO AS CODIGO, U.UNI_NOME AS DESCRICAO FROM UNIDADE U";
-          $sql.=" LEFT OUTER JOIN USUARIOUNIDADE UU ON U.UNI_CODIGO=UU.UU_CODUNI AND UU_CODUSR =".$_SESSION['usr_codigo']." GROUP BY U.UNI_CODIGO, U.UNI_NOME";
+          $sql.=" LEFT OUTER JOIN USUARIOUNIDADE UU ON U.UNI_CODIGO=UU.UU_CODUNI AND UU_CODUSR =".$_SESSION['usr_codigo']." AND UU.ATIVO = 'S' GROUP BY U.UNI_CODIGO, U.UNI_NOME";
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -76,22 +78,24 @@
           $sql="";
           $sql.= "SELECT A.UNI_CODIGO AS CODIGO,A.UNI_NOME AS DESCRICAO,A.UNI_APELIDO AS APELIDO";
           $sql.= "  FROM UNIDADE A ";
-          $sql.= "  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codUsr;
-          $sql.= "  LEFT OUTER JOIN POLO P ON A.UNI_CODPOL=P.POL_CODIGO";
-          $sql.= "  LEFT OUTER JOIN GRUPO G ON P.POL_CODGRP=G.GRP_CODIGO";
+          $sql.= "  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.UNI_CODIGO=UU.UU_CODUNI AND UU.UU_CODUSR=".$lote[0]->codUsr." AND UU.UU_ATIVO = 'S'";
+          $sql.= "  LEFT OUTER JOIN USUARIOPERFIL UP ON A.UNI_CODGRP=UP.UP_GRUPO";
+          if ($_SESSION['usr_grupoPerfil'] != "0") {
+            $sql.=" WHERE UP.UP_GRUPO=".$_SESSION['usr_grupoPerfil'];
+         }
           $sql.= "  GROUP BY A.UNI_CODIGO, A.UNI_NOME, A.UNI_APELIDO";
-           $classe->msgSelect(false);
-           $retCls=$classe->select($sql);
-           if( $retCls['retorno'] != "OK" ){
-             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-           } else { 
-             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
-           };  
+          $classe->msgSelect(false);
+          $retCls=$classe->select($sql);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+          } else { 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
+          };  
          };
          if( $rotina=="buscarUnidadesUsuario" ){
           $sql="";
           $sql.="SELECT U.UNI_CODIGO AS CODIGO, U.UNI_NOME AS DESCRICAO FROM USUARIOUNIDADE UU";
-          $sql.=" INNER JOIN UNIDADE U ON U.UNI_CODIGO=UU_CODUNI AND UU_CODUSR =".$lote[0]->usuarioSelecionado;
+          $sql.=" INNER JOIN UNIDADE U ON U.UNI_CODIGO=UU_CODUNI AND UU_CODUSR =".$lote[0]->usuarioSelecionado." WHERE UU.UU_ATIVO = 'S'";
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
@@ -689,7 +693,7 @@
                               ,"edtCpf"
                               ,"idBtnConfirmarCustom"]      // Foco qdo Cad/Alt/Exc
           ,"formPassoPasso" : "Trac_Espiao.php"     // Enderço da pagina PASSO A PASSO
-          ,"indiceTable"    : "DESCRICAO"           // Indice inicial da table
+          ,"indiceTable"    : "CPF"           // Indice inicial da table
           ,"tamBotao"       : "15"                  // Tamanho botoes defalt 12 [12/25/50/75/100]
           ,"tamMenuTable"   : ["10em","20em"]                                
           ,"labelMenuTable" : "Opções"              // Caption para menu table 

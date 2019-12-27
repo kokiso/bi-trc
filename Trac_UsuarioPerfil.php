@@ -28,8 +28,10 @@
         //    Dados para JavaScript PERFIL  //
         //////////////////////////////////////
         if( $rotina=="selectUp" ){
-          $sql="SELECT A.UP_CODIGO
+        $sql = "SELECT A.UP_CODIGO
                        ,A.UP_NOME
+                       ,A.UP_GRUPO
+                       ,COALESCE(G.GRP_NOME, 'SEM GRUPO') AS GRP_NOME
                        ,A.UP_D01
                        ,A.UP_D02
                        ,A.UP_D03
@@ -53,20 +55,24 @@
                        ,CASE WHEN A.UP_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS UP_ATIVO
                        ,CASE WHEN A.UP_REG='P' THEN 'PUB' WHEN A.UP_REG='S' THEN 'SIS' ELSE 'ADM' END AS UP_REG
                        ,U.US_APELIDO
-                       ,A.UP_CODUSR
-                       ,CASE WHEN A.CONSULTAR_RELATORIO='S' THEN 'PERMITIDO' ELSE 'NAO PERMITIDO' END AS CONSULTAR_USUARIO
-                       ,CASE WHEN A.GRUPO_OPERACIONAL='S' THEN 'PERMITIDO' ELSE 'NAO PERMITIDO' END AS CONSULTAR_USUARIO
+                       ,A.UP_CODUSR";
+        $sql .= ",CASE WHEN A.CONSULTAR_RELATORIO='S' THEN 'PERMITIDO' ELSE 'NAO PERMITIDO' END AS CONSULTAR_USUARIO
+                 ,CASE WHEN A.GRUPO_OPERACIONAL='S' THEN 'PERMITIDO' ELSE 'NAO PERMITIDO' END AS CONSULTAR_USUARIO
                   FROM USUARIOPERFIL A
-                  LEFT OUTER JOIN USUARIOSISTEMA U ON A.UP_CODUSR=U.US_CODIGO
-                 WHERE (A.UP_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";                 
-          $classe->msgSelect(false);
-          $retCls=$classe->select($sql);
-          if( $retCls['retorno'] != "OK" ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
-          } else { 
-            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]'; 
-          };  
+                  INNER JOIN USUARIOSISTEMA U ON A.UP_CODUSR=U.US_CODIGO";
+        $sql .= " LEFT OUTER JOIN GRUPO G ON A.UP_GRUPO=G.GRP_CODIGO";
+        $sql .= " WHERE ((A.UP_ATIVO='" . $lote[0]->ativo . "') OR ('*'='" . $lote[0]->ativo . "')) ";
+        if ($_SESSION['usr_grupoPerfil'] != "0") {
+          $sql .= " AND A.UP_GRUPO =" . $_SESSION['usr_grupoPerfil'];
+        }
+        $classe->msgSelect(false);
+        $retCls = $classe->select($sql);
+        if ($retCls['retorno'] != "OK") {
+          $retorno = '[{"retorno":"ERR","dados":"","erro":"' . $retCls['erro'] . '"}]';
+        } else {
+          $retorno = '[{"retorno":"OK","dados":' . json_encode($retCls['dados']) . ',"erro":""}]';
         };
+      };
         ////////////////////////////////////
         // Dados para JavaScript          //
         ////////////////////////////////////
@@ -288,167 +294,6 @@
                       $strExcel = "N";
                     };  
                     break;
-                  /*                    
-                  case 22:                  
-                    $d21=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d21 < 0) or ($d21 > 4)  ){ 
-                      $erro     = "CAMPO D21 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 23:                  
-                    $d22=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d22 < 0) or ($d22 > 4)  ){ 
-                      $erro     = "CAMPO D22 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 24:                  
-                    $d23=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d23 < 0) or ($d23 > 4)  ){ 
-                      $erro     = "CAMPO D23 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 25:                  
-                    $d24=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d24 < 0) or ($d24 > 4)  ){ 
-                      $erro     = "CAMPO D24 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 26:                  
-                    $d25=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d25 < 0) or ($d25 > 4)  ){ 
-                      $erro     = "CAMPO D25 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 27:                  
-                    $d26=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d26 < 0) or ($d26 > 4)  ){ 
-                      $erro     = "CAMPO D26 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 28:                  
-                    $d27=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d27 < 0) or ($d27 > 4)  ){ 
-                      $erro     = "CAMPO D27 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 29:                  
-                    $d28=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d28 < 0) or ($d28 > 4)  ){ 
-                      $erro     = "CAMPO D28 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 30:                  
-                    $d29=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d29 < 0) or ($d29 > 4)  ){ 
-                      $erro     = "CAMPO D29 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 31:                  
-                    $d30=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d30 < 0) or ($d30 > 4)  ){ 
-                      $erro     = "CAMPO D30 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 32:                  
-                    $d31=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d31 < 0) or ($d31 > 4)  ){ 
-                      $erro     = "CAMPO D31 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 33:                  
-                    $d32=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d32 < 0) or ($d32 > 4)  ){ 
-                      $erro     = "CAMPO D32 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 34:                  
-                    $d33=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d33 < 0) or ($d33 > 4)  ){ 
-                      $erro     = "CAMPO D33 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 35:                  
-                    $d34=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d34 < 0) or ($d34 > 4)  ){ 
-                      $erro     = "CAMPO D34 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 36:                  
-                    $d35=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d35 < 0) or ($d35 > 4)  ){ 
-                      $erro     = "CAMPO D35 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 37:                  
-                    $d36=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d36 < 0) or ($d36 > 4)  ){ 
-                      $erro     = "CAMPO D36 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 38:                  
-                    $d37=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d37 < 0) or ($d37 > 4)  ){ 
-                      $erro     = "CAMPO D37 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 39:                  
-                    $d38=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d38 < 0) or ($d38 > 4)  ){ 
-                      $erro     = "CAMPO D38 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 40:                  
-                    $d39=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d39 < 0) or ($d39 > 4)  ){ 
-                      $erro     = "CAMPO D39 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                    
-                  case 41:                  
-                    $d40=preg_replace('/[^0-9]/', '', trim($cell->nodeValue));
-                    if( ($d40 < 0) or ($d40 > 4)  ){ 
-                      $erro     = "CAMPO D40 INTEIRO VALIDO ENTRE 0..4";
-                      $strExcel = "N";
-                    };  
-                    break;
-                  */  
                 };
               };
               ////////////////////////////////////////////
@@ -563,6 +408,7 @@
     <link rel="stylesheet" href="css/cssFaTable.css">
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
+    <script src="tabelaTrac/f10/tabelaGrupoF10.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <script>
       "use strict";
@@ -597,13 +443,34 @@
             ,{"id":2  ,"field"          : "UP_NOME"   
                       ,"labelCol"       : "DESCRICAO"
                       ,"obj"            : "edtDescricao"
-                      ,"tamGrd"         : "20em"
+                      ,"tamGrd"         : "15em"
                       ,"tamImp"         : "30"
                       ,"digitosMinMax"  : [3,40]
                       ,"ajudaCampo"     : ["Nome do perfil."]
                       ,"importaExcel"   : "S"                                          
                       ,"padrao":0}
-            ,{"id":3  ,"field"          : "UP_D01"      
+            ,{"id":3  ,"field"          : "UP_GRUPO"   
+                      ,"labelCol"       : "CODGRP"
+                      ,"labelColImp"    : "GRP"
+                      ,"obj"            : "edtPerfilGrupo"
+                      ,"fieldType"      : "int"              
+                      ,"formato"        : ["i4"]
+                      ,"tamGrd"         : "0em"
+                      ,"tamImp"         : "10"
+                      ,"ajudaCampo"     : ["Codigo do grupo."]
+                      ,"importaExcel"   : "S"                                          
+                      ,"padrao":0}
+            ,{"id":4  ,"field"          : "GRP_NOME"   
+                      ,"insUpDel"       : ["N","N","N"]
+                      ,"labelCol"       : "GRUPO"
+                      ,"obj"            : "edtDesPerfilGrupo"
+                      ,"tamGrd"         : "15em"
+                      ,"tamImp"         : "30"
+                      ,"digitosMinMax"  : [3,40]
+                      ,"ajudaCampo"     : ["Nome do grupo."]
+                      ,"importaExcel"   : "S"                                          
+                      ,"padrao":0}
+            ,{"id":5  ,"field"          : "UP_D01"      
                       ,"labelCol"       : "D01"
                       ,"labelColImp"    : "01"
                       ,"obj"            : "cbD01"
@@ -619,7 +486,7 @@
                                             ,"Usuarios ativos","Usuario->Unidade","Perfil","Cargo"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":4  ,"field"          : "UP_D02"      
+            ,{"id":6  ,"field"          : "UP_D02"      
                       ,"labelCol"       : "D02"
                       ,"labelColImp"    : "02"
                       ,"obj"            : "cbD02"
@@ -634,7 +501,7 @@
                       ,"ajudaCampo"     : [  "Direito para opçâo parametro integracao"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":5  ,"field"          : "UP_D03"      
+            ,{"id":7  ,"field"          : "UP_D03"      
                       ,"labelCol"       : "D03"
                       ,"labelColImp"    : "03"
                       ,"obj"            : "cbD03"
@@ -649,7 +516,7 @@
                       ,"ajudaCampo"     : [  "Direito para integrar"]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":6  ,"field"          : "UP_D04"      
+            ,{"id":8  ,"field"          : "UP_D04"      
                       ,"labelCol"       : "D04"
                       ,"labelColImp"    : "04"
                       ,"obj"            : "cbD04"
@@ -664,7 +531,7 @@
                       ,"ajudaCampo"     : [  "..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":7  ,"field"          : "UP_D05"  ,"labelCol":"D05" ,"labelColImp":"05" ,"obj":"cbD05"
+            ,{"id":9  ,"field"          : "UP_D05"  ,"labelCol":"D05" ,"labelColImp":"05" ,"obj":"cbD05"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -676,7 +543,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}  
-            ,{"id":8  ,"field"          : "UP_D06"  ,"labelCol":"D06" ,"labelColImp":"06" ,"obj":"cbD06"
+            ,{"id":10  ,"field"          : "UP_D06"  ,"labelCol":"D06" ,"labelColImp":"06" ,"obj":"cbD06"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -688,7 +555,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":9  ,"field"          : "UP_D07"  ,"labelCol":"D07" ,"labelColImp":"07" ,"obj":"cbD07"
+            ,{"id":11  ,"field"          : "UP_D07"  ,"labelCol":"D07" ,"labelColImp":"07" ,"obj":"cbD07"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -700,7 +567,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":10 ,"field"          : "UP_D08"  ,"labelCol":"D08" ,"labelColImp":"08" ,"obj":"cbD08"
+            ,{"id":12 ,"field"          : "UP_D08"  ,"labelCol":"D08" ,"labelColImp":"08" ,"obj":"cbD08"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -712,7 +579,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":11 ,"field"          : "UP_D09"  ,"labelCol":"D09" ,"labelColImp":"09" ,"obj":"cbD09"
+            ,{"id":13 ,"field"          : "UP_D09"  ,"labelCol":"D09" ,"labelColImp":"09" ,"obj":"cbD09"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -724,7 +591,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}                                                  
-            ,{"id":12 ,"field"          : "UP_D10"  ,"labelCol":"D10" ,"labelColImp":"10" ,"obj":"cbD10"
+            ,{"id":14 ,"field"          : "UP_D10"  ,"labelCol":"D10" ,"labelColImp":"10" ,"obj":"cbD10"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -736,7 +603,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":13 ,"field"          : "UP_D11"  ,"labelCol":"D11" ,"labelColImp":"11" ,"obj":"cbD11"
+            ,{"id":15 ,"field"          : "UP_D11"  ,"labelCol":"D11" ,"labelColImp":"11" ,"obj":"cbD11"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -748,7 +615,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":14 ,"field"          : "UP_D12"  ,"labelCol":"D12" ,"labelColImp":"12" ,"obj":"cbD12"
+            ,{"id":16 ,"field"          : "UP_D12"  ,"labelCol":"D12" ,"labelColImp":"12" ,"obj":"cbD12"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -760,7 +627,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":15 ,"field"          : "UP_D13"  ,"labelCol":"D13" ,"labelColImp":"13" ,"obj":"cbD13"
+            ,{"id":17 ,"field"          : "UP_D13"  ,"labelCol":"D13" ,"labelColImp":"13" ,"obj":"cbD13"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -772,7 +639,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":16 ,"field"          : "UP_D14"  ,"labelCol":"D14" ,"labelColImp":"14" ,"obj":"cbD14"
+            ,{"id":18 ,"field"          : "UP_D14"  ,"labelCol":"D14" ,"labelColImp":"14" ,"obj":"cbD14"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -784,7 +651,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":17 ,"field"          : "UP_D15"  ,"labelCol":"D15" ,"labelColImp":"15" ,"obj":"cbD15"
+            ,{"id":19 ,"field"          : "UP_D15"  ,"labelCol":"D15" ,"labelColImp":"15" ,"obj":"cbD15"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -796,7 +663,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":18 ,"field"          : "UP_D16"  ,"labelCol":"D16" ,"labelColImp":"16" ,"obj":"cbD16"
+            ,{"id":20 ,"field"          : "UP_D16"  ,"labelCol":"D16" ,"labelColImp":"16" ,"obj":"cbD16"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -808,7 +675,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":19 ,"field"          : "UP_D17"  ,"labelCol":"D17" ,"labelColImp":"17" ,"obj":"cbD17"
+            ,{"id":21 ,"field"          : "UP_D17"  ,"labelCol":"D17" ,"labelColImp":"17" ,"obj":"cbD17"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -820,7 +687,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":20 ,"field"          : "UP_D18"  ,"labelCol":"D18" ,"labelColImp":"18" ,"obj":"cbD18"
+            ,{"id":22 ,"field"          : "UP_D18"  ,"labelCol":"D18" ,"labelColImp":"18" ,"obj":"cbD18"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -832,7 +699,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":21 ,"field"          : "UP_D19"  ,"labelCol":"D19" ,"labelColImp":"19" ,"obj":"cbD19"
+            ,{"id":23 ,"field"          : "UP_D19"  ,"labelCol":"D19" ,"labelColImp":"19" ,"obj":"cbD19"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -844,7 +711,7 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":22 ,"field"          : "UP_D20"  ,"labelCol":"D20" ,"labelColImp":"20" ,"obj":"cbD20"
+            ,{"id":24 ,"field"          : "UP_D20"  ,"labelCol":"D20" ,"labelColImp":"20" ,"obj":"cbD20"
                       ,"tipo"           : "cb"                      
                       ,"tamGrd"         : "0em"
                       ,"tamImp"         : "5"                      
@@ -856,42 +723,41 @@
                       ,"ajudaCampo"     : [ "Direito para opções..."]
                       ,"importaExcel"   : "S"                                                                
                       ,"padrao":0}
-            ,{"id":23 ,"field"          : "UP_ATIVO"  
+            ,{"id":25 ,"field"          : "UP_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"
-                      ,"tamGrd"         : "10em"
                       ,"tamImp"         : "10"
                       ,"padrao":2}                                        
-            ,{"id":24 ,"field"          : "UP_REG"    
+            ,{"id":26 ,"field"          : "UP_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"tamImp"         : "10"
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":25 ,"field"          : "US_APELIDO" 
+            ,{"id":27 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario" 
                       ,"tamGrd"         : "10em"
                       ,"padrao":4}                
-            ,{"id":26 ,"field"          : "UP_CODUSR" 
+            ,{"id":28 ,"field"          : "UP_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                      
-            ,{"id":27 ,"labelCol"       : "PP"      
+            ,{"id":29 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
                         +"objUp.espiao();"
                         +"elTr.cells[0].childNodes[0].checked=false;"
                       ,"padrao":8}
-            ,{"id":28 ,"field"          : "CONSULTAR_RELATORIO"  
+            ,{"id":30 ,"field"          : "CONSULTAR_RELATORIO"  
                       ,"labelCol"       : "CONSULT. RELATÓRIO"   
                       ,"obj"            : "cbConsultaRelatorio"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "10"
                       ,"padrao":10}   
-            ,{"id":29 ,"field"          : "GRUPO_OPERACIONAL"  
+            ,{"id":31 ,"field"          : "GRUPO_OPERACIONAL"  
                       ,"labelCol"       : "GRUPO OPERACIONAL"   
                       ,"obj"            : "cbGrupoOperacional"
                       ,"tamGrd"         : "10em"
@@ -1044,6 +910,7 @@
       var jsUp;                       // Obj principal da classe clsTable2017
       var objExc;                     // Obrigatório para instanciar o JS Importar excel
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
+      var objGrpF10;                  // Obrigatório para instanciar o JS GrupoF10
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
       var clsErro;                    // Classe para erros            
       var fd;                         // Formulario para envio de dados para o PHP
@@ -1130,6 +997,25 @@
           gerarMensagemErro("UP",retPhp[0].erro,"AVISO");    
         };  
       };
+      function grpFocus(obj){ 
+        document.getElementById(obj.id).setAttribute("data-oldvalue",document.getElementById(obj.id).value); 
+      };
+      function grpF10Click(){ fGrupoF10(0,"edtCodGrp","cbD01"); };  
+      function RetF10tblGrp(arr){
+        document.getElementById("edtPerfilGrupo").value   = arr[0].CODIGO;
+        document.getElementById("edtDesPerfilGrupo").value   = arr[0].APELIDO;
+        document.getElementById("edtPerfilGrupo").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+      function codGrpBlur(obj){
+        var elOld = jsNmrs(document.getElementById(obj.id).getAttribute("data-oldvalue")).inteiro().ret();
+        var elNew = jsNmrs(obj.id).inteiro().ret();
+        if( elOld != elNew ){
+          var ret = fGrupoF10(1,obj.id,"cbD01");
+          document.getElementById(obj.id).value          = ( ret.length == 0 ? "0000"    : jsNmrs(ret[0].CODIGO).emZero(4).ret()  );
+          document.getElementById("edtDesPerfilGrupo").value     = ( ret.length == 0 ? ""        : ret[0].APELIDO                       );
+          document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )               );
+        };
+      };
     </script>
   </head>
   <body>
@@ -1157,6 +1043,22 @@
               <div class="campotexto campo75">
                 <input class="campo_input"  name="edtDescricao" id="edtDescricao" type="text" maxlength="15" />
                 <label class="campo_label campo_required" for="edtDescricao">DESCRICAO</label>
+              </div>
+              <div class="campotexto campo25">
+                <input class="campo_input inputF10" id="edtPerfilGrupo"
+                                                    OnKeyPress="return mascaraInteiro(event);"
+                                                    onBlur="codGrpBlur(this);" 
+                                                    onFocus="grpFocus(this);" 
+                                                    onClick="grpF10Click();"
+                                                    data-oldvalue=""
+                                                    autocomplete="off" 
+                                                    maxlength="4"
+                                                    type="text" />
+                <label class="campo_label campo_required" for="edtPerfilGrupo">GRUPO</label>
+              </div>
+              <div class="campotexto campo75">
+                <input class="campo_input_titulo input" id="edtDesPerfilGrupo" type="text" disabled />
+                <label class="campo_label campo_required" for="edtDesPerfilGrupo">RAZAO_GRUPO</label>
               </div>
               <div class="campotexto campo20">
                 <select class="campo_input_combo" name="cbD01" id="cbD01">

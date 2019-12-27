@@ -39,6 +39,7 @@ BEGIN
   DECLARE @usrAdmPubNew VARCHAR(1);
   DECLARE @consultarRelatorioNew VARCHAR(1);
   DECLARE @grupoOperacionalNew VARCHAR(1);
+  DECLARE @upGrupoNew INTEGER;
   -------------------------------------------------------
   -- Buscando os campos NEW para checagem antes do insert
   -------------------------------------------------------
@@ -72,6 +73,7 @@ BEGIN
          ,@direitoNew    = UP.UP_D04
          ,@grupoOperacionalNew    = UPPER(i.GRUPO_OPERACIONAL)
          ,@consultarRelatorioNew    = UPPER(i.CONSULTAR_RELATORIO)
+         ,@upGrupoNew    = i.UP_GRUPO
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.UP_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO;    
@@ -118,6 +120,7 @@ BEGIN
   DECLARE @upCodUsrOld INTEGER;
   DECLARE @grupoOperacionalOld VARCHAR(1);
   DECLARE @consultarRelatorioOld VARCHAR(1);
+  DECLARE @upGrupoOld INTEGER;
   SELECT @upCodigoOld   = o.UP_CODIGO
          ,@upNomeOld    = o.UP_NOME
          ,@upD01Old     = o.UP_D01
@@ -147,6 +150,7 @@ BEGIN
          ,@upAtivoOld   = o.UP_ATIVO
          ,@grupoOperacionalOld   = o.GRUPO_OPERACIONAL
          ,@consultarRelatorioOld   = o.CONSULTAR_RELATORIO
+         ,@upGrupoOld   = o.UP_GRUPO
     FROM USUARIOPERFIL o WHERE o.UP_CODIGO=@upCodigoNew;
   ---------------------------------------------------------------------
   -- Primary Key nao pode ser CREATEada
@@ -198,6 +202,7 @@ BEGIN
           ,UP_CODUSR = @upCodUsrNew
           ,GRUPO_OPERACIONAL = @grupoOperacionalNew
           ,CONSULTAR_RELATORIO = @consultarRelatorioNew
+          ,UP_GRUPO  = @upGrupoNew
     WHERE UP_CODIGO  = @upCodigoNew;
     ---------------
     -- Gravando LOG
@@ -217,7 +222,8 @@ BEGIN
         ,UP_REG
         ,UP_CODUSR
         ,GRUPO_OPERACIONAL
-        ,CONSULTAR_RELATORIO) VALUES(
+        ,CONSULTAR_RELATORIO
+        ,UP_GRUPO) VALUES(
         'A'                      -- UP_ACAO
         ,@upCodigoNew            -- UP_CODIGO
         ,@upNomeNew              -- UP_NOME
@@ -228,6 +234,7 @@ BEGIN
         ,@upCodUsrNew            -- UP_CODUSR
         ,@grupoOperacionalNew    -- GRUPO_OPERACIONAL
         ,@consultarRelatorioNew  -- CONSULTAR_RELATORIO
+        ,@upGrupoNew             -- UP_GRUPO
       );
     END
   END TRY
@@ -240,3 +247,5 @@ BEGIN
     RETURN;
   END CATCH
 END
+go
+

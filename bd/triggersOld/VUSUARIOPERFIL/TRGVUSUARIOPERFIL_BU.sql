@@ -38,6 +38,7 @@ BEGIN
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   DECLARE @consultarRelatorioNew VARCHAR(1);
+  DECLARE @grupoOperacionalNew VARCHAR(1);
   -------------------------------------------------------
   -- Buscando os campos NEW para checagem antes do insert
   -------------------------------------------------------
@@ -69,6 +70,7 @@ BEGIN
          ,@usrApelidoNew = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')
          ,@direitoNew    = UP.UP_D04
+         ,@grupoOperacionalNew    = UPPER(i.GRUPO_OPERACIONAL)
          ,@consultarRelatorioNew    = UPPER(i.CONSULTAR_RELATORIO)
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.UP_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
@@ -114,6 +116,7 @@ BEGIN
   DECLARE @upAtivoOld VARCHAR(1);
   DECLARE @upRegOld VARCHAR(1);
   DECLARE @upCodUsrOld INTEGER;
+  DECLARE @grupoOperacionalOld VARCHAR(1);
   DECLARE @consultarRelatorioOld VARCHAR(1);
   SELECT @upCodigoOld   = o.UP_CODIGO
          ,@upNomeOld    = o.UP_NOME
@@ -142,6 +145,7 @@ BEGIN
          ,@upRegOld     = o.UP_REG
          ,@upCodUsrOld  = o.UP_CODUSR
          ,@upAtivoOld   = o.UP_ATIVO
+         ,@grupoOperacionalOld   = o.GRUPO_OPERACIONAL
          ,@consultarRelatorioOld   = o.CONSULTAR_RELATORIO
     FROM USUARIOPERFIL o WHERE o.UP_CODIGO=@upCodigoNew;
   ---------------------------------------------------------------------
@@ -192,8 +196,9 @@ BEGIN
           ,UP_ATIVO  = @upAtivoNew
           ,UP_REG    = @upRegNew
           ,UP_CODUSR = @upCodUsrNew
+          ,GRUPO_OPERACIONAL = @grupoOperacionalNew
           ,CONSULTAR_RELATORIO = @consultarRelatorioNew
-    WHERE UP_CODIGO  = @upCodigoNew;     
+    WHERE UP_CODIGO  = @upCodigoNew;
     ---------------
     -- Gravando LOG
     ---------------
@@ -211,6 +216,7 @@ BEGIN
         ,UP_ATIVO
         ,UP_REG
         ,UP_CODUSR
+        ,GRUPO_OPERACIONAL
         ,CONSULTAR_RELATORIO) VALUES(
         'A'                      -- UP_ACAO
         ,@upCodigoNew            -- UP_CODIGO
@@ -220,6 +226,7 @@ BEGIN
         ,@upAtivoNew             -- UP_ATIVO
         ,@upRegNew               -- UP_REG
         ,@upCodUsrNew            -- UP_CODUSR
+        ,@grupoOperacionalNew    -- GRUPO_OPERACIONAL
         ,@consultarRelatorioNew  -- CONSULTAR_RELATORIO
       );
     END
