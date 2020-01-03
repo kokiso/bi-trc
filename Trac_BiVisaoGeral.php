@@ -294,10 +294,10 @@
             $sql.= " LEFT OUTER JOIN USUARIOUNIDADE UU ON V.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR =".$_SESSION['usr_codigo'];
             $sql.= " LEFT OUTER JOIN USUARIO USR ON USR.USR_CODUSR =".$_SESSION['usr_codigo'];
             $sql.= " LEFT OUTER JOIN USUARIOPERFIL P ON USR.USR_CODUP=P.UP_CODIGO";
-            if ($_SESSION['usr_grupoPerfil'] != "0") {
-               $sql.=" AND P.UP_GRUPO =".$_SESSION['usr_grupoPerfil'];
-            }
             $sql.= " WHERE VCL_CODGPO IS NOT NULL ";
+              if ($_SESSION['usr_grupoPerfil'] != "0") {
+                 $sql.=" AND P.UP_GRUPO =".$_SESSION['usr_grupoPerfil'];
+              }
             $sql.=$frota;
             $sql.=" GROUP BY VCL_CODGPO, GPO_NOME ORDER BY INFRACOES DESC";
             $classe->msgSelect(false);
