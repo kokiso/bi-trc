@@ -292,6 +292,10 @@
             $sql.= " LEFT OUTER JOIN GRUPOOPERACIONAL GPO ON V.VCL_CODGPO = GPO.GPO_CODIGO";
             $sql.= " LEFT OUTER JOIN UNIDADE UNI ON V.VCL_CODUNI=UNI.UNI_CODIGO";
             $sql.= " LEFT OUTER JOIN USUARIOUNIDADE UU ON V.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR =".$_SESSION['usr_codigo'];
+            $sql.= " INNER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO";
+            if ($_SESSION['usr_grupoPerfil'] != "0") {
+               $sql.=" AND P.UP_GRUPO =".$_SESSION['usr_grupoPerfil'];
+            }
             $sql.= " WHERE VCL_CODGPO IS NOT NULL ";
             $sql.=$frota;
             $sql.=" GROUP BY VCL_CODGPO, GPO_NOME ORDER BY INFRACOES DESC";

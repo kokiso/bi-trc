@@ -43,7 +43,11 @@
                   LEFT OUTER JOIN USUARIOSISTEMA US ON A.SIS_CODUSR=US.US_CODIGO
                   LEFT OUTER JOIN UNIDADE UNI ON A.UU_CODUNI=UNI.UNI_CODIGO
                   LEFT OUTER JOIN GRUPO GRP ON UNI.UNI_CODGRP=GRP.GRP_CODIGO
-                 WHERE (UU_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";                
+                  INNER JOIN USUARIOPERFIL P ON USR.USR_CODUP=P.UP_CODIGO ";
+                  if ($_SESSION['usr_grupoPerfil'] != "0") {
+                     $sql.=" AND P.UP_GRUPO =".$_SESSION['usr_grupoPerfil'];
+                  }
+          $sql.=" WHERE (UU_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')";                
           $classe->msgSelect(false);
           $retCls=$classe->select($sql);
           if( $retCls['retorno'] != "OK" ){
