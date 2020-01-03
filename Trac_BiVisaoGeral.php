@@ -292,7 +292,8 @@
             $sql.= " LEFT OUTER JOIN GRUPOOPERACIONAL GPO ON V.VCL_CODGPO = GPO.GPO_CODIGO";
             $sql.= " LEFT OUTER JOIN UNIDADE UNI ON V.VCL_CODUNI=UNI.UNI_CODIGO";
             $sql.= " LEFT OUTER JOIN USUARIOUNIDADE UU ON V.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR =".$_SESSION['usr_codigo'];
-            $sql.= " INNER JOIN USUARIOPERFIL P ON A.USR_CODUP=P.UP_CODIGO";
+            $sql.= " LEFT OUTER JOIN USUARIO USR ON USR.USR_CODUSR =".$_SESSION['usr_codigo'];
+            $sql.= " LEFT OUTER JOIN USUARIOPERFIL P ON USR.USR_CODUP=P.UP_CODIGO";
             if ($_SESSION['usr_grupoPerfil'] != "0") {
                $sql.=" AND P.UP_GRUPO =".$_SESSION['usr_grupoPerfil'];
             }
@@ -1016,7 +1017,7 @@ function criarElemento(elem,attr,app){
           ]
         };
         for (let index = 0; index < retPhp[0]["dados"]["qteRegistros"]; index++) {
-          let valor = retPhp[0]["dados"][index]['INFRACOES'] / retPhp[0]["dados"]["total"];
+          let valor = retPhp[0]["dados"][index]['INFRACOES'];
             valor=jsNmrs(valor).dec(2).dolar().ret();
             arrPieData['labels'].push(retPhp[0]['dados'][index]['NOME'])
             arrPieData['datasets'][0]['data'].push(valor);
