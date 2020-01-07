@@ -2328,3 +2328,53 @@ a.homer {
     background-color: #BEBEBE;
     box-shadow: inset 0px 0px 0px rgba(0, 0, 0, 0.125);
 }
+
+.texto-loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    margin: -40px 0 0 -75px;
+    color: #3498db;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .loader-in {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: 300px;
+    height: 300px;
+    margin: -150px 0 0 -150px;
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 240px;
+    height: 240px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+  }
+  
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .fade-in {
+    opacity: 0.5;
+    transition: 1s opacity;
+    background: white;
+}
+
+.fade-out {
+    opacity: 1;
+    transition: 1s opacity;
+    background: white;
+}
