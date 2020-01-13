@@ -76,32 +76,32 @@ BEGIN
   DECLARE @mvmRpm INTEGER;
   DECLARE @mvmLocalizacao VARCHAR(100);
   DECLARE @mvmAnoMes INTEGER;
-  DECLARE @mvmTurno VARCHAR(1);    
+  DECLARE @mvmTurno VARCHAR(1);
   ---------------------------------------------------
   -- Buscando os campos para checagem antes do insert
   ---------------------------------------------------
-  SELECT @mvmPosicao       =  i.TMVM_POSICAO    
-         ,@mvmCodVei       =  i.TMVM_CODVEI     
-         ,@mvmPlaca        =  i.TMVM_PLACA      
+  SELECT @mvmPosicao       =  i.TMVM_POSICAO
+         ,@mvmCodVei       =  i.TMVM_CODVEI
+         ,@mvmPlaca        =  i.TMVM_PLACA
          ,@vclEntraBi      =  COALESCE(VCL.VCL_ENTRABI,'*')
          ,@mvmCodUni       =  i.TMVM_CODUNI
          ,@mvmCodPol       =  UNI.UNI_CODPOL
          ,@uniApelido      =  COALESCE(UNI.UNI_APELIDO,'ERRO')
-         ,@mvmRfid         =  i.TMVM_RFID       
-         ,@mvmDesMtr       =  i.TMVM_DESMTR     
-         ,@mvmCodEveSS     =  i.TMVM_CODEVESS     
-         ,@mvmDesEve       =  i.TMVM_DESEVE     
+         ,@mvmRfid         =  COALESCE( NULLIF(i.TMVM_RFID, '-'), (SELECT TOP 1 MTR_RFID FROM MOTORISTA WHERE MTR_VEICULO = i.TMVM_PLACA AND MTR_ATIVO = 'S'))
+         ,@mvmDesMtr       =  COALESCE( NULLIF(i.TMVM_DESMTR, 'NAO INFORMADO'), (SELECT TOP 1 MTR_NOME FROM MOTORISTA WHERE MTR_VEICULO = i.TMVM_PLACA AND MTR_ATIVO = 'S'))
+         ,@mvmCodEveSS     =  i.TMVM_CODEVESS
+         ,@mvmDesEve       =  i.TMVM_DESEVE
          ,@mvmNumeroSerie  =  i.TMVM_NUMEROSERIE
-         ,@mvmLatitude     =  i.TMVM_LATITUDE   
-         ,@mvmLongitude    =  i.TMVM_LONGITUDE  
-         ,@mvmVelocidade   =  i.TMVM_VELOCIDADE 
-         ,@mvmOdometro     =  i.TMVM_ODOMETRO   
-         ,@mvmIgnicao      =  i.TMVM_IGNICAO    
+         ,@mvmLatitude     =  i.TMVM_LATITUDE
+         ,@mvmLongitude    =  i.TMVM_LONGITUDE
+         ,@mvmVelocidade   =  i.TMVM_VELOCIDADE
+         ,@mvmOdometro     =  i.TMVM_ODOMETRO
+         ,@mvmIgnicao      =  i.TMVM_IGNICAO
          ,@mvmTemperatura  =  i.TMVM_TEMPERATURA
-         ,@mvmDataGps      =  i.TMVM_DATAGPS    
+         ,@mvmDataGps      =  i.TMVM_DATAGPS
          ,@mvmHoraGps      =  i.TMVM_HORAGPS    
-         ,@mvmHorimeto     =  i.TMVM_HORIMETRO  
-         ,@mvmRpm          =  i.TMVM_RPM        
+         ,@mvmHorimeto     =  i.TMVM_HORIMETRO
+         ,@mvmRpm          =  i.TMVM_RPM
          ,@mvmLocalizacao  =  i.TMVM_LOCALIZACAO
          ,@mvmAnoMes       =  i.TMVM_ANOMES
   FROM inserted i
@@ -117,22 +117,6 @@ BEGIN
     -----------------------------------------------------
     SELECT @varPosicao=COALESCE(MVM_POSICAO,0) FROM MOVIMENTO WHERE MVM_POSICAO=@mvmPosicao;
 	  IF( @@rowcount=0 ) BEGIN
-      ---------------------------------------------------------
-      -- Inserindo o motorista
-      -- Pode existir RFID duplicado desde que nao esteja ativo
-      -- Tem que ser na view para atualizar UNI_QTOSMTR
-      ---------------------------------------------------------
-      SELECT @varCodMtr=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mvmRfid) AND (MTR_NOME=@mvmDesMtr) AND (MTR_ATIVO='S'));
-      IF( @varCodMtr=0 ) BEGIN
-        SELECT @varCodMtr=(MAX(MTR_CODIGO)+1) FROM MOTORISTA;
-        INSERT INTO dbo.VMOTORISTA(
-          MTR_CODIGO  ,MTR_NOME    ,MTR_RFID ,MTR_CODUNI,MTR_ATIVO ,MTR_REG,MTR_POSICAO,MTR_CODUSR) VALUES(
-          @varCodMtr  ,@mvmDesMtr  ,@mvmRfid ,@mvmCodUni,'S'       ,'P'    ,@mvmPosicao,1
-        );
-      END ELSE BEGIN
-        UPDATE MOTORISTA SET MTR_POSICAO=@mvmPosicao WHERE MTR_CODIGO=@varCodMtr;
-      END
-      --
       --
       -------------------------------------------------
       -- Inserindo o veiculo
@@ -141,7 +125,7 @@ BEGIN
       SELECT @varCodVcl=COALESCE(VCL_CODIGO,'OK'),@vclFrota=VCL_FROTA FROM VEICULO WHERE VCL_CODIGO=@mvmPlaca;
       IF( @varCodVcl='OK' ) BEGIN
         SET @vclFrota='P';
-        INSERT INTO dbo.VVEICULO( 
+        INSERT INTO dbo.VVEICULO(
           VCL_CODIGO  ,VCL_NOME               ,VCL_FROTA,VCL_CODUNI ,VCL_ENTRABI,VCL_DTCALIBRACAO,VCL_ATIVO,VCL_REG,VCL_CODUSR) VALUES(
           @mvmPlaca   ,'CADASTRO AUTOMATICO'  ,'P'      ,@mvmCodUni ,'S'        ,'1900-01-01'    ,'S'      ,'P'    ,1
         );
@@ -152,9 +136,9 @@ BEGIN
       -- Inserindo o turno
       -------------------------------------------------
       SET @mvmTurno='*';
-      SELECT @mvmTurno=COALESCE(TRN_NOME,'*') FROM TURNO 
+      SELECT @mvmTurno=COALESCE(TRN_NOME,'*') FROM TURNO
        WHERE (@mvmHoraGps BETWEEN TRN_INTI AND TRN_INTF)
-         AND (TRN_FROTA=@vclFrota);   
+         AND (TRN_FROTA=@vclFrota);
       --
       --
       ------------------------
@@ -163,7 +147,7 @@ BEGIN
       SELECT @varCodEve=COALESCE(EVE_CODIGO,0),@varCodEg=EVE_CODEG FROM EVENTO WHERE EVE_NOME=@mvmDesEve;
       IF( @varCodEve=0 ) BEGIN
         SELECT @varCodEve=(MAX(EVE_CODIGO)+1) FROM EVENTO;
-        INSERT INTO dbo.EVENTO( 
+        INSERT INTO dbo.EVENTO(
           EVE_CODIGO  ,EVE_NOME   ,EVE_CODEG  ,EVE_ATIVO,EVE_REG,EVE_CODUSR) VALUES(
           @varCodEve  ,@mvmDesEve ,'*'        ,'S'       ,'P'    ,1
         );
@@ -204,16 +188,34 @@ BEGIN
           END
         END
       END
+      ---------------------------------------------------------
+      -- Inserindo o motorista
+      -- Pode existir RFID duplicado desde que nao esteja ativo
+      -- Tem que ser na view para atualizar UNI_QTOSMTR
+      ---------------------------------------------------------
+      SELECT @varCodMtr=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mvmRfid) AND (MTR_NOME=@mvmDesMtr) AND (MTR_ATIVO='S'));
+      IF( @varCodMtr=0 ) BEGIN
+        IF (@mvmRfid IS NOT NULL AND @mvmDesMtr IS NOT NULL) BEGIN
+        SELECT @varCodMtr=(MAX(MTR_CODIGO)+1) FROM MOTORISTA;
+        INSERT INTO dbo.VMOTORISTA(
+          MTR_CODIGO  ,MTR_NOME    ,MTR_RFID ,MTR_CODUNI,MTR_ATIVO ,MTR_REG,MTR_POSICAO,MTR_CODUSR, MTR_VEICULO) VALUES(
+          @varCodMtr  ,@mvmDesMtr  ,@mvmRfid ,@mvmCodUni,'S'       ,'P'    ,@mvmPosicao,1, COALESCE(@mvmPlaca, '')
+        );
+        END
+      END ELSE BEGIN
+        UPDATE MOTORISTA SET MTR_POSICAO=@mvmPosicao WHERE MTR_CODIGO=@varCodMtr;
+      END
+      --
       ------------------------------------------------------------------------------------------------------------------
       -- Gravando na tabela principal
       -- Acertado com Pedro em 05jul2018 que o campo Ignicao nao eh confiavel pois pode ser atualizado apenas no proximo
       -- evento, entao ajusto aqui pelo evento recebido da SS (IgnicaoLigado ou IgnicaoDesligada)
       -- Esse ajuste eh devido ao BI Produtividade
       ------------------------------------------------------------------------------------------------------------------
-      IF( @varCodEve=44 ) 
-        SET @mvmIgnicao=1;  
-      IF( @varCodEve=52 ) 
-        SET @mvmIgnicao=0;  
+      IF( @varCodEve=44 )
+        SET @mvmIgnicao=1;
+      IF( @varCodEve=52 )
+        SET @mvmIgnicao=0;
       --
       --
       INSERT INTO MOVIMENTO(
@@ -246,7 +248,7 @@ BEGIN
         ,@mvmPlaca        -- MVM_PLACA
         ,@mvmCodUni       -- MVM_CODUNI
         ,@mvmCodPol       -- MVM_CODPOL
-        ,@mvmRfid         -- MVM_RFID
+        ,COALESCE(@mvmRfid, '-') -- MVM_RFID
         ,@varCodMtr       -- MVM_CODMTR
         ,@mvmCodEveSS     -- MVM_CODEVESS
         ,@varCodEve       -- MVM_CODEVE
@@ -702,8 +704,7 @@ BEGIN
       SELECT @dataProximaConsolidacao = DATEADD(HOUR, INTERVALO_CONSOLIDACAO, DATA_CONSOLIDACAO)
 	    FROM CONFIGURACAO_CONSOLIDACAO_INFRACAO;
 
+
     END
   END
 END
-go
-
