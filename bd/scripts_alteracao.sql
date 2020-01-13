@@ -145,3 +145,6 @@ go
 ALTER TABLE BKPVEICULO
 	ADD VCL_CODGPO INTEGER NULL
 go
+
+alter table MOTORISTA alter column MTR_RFID varchar(30) null
+go

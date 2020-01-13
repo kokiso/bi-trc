@@ -151,10 +151,15 @@ BEGIN
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
+    DECLARE @ErrorCode INT;
     DECLARE @ErrorSeverity INT;
     DECLARE @ErrorState INT;
-    SELECT @ErrorMessage=ERROR_MESSAGE(),@ErrorSeverity=ERROR_SEVERITY(),@ErrorState=ERROR_STATE();
+    SELECT @ErrorMessage=ERROR_MESSAGE(),@ErrorSeverity=ERROR_SEVERITY(),@ErrorState=ERROR_STATE(), @ErrorCode=ERROR_NUMBER();
+    IF @ErrorCode= 1205 -- um deadlock foi detectado
+    SET @ErrorCode = 'Falha ao executar a operação. Tente novamente mais tarde.'
     RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
     RETURN;
   END CATCH
 END
+go
+
