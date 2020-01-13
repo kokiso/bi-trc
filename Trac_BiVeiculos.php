@@ -1548,6 +1548,7 @@
             </div>
            </div>
          </div>
+    </div>
  				<!-- -->
         <!--BOX QTDE KM MES-->
 				<div class="col-md-3 col-sm-6 col-xs-12">

@@ -87,8 +87,8 @@ BEGIN
          ,@mvmCodUni       =  i.TMVM_CODUNI
          ,@mvmCodPol       =  UNI.UNI_CODPOL
          ,@uniApelido      =  COALESCE(UNI.UNI_APELIDO,'ERRO')
-         ,@mvmRfid         =  COALESCE( NULLIF(i.TMVM_RFID, '-'), (SELECT TOP 1 MTR_RFID FROM MOTORISTA WHERE MTR_VEICULO = i.TMVM_PLACA AND MTR_ATIVO = 'S'))
-         ,@mvmDesMtr       =  COALESCE( NULLIF(i.TMVM_DESMTR, 'NAO INFORMADO'), (SELECT TOP 1 MTR_NOME FROM MOTORISTA WHERE MTR_VEICULO = i.TMVM_PLACA AND MTR_ATIVO = 'S'))
+         ,@mvmRfid         =  NULLIF(i.TMVM_RFID, '-')
+         ,@mvmDesMtr       =  NULLIF(i.TMVM_DESMTR, 'NAO INFORMADO')
          ,@mvmCodEveSS     =  i.TMVM_CODEVESS
          ,@mvmDesEve       =  i.TMVM_DESEVE
          ,@mvmNumeroSerie  =  i.TMVM_NUMEROSERIE
@@ -107,6 +107,11 @@ BEGIN
   FROM inserted i
   LEFT OUTER JOIN VEICULO VCL ON i.TMVM_PLACA=VCL.VCL_CODIGO
   LEFT OUTER JOIN UNIDADE UNI ON i.TMVM_CODUNI=UNI.UNI_CODIGO;
+
+   IF (@mvmRfid IS NULL OR @mvmDesMtr IS NULL) BEGIN
+        SELECT TOP 1 @mvmRfid = MTR_RFID , @mvmDesMtr = MTR_NOME FROM MOTORISTA WHERE MTR_VEICULO = @mvmPlaca
+   END
+
   -----------------------------------------------------
   -- Somente as unidades cadastradas vao ser integradas
   -- Somente os veiculos selecionados são cadastrados
@@ -708,3 +713,5 @@ BEGIN
     END
   END
 END
+go
+
