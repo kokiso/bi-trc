@@ -109,7 +109,7 @@ BEGIN
   LEFT OUTER JOIN UNIDADE UNI ON i.TMVM_CODUNI=UNI.UNI_CODIGO;
 
    IF (@mvmRfid IS NULL OR @mvmDesMtr IS NULL) BEGIN
-        SELECT TOP 1 @mvmRfid = MTR_RFID , @mvmDesMtr = MTR_NOME FROM MOTORISTA WHERE MTR_VEICULO = @mvmPlaca
+        SELECT TOP 1 @mvmRfid = MTR_RFID , @mvmDesMtr = MTR_NOME FROM MOTORISTA WHERE MTR_VEICULO = @mvmPlaca AND MTR_ATIVO = 'S'
    END
 
   -----------------------------------------------------
