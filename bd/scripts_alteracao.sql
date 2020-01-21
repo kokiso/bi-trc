@@ -145,3 +145,14 @@ go
 ALTER TABLE BKPVEICULO
 	ADD VCL_CODGPO INTEGER NULL
 go
+
+create index MOTORISTA_MTR_ATIVO_index
+	on MOTORISTA (MTR_ATIVO desc)
+go
+
+create index MOTORISTA_MTR_VEICULO_index
+	on MOTORISTA (MTR_VEICULO)
+go
+
+alter table MOTORISTA alter column MTR_RFID varchar(30) null
+go
