@@ -708,6 +708,7 @@ if (isset($_POST["visaogeral"])) {
   <script src="js/js2017.js"></script>
   <script src="js/jsTable2017.js"></script>
   <script src="tabelaTrac/f10/exportacaoDashboardF10.js"></script>
+  <script src="config/configuracoes.js"></script>
   <link rel="stylesheet" href="css/iframeBi.css">
   <script language="javascript" type="text/javascript"></script>
   <style>
@@ -1701,14 +1702,14 @@ if (isset($_POST["visaogeral"])) {
         ["INFRACOES_GPO"],
         ["RANKING_INFRACOES_UNIDADE"],
         ["RANKING_INFRACOES_POLO"]
-      ];     
-        fexportarRelatorioF10(cards);
+      ];
+      fexportarRelatorioF10(cards);
     }
-
+    
     function RetF10tblRelatorio(rels, formato) {
       let relatorios = {};
       rels.forEach(item => {
-         relatorios[item["RELATORIO"]] = true;
+        relatorios[item["RELATORIO"]] = true;
       });
       var filtros = {
         "UNIDADE": pubCodUni + "",
@@ -1719,8 +1720,10 @@ if (isset($_POST["visaogeral"])) {
         "GRUPOOPERACIONAL_NOME": pubDesGpo,
         "DATA": document.getElementById("cbCompetencia").value,
         "LEVEPESADO" : pubLevPes
-    };
-      exportarRelatorioF10(relatorios, formato, filtros);
+      };
+      var caminho = "RelatorioVisaoGeralServlet";
+      var tipo = "RelatorioVisaoGeral.";
+      exportarRelatorioF10(relatorios, formato, filtros, caminho, tipo);
     } 
 
   </script>

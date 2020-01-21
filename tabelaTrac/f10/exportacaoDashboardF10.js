@@ -30,21 +30,19 @@ function fexportarRelatorioF10(cards){
     delete(relatorioF10);
 };
 
-function exportarRelatorioF10(relatorios, formato, filtros) {
+function exportarRelatorioF10(relatorios, formato, filtros, caminho, tipo) {
 
   if (formato){
 
     
     var request = new XMLHttpRequest();
-    request.open('POST', 'http://localhost:8000/TotalTracRelatorios/RelatorioVisaoGeralServlet', true);
+    request.open('POST', URL_EXPORTAR + caminho, true);
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     request.responseType = 'blob';
     
-    
-    
   request.onload = function() {
     if(request.status === 200) {
-      var filename = 'relatorio.' + formato;
+      var filename = tipo + formato;
       var blob = new Blob([request.response], { type: 'application/' + formato });
       var link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
