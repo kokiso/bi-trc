@@ -39,7 +39,7 @@ String.prototype.campoSql = function(tipo) {
   }
 };
 //
-function clsTable2017(obj, opt) {
+function clsTable2017(obj, opt, relatorio) {
   var self = this;
   self.Js = "";
   self.procurar = true; // Opção para monta a div de qtdade de registros e input procurar
@@ -79,7 +79,7 @@ function clsTable2017(obj, opt) {
     return arr;
   };
   //
-  this.montarHtmlCE2017 = function(parJS) {
+  this.montarHtmlCE2017 = function(parJS, relatorio) {
     //////////////////////////////////////////////////////////////////////////////////
     // Colocando um ID único no JSON e TABLE para ser o indice ao alterar e excluir //
     //////////////////////////////////////////////////////////////////////////////////
@@ -300,8 +300,10 @@ function clsTable2017(obj, opt) {
 
     var dPaiETop = document.createElement("div");
     dPaiETop.id = "dPaiETop" + self.Js.div;
-    dPaiETop.className = "campotexto campo100 divProcurar";
-    dPaiETop.style.height = "3em";
+    dPaiETop.className = relatorio
+      ? "campotextoRelatorio campo100 divProcurar"
+      : "campotexto campo100 divProcurar";
+    dPaiETop.style.height = relatorio ? "2em" : "3em";
     dPaiETop.style.top = "0em";
     dPaiETop.style.margin = margem;
     dPaiETop.style.width = taman;
@@ -317,8 +319,9 @@ function clsTable2017(obj, opt) {
     dPaiETab.id = "dPaiETab" + self.Js.div;
     dPaiETab.className = "divContainerTable";
 
+    var tamanho = relatorio ? "10.4em" : "12.4em";
     dPaiETab.style.height = bBotaoH
-      ? "calc(100% - 12.4em)"
+      ? "calc(100% - " + tamanho + ")"
       : "calc(100% - 6em)"; // 7em=3em Top+4em Bot
     ////////////////////////////////////////////////////////////
     // Se a opção for para não montar a div de registros/seek //
@@ -475,7 +478,11 @@ function clsTable2017(obj, opt) {
     ////////////////////////////
     // Label para campo imput //
     ////////////////////////////
-    dPaiETopLab.className = "campo25 tableDivProcurarLabel";
+    if (!relatorio) {
+      dPaiETopLab.className = "campo25 tableDivProcurarLabel";
+    } else {
+      dPaiETopLab.className = "campo100 tableDivProcurarLabelRelatorio";
+    }
     ceLabel = document.createElement("label");
     ceLabel.cssFloat = "right";
     ceLabel.id = "lblProcurar_" + self.Js.tbl;
@@ -512,8 +519,10 @@ function clsTable2017(obj, opt) {
     ceImg = document.createElement("i");
     ceImg.setAttribute("class", "faInp fa-pencil-square-o icon-large");
 
-    cePar.appendChild(ceInput);
-    cePar.appendChild(ceImg);
+    if (!relatorio) {
+      cePar.appendChild(ceInput);
+      cePar.appendChild(ceImg);
+    }
 
     dPaiETopInp.appendChild(cePar);
     if (self.tblF10 == false) dPaiETop.appendChild(dPaiETopOpc);
@@ -535,17 +544,84 @@ function clsTable2017(obj, opt) {
       cePar.className = "campo25";
       cePar.style.cssFloat = "right";
 
+      if (relatorio) {
+        var selecionado = "";
+        cePar.className = "campo100 alinharBotoes";
+        buttonPdf = document.createElement("button");
+        buttonPdf.className = "btn btn-default espacamentoBotao";
+        iconPdf = document.createElement("i");
+        spanPdf = document.createElement("span");
+        spanPdf.className = "fonteIcones";
+        spanPdf.innerHTML = "PDF";
+        iconPdf.className = "fa fa-file-pdf-o fa-2x";
+        iconPdf.appendChild(spanPdf);
+        buttonPdf.appendChild(iconPdf);
+        buttonPdf.addEventListener("click", function() {
+          if (buttonPdf.classList.contains("btn-default")) {
+            buttonPdf.classList.remove("btn-default");
+            buttonPdf.classList.add("btn-success");
+            buttonXlsx.classList.remove("btn-success");
+            buttonXlsx.classList.add("btn-default");
+            buttonDocx.classList.remove("btn-success");
+            buttonDocx.classList.add("btn-default");
+            selecionado = "pdf";
+          }
+        });
+        buttonXlsx = document.createElement("button");
+        buttonXlsx.className = "btn btn-default espacamentoBotao";
+        iconXlsx = document.createElement("i");
+        spanXlsx = document.createElement("span");
+        spanXlsx.className = "fonteIcones";
+        spanXlsx.innerHTML = "XLSX";
+        iconXlsx.className = "fa fa-file-excel-o fa-2x";
+        iconXlsx.appendChild(spanXlsx);
+        buttonXlsx.appendChild(iconXlsx);
+        buttonXlsx.addEventListener("click", function() {
+          if (buttonXlsx.classList.contains("btn-default")) {
+            buttonXlsx.classList.add("btn-success");
+            buttonXlsx.classList.remove("btn-default");
+            buttonPdf.classList.remove("btn-success");
+            buttonPdf.classList.add("btn-default");
+            buttonDocx.classList.remove("btn-success");
+            buttonDocx.classList.add("btn-default");
+            selecionado = "xlsx";
+          }
+        });
+        buttonDocx = document.createElement("button");
+        buttonDocx.className = "btn btn-default espacamentoBotao";
+        iconDocx = document.createElement("i");
+        spanDocx = document.createElement("span");
+        spanDocx.className = "fonteIcones";
+        spanDocx.innerHTML = "DOCX";
+        iconDocx.className = "fa fa-file-word-o fa-2x";
+        iconDocx.appendChild(spanDocx);
+        buttonDocx.appendChild(iconDocx);
+        buttonDocx.addEventListener("click", function() {
+          if (buttonDocx.classList.contains("btn-default")) {
+            buttonDocx.classList.remove("btn-default");
+            buttonDocx.classList.add("btn-success");
+            buttonPdf.classList.remove("btn-success");
+            buttonPdf.classList.add("btn-default");
+            buttonXlsx.classList.remove("btn-success");
+            buttonXlsx.classList.add("btn-default");
+            selecionado = "docx";
+          }
+        });
+      }
+
       ceButton = document.createElement("button");
       ceButton.id = btnF10;
       ceButton.innerHTML = "Confirmar";
-      ceButton.className = "campo100 tableBotao botaoHorizontal";
+      ceButton.className = relatorio
+        ? "campo25 tableBotao botaoHorizontal"
+        : "campo100 tableBotao botaoHorizontal";
       ceButton.addEventListener("click", function() {
         try {
           var clsChecados = opt ? self.gerarJson("n") : self.gerarJson("1"); //Classe para buscar registros checados
           var chkds = clsChecados.gerar(); //Retorna um array associativo de todos registros checados
           var tamC = chkds.length; //Tamanho do array chkds
           // for (var checados = 0; checados < tamC; checados++) {
-          eval("RetF10" + self.Js.tbl + "(chkds)");
+          eval("RetF10" + self.Js.tbl + "(chkds, selecionado)");
           document.getElementById(lblCls).click();
           ///////////////////////////////////////////////////
           // Onde vai o foco quando confirmar o formulario //
@@ -572,6 +648,13 @@ function clsTable2017(obj, opt) {
       //////////////////////
       // Botao sem imagem //
       //////////////////////
+      if (relatorio) {
+        ceButton.style.cssFloat = "right";
+        ceButton.classList.add("btn-lg");
+        cePar.appendChild(buttonPdf);
+        cePar.appendChild(buttonXlsx);
+        cePar.appendChild(buttonDocx);
+      }
       cePar.appendChild(ceButton);
       dPaiEBot.appendChild(cePar);
     }
@@ -863,6 +946,9 @@ function clsTable2017(obj, opt) {
                   .getElementsByTagName("button")[0]
                   .click();
               });
+              if (relatorio) {
+                ceInput.setAttribute("checked", "true");
+              }
               ceInput.setAttribute(
                 "onclick",
                 "this.checked=(this.checked==false)"
@@ -1965,8 +2051,11 @@ function clsTable2017(obj, opt) {
           });
           self.desabilitaCampos(vet);
         }
-        if (opt) {
+        if (opt && !relatorio) {
           preencherSelect(chkds);
+        }
+        if (relatorio) {
+          exportarRelatorio();
         }
       } catch (e) {
         gerarMensagemErro("ALT", e + " " + ultimoCampo, "Erro");
@@ -4123,6 +4212,7 @@ function clsTable2017(obj, opt) {
       if (["chk", "img"].indexOf(reg.tipo) == -1) {
         seq++;
         if (reg.labelCol == coluna) {
+          coluna = relatorio ? "EXPORTAR " + coluna : coluna;
           document.getElementById(
             "lblProcurar_" + self.Js.tbl
           ).innerHTML = coluna;

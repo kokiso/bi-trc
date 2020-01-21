@@ -1,0 +1,1756 @@
+/*
+* http://www.betomarques.com/artigos/artigo_019.php
+* http://www.w3c.br/pub/Cursos/CursoHTML5/html5-web.pdf - Muito bom
+*
+* border -> https://www.w3schools.com/cssref/playit.asp?filename=playcss_border-style&preval=ridge
+*/
+
+
+/*
+  FONT-SIZE 62.5%
+  Conversão de PX para EM
+  Como fazer contas em base 16 é meio chatinho podemos usar um truque de CSS para facilitar a conversão de pixels para EM.
+  Isto significa que alteramos o valor da fonte padrão de 16px para 10px. 
+  Desta forma, 12px passa a equivaler a 1.2em, 14px fica equivalente a 1.4em, etc.
+*/
+
+
+/*********************************************************************************************
+* Border-box
+* Outro truque bacana de CSS para design responsivo é o box-sizing border box acompanhado do 
+* seletor *. Basicamente esta regra diz que todos os elementos agora levarão em conta apenas a 
+* largura e altura determinada, sem somar a este valor a borda e o padding. 
+* Ou seja, uma coisa a menos para nos preocuparmos.
+*********************************************************************************************/
+
+*,
+*:before,
+*:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.divShowModal {
+    opacity: 0.5;
+    /*background-color:silver;*/
+    background-color: #ecf0f5;
+    z-index: 29;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.divTelaCheia {
+    /*background-color: #FFFFFF;*/
+    width: 100%;
+}
+
+.divTopoInicio {
+    width: 100%;
+    height: 5.2em;
+    /*border-bottom:1px solid silver;*/
+    padding: 0.2em;
+}
+
+.divTopoInicio_logo {
+    float: left;
+    width: 15%;
+    height: 100%;
+    padding: 1em 1em 1em 1em;
+    background-image: url('../imagens/logoMaior.png');
+    /*background-image: url('../imagens/logo_branco.png');*/
+    background-size: 100% 100%;
+    border-bottom: 1px solid silver;
+    cursor: pointer;
+}
+
+.divTopoExcel {
+    display: none;
+    border: 1px solid silver;
+    float: left;
+    height: 5.4em;
+    border-radius: 6px 6px 6px 6px;
+}
+
+.logoHome:after {
+    content: attr(data-name);
+}
+
+.logoHome {
+    float: right;
+    width: 15%;
+    height: 100%;
+    border-bottom: 1px solid silver;
+    cursor: pointer;
+    /*
+    display: block;
+    text-decoration: none;
+    border:1px solid #25729a; 
+    -webkit-border-radius: 3px; 
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    font-family: verdana;
+    padding: 2px 0 10px 0;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align:left;
+    padding-left:0.8em;
+    color: #FFFFFF; 
+    background-color: #dd4b39;
+    */
+}
+
+.logoHome:hover {
+    color: #f2f2f2;
+}
+
+.divTopoInicio_Informacao {
+    float: left;
+    width: 70%;
+    height: 100%;
+    border-bottom: 1px solid silver;
+    padding-top: 0.1em !important;
+}
+
+.fieldS {
+    padding: 15px;
+    background-color: white;
+    border-width: 2px;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0.4em 0.4em 0.08em #ccc;
+}
+
+.fieldSLeg {
+    font-size: 1.4em;
+    font-weight: 600;
+    padding-left: 1.5em;
+    padding-top: 0.6em;
+    background-color: silver;
+    box-shadow: 3px 3px 3px #999;
+    height: 1.7em;
+    border-radius: 6px 6px 1px 1px;
+    width: 2em;
+    border-width: 1px;
+    margin-left: -0.5em;
+    color: #FFFFFF;
+    background-color: #3093c7;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(70%, #3093c7), color-stop(100%, #1c5a85));
+    background-image: -moz-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -ms-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: -o-linear-gradient(top, #3093c7, #1c5a85);
+    background-image: linear-gradient(top, #3093c7, #1c5a85);
+    filter: progid: DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#3093c7, endColorstr=#1c5a85);
+    height: 2.2em;
+}
+
+.fieldSLeg:before {
+    font-family: FontAwesome;
+    font-size: 1em
+}
+
+.label_Informacao {
+    width: 100%;
+    margin-top: 0.5em;
+    text-align: center;
+    font-size: 3em;
+    color: white;
+    font-family: heather;
+}
+
+.label_Informacao:after {
+    content: attr(data-name);
+}
+
+.divRodapeInicio {
+    width: 100%;
+    height: 5%;
+    background-color: navy;
+    bottom: 0;
+    position: fixed;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 1.2em;
+    font-weight: 400;
+    text-shadow: 1px 2px 0 black;
+    background-image: -moz-linear-gradient(45deg, #1c5a85 10%, transparent 85%, #4682B4 75%, transparent 10%, #1c5a85 95%);
+    background-image: -ms-linear-gradient(45deg, #2E9AFE 10%, transparent 85%, #4682B4 75%, transparent 10%, #2E9AFE 95%);
+}
+
+.label_Rodape {
+    width: 100%;
+    margin-top: 0.5em;
+    text-align: center;
+    font-size: 1.2em;
+    color: #8B8682;
+}
+
+.center {
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.active {
+    display: block;
+}
+
+.inactive {
+    display: none;
+}
+
+.campotexto {
+    position: relative;
+    display: inline-block;
+    float: left;
+    min-height: 4.5em;
+    /* 50px */
+}
+
+.campotextoRelatorio {
+    position: relative;
+    display: inline-block;
+    float: left;
+    min-height: 2.9em;
+    /* 50px */
+}
+
+.campotextoNew {
+    position: relative;
+    display: inline-block;
+    float: left;
+    min-height: 3em;
+    font-size: 1em;
+    /*margin-top:0.25em;*/
+}
+
+.campo05 {
+    width: 5%;
+}
+
+.campo10 {
+    width: 10%;
+}
+
+.campo12 {
+    width: 12.50%;
+}
+
+.campo15 {
+    width: 15%;
+}
+
+.campo20 {
+    width: 20%;
+}
+
+.campo25 {
+    width: 25%;
+}
+
+.campo30 {
+    width: 30%;
+}
+
+.campo35 {
+    width: 35%;
+}
+
+.campo40 {
+    width: 40%;
+}
+
+.campo45 {
+    width: 45%;
+}
+
+.campo50 {
+    width: 50%;
+}
+
+.campo75 {
+    width: 75%;
+}
+
+.campo85 {
+    width: 85%;
+}
+
+.campo100 {
+    width: 100%;
+}
+
+
+/*.campo50.form-action { border-top-color: transparent; padding-top: 10px;}*/
+
+
+/*.campo100.form-action {padding-top: 15px;  margin-top: 15px;  border-top: 1px solid #9CD3A3;}*/
+
+.campo_input,
+.campo_input_titulo {
+    outline: 0;
+    border: 1px solid silver;
+    height: 42px;
+    padding: 1em 0.5em 0.1em 0.5em;
+    width: 100%;
+    border-radius: 0px 0px 0px 8px;
+}
+
+.campo_input_combo {
+    outline: 0;
+    border: 1px solid silver;
+    height: 42px;
+    padding: 1.31em 0.5em 0.5em;
+    width: 100%;
+    border-radius: 0px 0px 0px 8px;
+    /*background:white;*/
+    background-image: url("../imagens/down_arrow_select.jpg");
+    /*background: -webkit-gradient(linear, left top, left bottom,from(white),to(#f2f2f2)) !important;*/
+    background-position: 100% 00%;
+    background-size: 2.5em 100%;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+}
+
+
+/* Para tirar a seta select no IE */
+
+select::-ms-expand {
+    display: none;
+}
+
+.campo_file {
+    outline: 0;
+    border: 1px solid silver;
+    /*height:42px;*/
+    padding: 1.31em 0.5em 0.5em;
+    width: 100%;
+    border-radius: 0px 0px 0px 8px;
+}
+
+
+/*
+.campo_input_combo{
+  background: url("../imagens/down_arrow_select.jpg") no-repeat right top;    
+}
+*/
+
+.campo_input,
+.campo_file {
+    /* 11nov2017 background-color: #f2f2f2; */
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#f2f2f2));
+}
+
+.campo_input_titulo {
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#E6F6F5));
+}
+
+.input {
+    outline: 0;
+    border: 1px solid #ccc;
+}
+
+.inputF10 {
+    outline: 0;
+    border: 1px solid #ccc;
+    padding-left: 23px;
+    /* Largura da imagem possui 20px */
+    padding-top: 15px;
+    /* Só pra centralizar o texto verticalmente já que a altura da imagem é de 25px */
+    background-image: url('../imagens/search_active.png');
+    background-repeat: no-repeat;
+    /* Para não repetir o background ao longo de topo o componente */
+    background-position: 3px 15px;
+}
+
+.inputF10Titulo {
+    outline: 0;
+    border: 1px solid #ccc;
+    padding-left: 23px;
+    /* Largura da imagem possui 20px */
+    padding-top: 15px;
+    /* Só pra centralizar o texto verticalmente já que a altura da imagem é de 25px */
+    background-image: url('../imagens/search_active.png');
+    background-repeat: no-repeat;
+    /* Para não repetir o background ao longo de topo o componente */
+    background-position: 3px 15px;
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#E6F6F5));
+}
+
+.input:focus {
+    background-color: white;
+    border-color: blue;
+}
+
+.input:focus~label {
+    color: blue;
+    font-weight: none;
+}
+
+.campo_input_imagem {
+    border: 1px solid silver;
+    height: 42px;
+    padding-left: 2.0em;
+    padding-top: 0.2em;
+    width: 100%;
+    font-size: 3em;
+    border-radius: 0px 0px 0px 8px;
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#E6F6F5));
+}
+
+.campo_input_imagemHelpCad {
+    padding-left: 0.6em;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    width: 50%;
+    float: left;
+    font-size: 3em;
+    border-radius: 0px 0px 0px 8px;
+    border: 1px solid #ccc !important;
+}
+
+.campo_required:after {
+    content: "  \f084";
+    font-family: FontAwesome;
+    color: #3093c7;
+}
+
+.campo_input_combo:focus {
+    background-color: white;
+    border-color: blue;
+}
+
+.campo_label {
+    position: absolute;
+    top: 0.1em;
+    left: 0.5em;
+    font-size: 1.2em;
+    color: #73879C;
+}
+
+.campo_labelNew {
+    position: absolute;
+    top: 0.1em;
+    left: 0.5em;
+    font-size: 1.2em;
+    color: #73879C;
+}
+
+.campo_labelSombra {
+    font-size: 1.4em;
+    font-style: oblique;
+    /*text-shadow: 1px 1px 1px black; */
+    letter-spacing: 2px;
+}
+
+.campo_label_imagem {
+    position: absolute;
+    top: 1px;
+    left: 10px;
+    font-size: 12px;
+    color: #73879C;
+}
+
+.botaoBis {
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 0.5em 1em;
+    text-align: center;
+    cursor: hand;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #B0BED9), color-stop(100%, #dcdcdc));
+    /* IE10+ */
+    background: -o-linear-gradient(top, white 0%, #dcdcdc 100%);
+    border: 1px solid black;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: verdana;
+}
+
+.botaoBis:hover {
+    color: blue;
+    cursor: pointer;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dcdcdc), color-stop(100%, #B0BED9));
+}
+
+
+/*
+* INICIO
+* PARA EXIBIR CAIXA DE ERRO E AJUDA
+*/
+
+.alertContainer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    /*z-index:300;*/
+}
+
+.alertClose {
+    background: #4682B4;
+    color: #FFFFFF;
+    line-height: 25px;
+    position: absolute;
+    right: -12px;
+    text-align: center;
+    top: -10px;
+    width: 24px;
+    z-index: 99999;
+    text-decoration: none;
+    font-weight: bold;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    border-radius: 12px;
+    -moz-box-shadow: 1px 1px 3px #000;
+    -webkit-box-shadow: 1px 1px 3px #000;
+    box-shadow: 1px 1px 3px #000;
+}
+
+.alertClose:hover {
+    background: #483D8B;
+}
+
+.alertH2 {
+    color: #483D8B;
+    text-align: center;
+    border-bottom: 1px solid silver;
+    font-size: 2em;
+    padding-bottom: 0.5em;
+}
+
+.alertP {
+    color: #4682B4;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.alertMensagem {
+    width: 100%;
+    height: 100%;
+    margin: 1% auto;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    border-radius: 10px;
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#E6F6F5));
+    background: -ms-linear-gradient(white, #E6F6F5);
+    -moz-box-shadow: 1px 1px 30px #000;
+    -webkit-box-shadow: 1px 1px 30px #000;
+    box-shadow: 1px 1px 30px #000;
+}
+
+
+/*
+* FIM
+* PARA EXIBIR CAIXA DE ERRO E AJUDA
+*/
+
+
+/*
+*  mo=menu opções 
+*/
+
+.moContainer {
+    list-style: none;
+    border-radius: 6px 6px 0px 0px !important;
+    margin: 0;
+    width: 100%;
+    margin: 0 auto;
+    margin-top: 0.6em;
+    font-family: arial, sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 1;
+    background-color: white;
+    padding-left: 0;
+}
+
+.moTituloMenu {
+    padding: 10px;
+    border-radius: 6px 6px 0px 0px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2), inset 0 3px 2px rgba(0, 0, 0, 0.2);
+}
+
+.moTituloMenu a {
+    text-decoration: none;
+    color: #48515c;
+}
+
+.moTituloMenu ul {
+    display: none;
+    margin-top: 10px;
+    padding-left: 0.3em;
+}
+
+.moTituloMenu a:hover {
+    color: blue;
+}
+
+.moItemMenu {
+    border: 1px solid #878e98;
+    border-radius: 0px 5px 5px 0px;
+    -webkit-box-shadow: 2px 2px 18px #999 inset;
+    -moz-box-shadow: 2px 2px 18px #999 inset;
+    box-shadow: 2px 2px 10px #999 inset;
+    padding: 0.8em;
+    background-color: #EEE9E9;
+    /*
+  background-image:linear-gradient( to right, silver, white 90% );        
+  */
+    background-image: linear-gradient(90deg, silver 1.5em, transparent 2.5em, white 100%);
+    /*
+        background-image:linear-gradient(90deg, 
+          silver 1.5em, transparent 2.5em,
+          white 100%, transparent 10%,
+          silver 95%);  
+  */
+}
+
+.moItemMenu:hover {
+    background-color: #E6F6F5;
+}
+
+.moQtosItens {
+    display: inline;
+    float: right;
+    background: #E6F6F5;
+    color: black;
+    border: 1px solid #3c434c;
+    border-bottom: 1px solid #707781;
+    padding: 4px 6px;
+    font-size: 12px;
+    -moz-border-radius: 12px;
+    border-radius: 12px;
+    -moz-box-shadow: inset 0 0 10px #111;
+    -webkit-box-shadow: inset 0 0 10px #E6F6F5;
+    box-shadow: inner 0 0 10px #111;
+    position: relative;
+    margin-top: -4px;
+}
+
+
+/******************** 
+*  fim menu opções 
+********************/
+
+
+/*
+* Menu opções sem Jquery, apenas com css
+* Abreviação esc
+*/
+
+@keyframes show {
+    0% {
+        display: none;
+        opacity: 0;
+    }
+    1% {
+        display: block;
+    }
+    100% {
+        display: block;
+        opacity: 1;
+        z-index: 9999;
+    }
+}
+
+@keyframes hide {
+    0% {
+        display: block;
+        opacity: 1;
+    }
+    99% {
+        display: none;
+    }
+    100% {
+        display: none;
+        opacity: 0;
+        z-index: 0;
+    }
+}
+
+.escTituloMenu {
+    clear: both;
+    list-style: none;
+    list-style-type: none;
+    position: absolute;
+    float: left;
+    height: 2.5em;
+    width: 100px;
+    box-shadow: 1px 1px 1px 1px;
+    margin: 0;
+    padding-top: 10px;
+    padding-left: 8px;
+    text-align: left;
+    background-color: white;
+    cursor: hand;
+}
+
+.escTituloMenu a {
+    text-decoration: none;
+    color: #48515c;
+}
+
+.escTituloMenu ul {
+    display: none;
+}
+
+.escTituloMenu a:hover {
+    color: blue;
+}
+
+.escTituloMenu a i:after {
+    content: "\f00c";
+    font-family: FontAwesome;
+    font-size: 1.5em
+}
+
+.escItemMenu {
+    margin-left: -20;
+    list-style: none;
+    cursor: hand;
+    padding: 0.7em;
+    box-shadow: 1px 1px 1px 1px;
+    width: 250px;
+    background-color: #a6e1ec;
+    color: black;
+    position: relative;
+}
+
+.escItemMenu:hover {
+    background-color: #E6F6F5;
+}
+
+.mostra {
+    animation: show 500ms linear;
+    animation-fill-mode: forwards;
+}
+
+.esconde {
+    animation: hide 500ms linear;
+    animation-fill-mode: forwards;
+}
+
+.menuEsc {
+    width: 100px;
+    height: 50px;
+    margin-left: 100px;
+    margin-top: 1.4em;
+    position: relative;
+    font-size: 1.4em;
+    background-color: white;
+    float: left;
+}
+
+
+/*
+* FIm menu opções sem Jquery, apenas com css
+*/
+
+
+/*
+* Classe para o box de ajuda
+*/
+
+.ajuda {
+    position: relative;
+}
+
+.ajuda p:first-child {
+    margin-top: -1em;
+}
+
+.ajuda p {
+    text-align: justified;
+    font-size: 1.5em;
+    line-height: 1.5em;
+    margin: 0.5em;
+    margin-left: 1em;
+}
+
+.ajuda table {
+    font-size: 1.2em;
+    border-top: 1px solid black;
+    border-bottom: 1px solid gray;
+    margin-left: 1em;
+}
+
+.ajuda th {
+    width: 5em;
+    text-align: left;
+}
+
+.ajuda span {
+    margin-left: 1em;
+}
+
+.ajudaUl {
+    text-align: justified;
+    font-size: 1.5em;
+    line-height: 1.5em;
+    margin: 0.5em;
+    margin-left: 1em;
+}
+
+
+/*
+* Fim classe para o box de ajuda
+*/
+
+
+/***********************
+* Estilos para grade Bis
+***********************/
+
+.colunaOculta {
+    display: none;
+}
+
+.divProcurar {
+    border: 1px solid #73879C;
+    height: 35px;
+    padding-top: 3px;
+    padding-right: 5px;
+    border-radius: 6px 6px 0px 0px;
+}
+
+.divProcurar .divProcurarReg {
+    /* width:20%; */
+    float: left;
+    text-align: left;
+    padding-top: 0.4em;
+    padding-left: 0.4em;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.divProcurar .divProcurarLabel {
+    float: left;
+    text-align: right;
+    padding-top: 0.7em;
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+.divProcurar .divProcurarInput {
+    padding-top: 0.4em;
+    float: right;
+}
+
+.divProcurar .divProcurarInput input {
+    border: 1px solid silver;
+    height: 28px;
+    border-radius: 5px 5px 5px 5px;
+    padding-left: 3px;
+    margin-right: 3px;
+    width: 100%;
+}
+
+.divContainerTable {
+    overflow-y: auto;
+    overflow-x: auto;
+    height: 43em;
+    border: 1px solid #73879C;
+    background: white;
+}
+
+.divBotao {
+    height: 5em;
+    padding: 0.1em;
+    position: static;
+}
+
+.divBotao div {
+    white-space: nowrap;
+    top: 0px;
+    border-radius: 4px;
+    position: relative;
+    border: none;
+    background: #f0f0f0;
+    font-family: 'Roboto', sans-serif;
+    width: 8em;
+    cursor: pointer;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    transition: 0.1s all ease;
+    font-size: 1.4em;
+    font-weight: 300;
+    color: #777;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0px 0px 0px 0px #B8B8B8;
+    float: left;
+    text-align: center;
+    margin-right: 0.2em;
+}
+
+.divBotao div:focus {
+    outline: 0;
+}
+
+.divBotao div:hover {
+    background-color: #f5f5f5;
+    top: -2px;
+    border-bottom: 4px solid #ccc;
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.20);
+    font-weight: bold;
+}
+
+.divBotao div:active {
+    top: 0px;
+    border: 1px solid #ccc;
+    background-color: #ededed;
+    box-shadow: inset 0px 0px 4px rgba(0, 0, 0, 0.15);
+}
+
+
+/******************************************************
+* Somente para table help campos ativo/sis/usuario/pp *
+******************************************************/
+
+.tableHelp {
+    border-spacing: 0px;
+    width: 100%;
+}
+
+.tableHelpBody {
+    line-height: 1.5em;
+}
+
+.tableHelpTitulo {
+    font-size: 1.7em;
+    font-weight: 800;
+    color: #1c5a85;
+    line-height: 0.5em;
+    padding-top: 5px;
+    padding-bottom: 1px;
+}
+
+.tableHelpUl {
+    display: block;
+    list-style-type: square;
+    -webkit-margin-before: 0.5em;
+    -webkit-margin-after: 0.5em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 20px;
+}
+
+.tableHelpLi {
+    padding-bottom: 5px;
+}
+
+.tableHelpLiUltimo {
+    padding-bottom: 1px;
+}
+
+.tableHelpLiUltimoB {
+    padding-bottom: 1px;
+    font-weight: 800;
+}
+
+.tableHelpTexto {
+    font-size: 1.5em;
+    text-align: justify;
+}
+
+
+/* Fim */
+
+.bisTable {
+    border-spacing: 0px;
+    border-collapse: separate;
+    width: 100%;
+    font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;;
+    font-size: 1.2em;
+}
+
+.bisTable td {
+    margin: 0;
+    padding: 2px;
+    border-bottom: 1px solid silver;
+    border-left: 1px solid silver;
+    max-width: 1px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.bisTable th {
+    margin: 0;
+    padding: 2px;
+    border-bottom: 1px solid silver;
+    border-left: 1px solid silver;
+    color: #73879C;
+}
+
+.bisTable tr {
+    margin: 0;
+    padding: 2px;
+    color: black;
+    text-align: left;
+}
+
+.bisTable tbody tr:hover {
+    /*background: #E6F6F5 !important;*/
+    background: #E6F6F5;
+}
+
+.textoDireita {
+    text-align: right;
+}
+
+.textoCentro {
+    text-align: center;
+}
+
+.textoEsquerda {
+    text-align: left;
+}
+
+
+/*
+* edtDireita 2 casas decimas e 4 devido prototype formatar
+*/
+
+.edtDireita,
+.edtDireitaQuatroDec {
+    text-align: right;
+    padding-right: 10px;
+}
+
+.corGradeParCheck {
+    background-color: aquamarine !important;
+}
+
+.corGradeImparCheck {
+    background-color: aquamarine !important;
+}
+
+.corGradePar {
+    background-color: white;
+    height: 1em;
+}
+
+.corGradeImpar {
+    background-color: #DCDCDC;
+    height: 1em;
+}
+
+.corAlterado {
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#FF6347));
+    background: -ms-linear-gradient(top, white 0%, red 100%, white 50%);
+}
+
+.corVermelho {
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#FF6347));
+    background: -ms-linear-gradient(top, white 0%, red 100%, white 50%);
+}
+
+.fontAzul {
+    color: blue;
+}
+
+.fontVermelho {
+    color: #FF0000;
+}
+
+.corAzul {
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#6CA6CD));
+}
+
+.corTitulo {
+    background: -webkit-gradient(linear, left top, left bottom, from(white), to(#E6F6F5));
+}
+
+
+/**************************
+* Fim stilos para grade Bis
+**************************/
+
+
+
+/********************************
+* ESTILOS PARA GRAFICO E LEGENDAS
+********************************/
+
+#fork {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
+}
+
+.legend {
+    width: 140px;
+    height: auto;
+    padding: 15px;
+    border: 0px solid rgb(200, 200, 200);
+}
+
+.legend .title {
+    display: block;
+    margin-bottom: 0.5em;
+    line-height: 1.2em;
+    padding: 0 0.3em;
+}
+
+.legend .color-sample {
+    display: block;
+    float: left;
+    width: 1em;
+    height: 1em;
+    border: 2px solid;
+    /* Comment out if you don't want to show the fillColor */
+    border-radius: 0.5em;
+    /* Comment out if you prefer squarish samples */
+    margin-right: 0.5em;
+}
+
+
+/************************************
+* FIM ESTILOS PARA GRAFICO E LEGENDAS
+************************************/
+
+
+/************************************
+* INICIO TOOLTIP
+************************************/
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 150px;
+    background-color: #167aae;
+    color: #fff;
+    text-align: center;
+    padding: 5px 5px;
+    position: fixed;
+    z-index: 10;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1rem;
+    margin-left: 2.5em;
+    min-height: 2.7em;
+    /* para a seta ficar ajustada quando descricao pequena */
+}
+
+
+/* 
+* Fazendo a seta lado esquerdo - https://www.w3schools.com/css/tryit.asp?filename=trycss_tooltip_arrow_left
+*/
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -8px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent #167aae transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+
+/* FIM TOOLTIP */
+
+@media screen and (min-width: 1300px) {}
+
+;
+@media (min-width: 1100px) and (max-width: 1299px) {
+    /* A SOMA DESTAS TRES DIVs TEM QUE SER 100% */
+    .divTopoInicio_logo {
+        width: 10%;
+    }
+    .divTopoInicio_Informacao {
+        width: 80%;
+    }
+    .logoHome {
+        width: 9%;
+    }
+    .label_Informacao {
+        font-size: 3em;
+    }
+}
+
+@media (min-width: 900px) and (max-width: 1099px) {
+    /* A SOMA DESTAS TRES DIVs TEM QUE SER 100% */
+    .divTopoInicio_logo {
+        width: 13%;
+    }
+    .divTopoInicio_Informacao {
+        width: 80%;
+    }
+    .logoHome {
+        width: 7%;
+    }
+    .label_Informacao {
+        font-size: 2.5em;
+    }
+    .escondeA {
+        display: none;
+    }
+}
+
+@media (min-width: 700px) and (max-width: 899px) {
+    /* A SOMA DESTAS TRES DIVs TEM QUE SER 100% */
+    .divTopoInicio_logo {
+        display: none;
+    }
+    .divTopoInicio_Informacao {
+        width: 75%;
+    }
+    .logoHome {
+        width: 8%;
+    }
+    .label_Informacao {
+        font-size: 2em;
+    }
+    .campo10 {
+        width: 50%;
+    }
+    .campo12 {
+        width: 50%;
+    }
+    .campo15 {
+        width: 50%;
+    }
+    .campo20 {
+        width: 50%;
+    }
+    .campo25 {
+        width: 50%;
+    }
+    .campo30 {
+        width: 50%;
+    }
+    .campo35 {
+        width: 50%;
+    }
+    .campo45 {
+        width: 100%;
+    }
+    .campo50 {
+        width: 100%;
+    }
+    .campo75 {
+        width: 100%;
+    }
+    .campo85 {
+        width: 100%;
+    }
+    .escondeA {
+        display: none;
+    }
+    body {
+        font-size: 48%
+    }
+    ;
+}
+
+@media (min-width: 500px) and (max-width: 699px) {
+    /* A SOMA DESTAS TRES DIVs TEM QUE SER 100% */
+    .divTopoInicio_logo {
+        display: none;
+    }
+    .divTopoInicio_Informacao {
+        width: 68%;
+    }
+    .logoHome {
+        width: 9%;
+    }
+    .label_Informacao {
+        font-size: 2em;
+    }
+    .campo10 {
+        width: 100%;
+    }
+    .campo12 {
+        width: 100%;
+    }
+    .campo15 {
+        width: 100%;
+    }
+    .campo20 {
+        width: 100%;
+    }
+    .campo25 {
+        width: 100%;
+    }
+    .campo30 {
+        width: 50%;
+    }
+    .campo35 {
+        width: 50%;
+    }
+    .campo45 {
+        width: 100%;
+    }
+    .campo50 {
+        width: 100%;
+    }
+    .campo75 {
+        width: 100%;
+    }
+    .campo85 {
+        width: 100%;
+    }
+    .escondeA {
+        display: none;
+    }
+    .escondeB {
+        display: none;
+    }
+    .escondeC {
+        display: none;
+    }
+    body {
+        font-size: 35%;
+    }
+}
+
+@media (max-width: 499px) {
+    /* A SOMA DESTAS TRES DIVs TEM QUE SER 100% */
+    .divTopoInicio_logo {
+        display: none;
+    }
+    .divTopoInicio_Informacao {
+        width: 88%;
+    }
+    .logoHome {
+        width: 12%;
+    }
+    .campo10 {
+        width: 100%;
+    }
+    .campo12 {
+        width: 100%;
+    }
+    .campo15 {
+        width: 100%;
+    }
+    .campo20 {
+        width: 100%;
+    }
+    .campo25 {
+        width: 100%;
+    }
+    .campo30 {
+        width: 100%;
+    }
+    .campo35 {
+        width: 100%;
+    }
+    .campo45 {
+        width: 100%;
+    }
+    .campo50 {
+        width: 100%;
+    }
+    .campo75 {
+        width: 100%;
+    }
+    .campo85 {
+        width: 100%;
+    }
+    .campo100 {
+        width: 100%;
+    }
+    .label_Informacao {
+        font-size: 1.5em;
+    }
+}
+
+.mv_QtosItens:hover {
+    background-color: #E6F6F5;
+    color: blue;
+}
+
+
+/************************************
+* Formulario para manutencao de table
+************************************/
+
+.frmTable {
+    width: 300px;
+    padding: 10px;
+    position: absolute;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 0 3px 7px rgba(0, 0, 0, 0.3), inset 0 1px rgba(255, 255, 255, 1), inset 0 -3px 2px rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    background: white;
+    /* Fallback */
+    background: -moz-linear-gradient(#eeefef, #ffffff 10%);
+    background: -ms-linear-gradient(#eeefef, #ffffff 10%);
+    background: -o-linear-gradient(#eeefef, #ffffff 10%);
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#eeefef), color-stop(0.1, #ffffff));
+    background: -webkit-linear-gradient(#eeefef, #ffffff 10%);
+    background: linear-gradient(#eeefef, #ffffff 10%);
+}
+
+.frmTable .frmCampoTit .informe {
+    font-size: 2em;
+    padding: 0em 0em 0em 1em;
+    font-weight: 900;
+    width: 100%;
+    line-height: 42px;
+    background-image: linear-gradient(45deg, #1c5a85 10%, transparent 85%, #4682B4 75%, transparent 10%, #1c5a85 95%);
+    /* Azul
+    background-image:linear-gradient(45deg, 
+      #1c5a85 10%, transparent 85%,
+      #4682B4 75%, transparent 10%,
+      #1c5a85 95%);  
+    */
+    /* Laranja    
+    background-image:linear-gradient(45deg, 
+      #F58634 10%, transparent 85%,
+      #CD6839 75%, transparent 10%,
+      #F58634 95%);
+    */
+}
+
+
+/*********************************************
+* Formulario sem ser os de manutenção de table
+*********************************************/
+
+.formulario {
+    width: 300px;
+    padding: 10px;
+    position: absolute;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 0 3px 7px rgba(0, 0, 0, 0.3), inset 0 1px rgba(255, 255, 255, 1), inset 0 -3px 2px rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    background: white;
+    /* Fallback */
+    background: -moz-linear-gradient(#eeefef, #ffffff 10%);
+    background: -ms-linear-gradient(#eeefef, #ffffff 10%);
+    background: -o-linear-gradient(#eeefef, #ffffff 10%);
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#eeefef), color-stop(0.1, #ffffff));
+    background: -webkit-linear-gradient(#eeefef, #ffffff 10%);
+    background: linear-gradient(#eeefef, #ffffff 10%);
+}
+
+.formulario .frmCampo {
+    position: relative;
+}
+
+.formulario .frmCampo .informe {
+    background-color: silver;
+    font-size: 2em;
+    padding-right: 3em;
+    font-weight: 900;
+    text-align: center;
+}
+
+.formulario .frmCampo i {
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    height: 36px;
+    width: 36px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.7);
+    color: #777777;
+    text-align: center;
+    line-height: 42px;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    pointer-events: none;
+}
+
+.formulario .frmCampoTit .informe {
+    font-size: 2em;
+    padding-right: 3em;
+    font-weight: 900;
+    text-align: center;
+    background-image: linear-gradient(45deg, #1c5a85 10%, transparent 85%, #4682B4 75%, transparent 10%, #1c5a85 95%);
+}
+
+.formulario input[type=text],
+.formulario input[type=password] {
+    font-family: 'Lato', Calibri, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    width: 100%;
+    /* Alterado devido Atlas_AlteraSenha.php
+    padding: 10px 18px 10px 8px;
+    */
+    padding: 10px 18px 10px 40px;
+    border: none;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1), inset 0 3px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    background: #f9f9f9;
+    color: #777;
+    -webkit-transition: color 0.3s ease-out;
+    -moz-transition: color 0.3s ease-out;
+    -ms-transition: color 0.3s ease-out;
+    -o-transition: color 0.3s ease-out;
+    transition: color 0.3s ease-out;
+}
+
+
+/*
+  * Altera cor do .fa no hover
+  */
+
+.formulario input[type=text]:hover~i,
+.formulario input[type=password]:hover~i {
+    color: #52cfeb;
+}
+
+
+/*
+  * Altera cor do .fa quando text recebe foco
+  */
+
+.formulario input[type=text]:focus~i,
+.formulario input[type=password]:focus~i {
+    color: #42A2BC;
+}
+
+.formulario .botSupDir,
+.formulario .botSupEsq {
+    width: 65px;
+    height: 65px;
+    position: absolute;
+    top: -10px;
+    padding: 10px;
+    z-index: 2;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1), 0 3px 2px rgba(0, 0, 0, 0.1), inset 0 -3px 2px rgba(0, 0, 0, 0.2);
+}
+
+.formulario .botSupDir {
+    right: -25px;
+}
+
+.formulario .botSupEsq {
+    left: -30px;
+}
+
+.formulario .botSupDir:after,
+.formulario .botSupEsq:after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    top: -2px;
+    left: 30px;
+    box-shadow: 0 62px white, 0 0 white;
+}
+
+.formulario button {
+    width: 100%;
+    height: 100%;
+    margin-top: -1px;
+    font-size: 1.4em;
+    line-height: 1.75;
+    color: white;
+    outline: none;
+    border: none;
+    border-radius: inherit;
+    background: -moz-linear-gradient(#52cfeb, #42A2BC);
+    background: -ms-linear-gradient(#52cfeb, #42A2BC);
+    background: -o-linear-gradient(#52cfeb, #42A2BC);
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#52cfeb), to(#42A2BC));
+    background: -webkit-linear-gradient(#52cfeb, #42A2BC);
+    background: linear-gradient(#52cfeb, #42A2BC);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 3px 2px rgba(255, 255, 255, 0.2), inset 0 -3px 2px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.formulario .botSupDir button {
+    background: #52cfeb;
+}
+
+.formulario .botSupEsq button {
+    background: #eb5289;
+}
+
+.formulario .esq:hover,
+.formulario button[type=botSupEsq]:focus {
+    color: #eb5289;
+    background: white;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+}
+
+.formulario .dir:hover,
+.formulario button[type=botSupDir]:focus {
+    color: #52cfeb;
+    background: white;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+}
+
+.icon-large:before {
+    vertical-align: top;
+    font-size: 2em;
+}
+
+.faIL {}
+
+.faIL:before {
+    font-family: FontAwesome;
+    font-weight: normal;
+    font-style: normal;
+    display: inline-block;
+    text-decoration: inherit;
+    margin-top: -0.12em;
+}
+
+
+/* Fim do formulario */
+
+
+/*
+.effect {
+  color: #EEE;
+  text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0,0,0,.1), 0 0 4px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.3), 0 3px 2px rgba(0,0,0,.2), 0 4px 7px rgba(0,0,0,.25);
+}
+*/
+
+
+/*
+* TreeView
+*/
+
+.cssTreeviewContainer {
+    margin: 15px auto 0 10px;
+    width: 300px;
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+    border: solid 2px #777;
+    box-shadow: 0 0 5px #333;
+    float: left;
+}
+
+.cssTreeviewh1 {
+    margin: 0 0 10px;
+}
+
+.cssTreeview ul,
+.cssTreeview li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.cssTreeview input {
+    position: absolute;
+    opacity: 0;
+}
+
+.cssTreeview {
+    user-select: none;
+    font-size: 1.5em;
+}
+
+.cssTreeview a {
+    color: #35d;
+    text-decoration: none;
+}
+
+.cssTreeview a:hover {
+    text-decoration: underline;
+}
+
+.cssTreeview input+label+ul {
+    margin: 0 0 0 22px;
+}
+
+.cssTreeview input~ul {
+    display: none;
+}
+
+.cssTreeview label,
+.cssTreeview label::before {
+    cursor: pointer;
+}
+
+.cssTreeview input:disabled+label {
+    cursor: default;
+    opacity: .6;
+}
+
+.cssTreeview input:checked:not(:disabled)~ul {
+    display: block;
+}
+
+.cssTreeview label,
+.cssTreeview a,
+.cssTreeview label::before {
+    display: inline-block;
+    height: 18px;
+    line-height: 20px;
+    vertical-align: middle;
+}
+
+.cssTreeview label::before {
+    content: "";
+    width: 16px;
+    margin: -8px 8px 0 0;
+    vertical-align: middle;
+    background: url("../imagens/folder.gif");
+}
+
+.cssTreeview input:checked+label::before {
+    background: url("../imagens/folderopen.gif");
+}
+
+
+/*
+* Fim TreeView
+*/
+
+.selecionadoRelatorio {
+    border: white;
+    border-style: outset;
+    border-width: thick;
+    outline-style: inset;
+    outline-color: royalblue;
+}
+
+.espacamentoIcones {
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.fonteIcones {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.espacamentoBotao {
+    margin-right: 30px;
+}
+
+.alinharBotoes {
+    margin-top: 15px;
+}

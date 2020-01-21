@@ -32,6 +32,15 @@
   padding-right:1em;  
 } 
 
+.tableDivProcurarLabelRelatorio{
+  float:left;
+  text-align:center;
+  font-size:1.6em; 
+  font-weight: bold; 
+  padding-right:1em;  
+} 
+
+
 .tableDivProcurarInput{
   padding-top:0.2em;
   float:right;

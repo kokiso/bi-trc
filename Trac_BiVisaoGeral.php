@@ -300,23 +300,62 @@ if (isset($_POST["visaogeral"])) {
       if ($rotina == "biInfracaoGpo") {
         switch ($lote[0]->levpes) {
           case "LP":
-            $frota = " AND (V.VCL_FROTA IN('L','P'))";
+            $frota = " AND (VCL.VCL_FROTA IN('L','P'))";
             break;
           case "L":
-            $frota = " AND (V.VCL_FROTA='L')";
+            $frota = " AND (VCL.VCL_FROTA='L')";
             break;
           case "P":
-            $frota = " AND (V.VCL_FROTA='P')";
+            $frota = " AND (VCL.VCL_FROTA='P')";
             break;
         };
-        $sql = "SELECT TOP 10 COUNT(INF.ID) AS INFRACOES, GPO_NOME AS NOME FROM VEICULO V";
-        $sql .= " INNER JOIN INFRACAO INF ON V.VCL_CODIGO = INF.PLACA AND INF.ANO_MES =" . $codmes;
-        $sql .= " LEFT OUTER JOIN GRUPOOPERACIONAL GPO ON V.VCL_CODGPO = GPO.GPO_CODIGO";
-        $sql .= " LEFT OUTER JOIN UNIDADE UNI ON V.VCL_CODUNI=UNI.UNI_CODIGO";
-        $sql .= " LEFT OUTER JOIN USUARIOUNIDADE UU ON V.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR =" . $_SESSION['usr_codigo'];
-        $sql .= " WHERE VCL_CODGPO IS NOT NULL ";
-        $sql .= $frota;
-        $sql .= " GROUP BY VCL_CODGPO, GPO_NOME ORDER BY INFRACOES DESC";
+        if ($lote[0]->codgpo != '*') {
+          $gpo = " AND (VCL.VCL_CODGPO=" . $lote[0]->codgpo . ")";
+        }
+        $sql = "";
+        if ($lote[0]->qualSelect == "infracao") {
+
+          $arrAll = [];
+          array_push($arrAll, ["SIGLA" => "AB", "NOME" => "ACELERACAO BRUSCA", "ALIAS" => "A.BIABM", "TABLE" => "BI_ACELERBRUSCAMES", "UNION" => "S"]);
+          array_push($arrAll, ["SIGLA" => "CB", "NOME" => "CONDUCAO BANGUELA", "ALIAS" => "A.BICBM", "TABLE" => "BI_CONDUCAOBANGMES", "UNION" => "S"]);
+          array_push($arrAll, ["SIGLA" => "EV", "NOME" => "EXCESSO VELOC", "ALIAS" => "A.BIEVM", "TABLE" => "BI_EXCESSOVELOCMES", "UNION" => "S"]);
+          array_push($arrAll, ["SIGLA" => "EVC", "NOME" => "EXCESSO VELOC CHUVA", "ALIAS" => "A.BIEVCM", "TABLE" => "BI_EXCESSOVELCHMES", "UNION" => "S"]);
+          array_push($arrAll, ["SIGLA" => "FB", "NOME" => "FREADA BRUSCA", "ALIAS" => "A.BIFBM", "TABLE" => "BI_FREADABRUSCAMES", "UNION" => "S"]);
+          array_push($arrAll, ["SIGLA" => "ERPM", "NOME" => "EXCESSO RPM", "ALIAS" => "A.BIRAM", "TABLE" => "BI_RPMALTOMES", "UNION" => "N"]);
+          $qtos = count($arrAll);
+          $sql = "";
+          $sql.= "SELECT GPO_CODIGO, NOME, SUM(INFRACOES) AS INFRACOES FROM (" ;
+          for ($lin = 0; $lin < $qtos; $lin++) {
+            $alias  = $arrAll[$lin]["ALIAS"];
+            $table  = $arrAll[$lin]["TABLE"];
+            $sigla  = $arrAll[$lin]["SIGLA"];
+            $nome   = $arrAll[$lin]["NOME"];
+
+            $sql .= " SELECT GPO_CODIGO, GPO_NOME AS NOME";
+            $sql .= "        ,COALESCE(SUM(" . $alias . "_TOTAL),0) AS INFRACOES";
+            $sql .= "  FROM " . $table . " A";
+            $sql .= "  LEFT OUTER JOIN UNIDADE UNI ON " . $alias . "_CODUNI=UNI.UNI_CODIGO";
+            $sql .= "  LEFT OUTER JOIN VEICULO VCL ON " . $alias . "_CODVCL=VCL.VCL_CODIGO";
+            $sql .= "  INNER JOIN GRUPOOPERACIONAL GPO ON GPO.GPO_CODIGO=VCL.VCL_CODGPO";
+            $sql .= "  LEFT OUTER JOIN USUARIOUNIDADE UU ON " . $alias . "_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=" . $_SESSION['usr_codigo'];
+            $sql .= "  WHERE (" . $alias . "_ANOMES=" . $codmes . ")";
+            $sql .= "    AND (COALESCE(UU.UU_ATIVO,'')='S')";
+            $sql .= $frota;
+            $sql .= $gpo;
+            if ($lote[0]->coduni > 0) {
+              $sql .= "    AND (" . $alias . "_CODUNI=" . $lote[0]->coduni . ")";
+            };
+            if ($lote[0]->codpol != "*") {
+              $sql .= "    AND (UNI.UNI_CODPOL='" . $lote[0]->codpol . "')";
+            };
+            $sql .= " GROUP BY GPO_CODIGO, GPO_NOME";
+            if ($arrAll[$lin]["UNION"] == "S")
+              $sql .= " UNION ALL ";
+          };
+        $sql.= " ) t GROUP BY GPO_CODIGO, NOME";
+        };
+
+
         $classe->msgSelect(false);
         $retCls = $classe->selectAssoc($sql);
         if ($retCls['retorno'] != "OK") {
@@ -663,7 +702,12 @@ if (isset($_POST["visaogeral"])) {
   <link rel="stylesheet" href="adminLTE/ionicons.css">
   <link rel="stylesheet" href="adminLTE/AdminLTE.css">
   <link rel="stylesheet" href="adminLTE/all-skins.css">
+  <link rel="stylesheet" href="css/cssDashboard.css">
+  <link rel="stylesheet" href="css/cssTable2017.css">
+  <link rel="stylesheet" href="css/cssFaTable.css">
   <script src="js/js2017.js"></script>
+  <script src="js/jsTable2017.js"></script>
+  <script src="tabelaTrac/f10/exportacaoDashboardF10.js"></script>
   <link rel="stylesheet" href="css/iframeBi.css">
   <script language="javascript" type="text/javascript"></script>
   <style>
@@ -689,13 +733,14 @@ if (isset($_POST["visaogeral"])) {
     });
     var clsJs; // Classe responsavel por montar um Json e eviar PHP
     var clsErro; // Classe para erros            
+    var relatorioF10; // Obrigatório para instanciar o JS relatorioF10
     var fd; // Formulario para envio de dados para o PHP
     var msg; // Variavel para guardadar mensagens de retorno/erro 
     var tam // Para tamanho de arrays
     var retPhp // Retorno do Php para a rotina chamadora
     var contMsg = 0; // contador para mensagens
     var jsPub = JSON.parse(localStorage.getItem("lsPublico"));
-    var pubCodUni = 0;
+    var pubCodUni = "0";
     var pubDesUni = "";
     var pubCodPol = "*";
     var pubDesPol = "";
@@ -1001,13 +1046,14 @@ if (isset($_POST["visaogeral"])) {
     }
 
 
-    function fncFiltrarGraficoGrupoOperacional(qualSelect, qualTbl, qualDiv, qualTot, qualCodUni, qualCodPol, qualLevPes) {
+    function fncFiltrarGraficoGrupoOperacional(qualSelect, qualTbl, qualDiv, qualTot, qualCodUni, qualCodPol, qualLevPes, qualCodGpo) {
       clsJs = jsString("lote");
       clsJs.add("rotina", "biInfracaoGpo");
       clsJs.add("login", jsPub[0].usr_login);
       clsJs.add("qualSelect", qualSelect);
       clsJs.add("coduni", qualCodUni);
       clsJs.add("codpol", qualCodPol);
+      clsJs.add("codgpo", qualCodGpo);
       clsJs.add("levpes", qualLevPes);
       clsJs.add("compet", document.getElementById("cbCompetencia").value);
       fd = new FormData();
@@ -1431,10 +1477,7 @@ if (isset($_POST["visaogeral"])) {
           ceLi.style.height = "25px";
           ceAnc = document.createElement("a");
           ceAnc.href = "#";
-          ceAnc.setAttribute("onclick",
-            `iniciarBi('${retPhp[0]["dados"][lin]["UNI_CODIGO"] ? retPhp[0]["dados"][lin]["UNI_CODIGO"] : '*'}',
-               '${retPhp[0]["dados"][lin]["UNI_APELIDO"] ? retPhp[0]["dados"][lin]["UNI_APELIDO"] : '*'}',
-                          '${pubCodPol}', 'Todos polos', '${retPhp[0]["dados"][lin]["GPO_CODIGO"]}', 'Todos Grupos Operacionais')`);
+          ceAnc.setAttribute("onclick", `iniciarBi('${retPhp[0]["dados"][lin]["UNI_CODIGO"] ? retPhp[0]["dados"][lin]["UNI_CODIGO"] : '*'}','${retPhp[0]["dados"][lin]["UNI_APELIDO"] ? retPhp[0]["dados"][lin]["UNI_APELIDO"] : '*'}','${pubCodPol}','${pubDesPol}','${retPhp[0]["dados"][lin]["GPO_CODIGO"]}','${retPhp[0]["dados"][lin]["GPO_NOME"]}')`);
           ceImg = document.createElement("i");
           ceImg.className = "fa fa-object-ungroup text-red";
           ceAnc.appendChild(ceImg);
@@ -1447,9 +1490,7 @@ if (isset($_POST["visaogeral"])) {
         ceLi = document.createElement("li");
         ceAnc = document.createElement("a");
         ceAnc.href = "#";
-        ceAnc.setAttribute("onclick",
-          `iniciarBi('${pubCodUni}', 'Todas Unidades',
-                          '${pubCodPol}', 'Todos polos', '*', 'Todos Grupos Operacionais')`);
+        ceAnc.setAttribute("onclick", `iniciarBi('${pubCodUni}','${pubDesUni}','${pubCodPol}','${pubDesPol}','*','${pubDesGpo}')`);
         ceImg = document.createElement("i");
         ceImg.className = "fa fa-object-ungroup text-red";
         ceAnc.appendChild(ceImg);
@@ -1482,7 +1523,7 @@ if (isset($_POST["visaogeral"])) {
           ceAnc.href = "#";
           ceAnc.setAttribute("onclick", "iniciarBi('" + retPhp[0]["dados"][lin]["UNI_CODIGO"] +
             "','" + retPhp[0]["dados"][lin]["UNI_APELIDO"] + "'" +
-            "," + `'${pubCodPol}'` + ",'Todos polos', '*' , 'Todos Grupos Operacionais')");
+            "," + `'${pubCodPol}','${pubDesPol}','*','${pubDesGpo}')`);
           ceImg = document.createElement("i");
           ceImg.className = "fa fa-object-ungroup text-red";
           ceAnc.appendChild(ceImg);
@@ -1527,8 +1568,7 @@ if (isset($_POST["visaogeral"])) {
           ceLi.style.height = "25px";
           ceAnc = document.createElement("a");
           ceAnc.href = "#";
-          ceAnc.setAttribute("onclick", "iniciarBi('0','Todas unidades','" + retPhp[0]["dados"][lin]["POL_CODIGO"] + "','" +
-            retPhp[0]["dados"][lin]["POL_NOME"] + "', '*', 'Todos Grupos Operacionais')");
+          ceAnc.setAttribute("onclick", `iniciarBi('0','${pubDesUni}','${retPhp[0]["dados"][lin]["POL_CODIGO"]}','${retPhp[0]["dados"][lin]["POL_NOME"]}','*','${pubDesGpo}')`);
           ceImg = document.createElement("i");
           ceImg.className = "fa fa-object-group text-red";
           ceAnc.appendChild(ceImg);
@@ -1653,27 +1693,36 @@ if (isset($_POST["visaogeral"])) {
     };
 
     function exportarRelatorio() {
-
-      $.post("http://localhost:8000/TotalTracRelatorios/RelatorioVisaoGeralServlet",
-        JSON.stringify({
-          formato: "pdf",
-          usuario: "alberto",
-          senha: "senhadoalberto",
-          reports: [
-            "veiculos",
-            "motoristas"
-          ]
-        }), function(data) {
-    var blob=new Blob([data]);
-    console.log();
-
-    var link=document.createElement('a');
-    link.href=window.URL.createObjectURL(blob);
-    link.download="relatorio.pdf";
-    link.click();
-  }, "json"
-      );
+      var cards = [
+        ["VEICULOS"],
+        ["MOTORISTAS"],
+        ["COMPARATIVO_INFRACOES"],
+        ["INFRACOES_MES"],
+        ["INFRACOES_GPO"],
+        ["RANKING_INFRACOES_UNIDADE"],
+        ["RANKING_INFRACOES_POLO"]
+      ];     
+        fexportarRelatorioF10(cards);
     }
+
+    function RetF10tblRelatorio(rels, formato) {
+      let relatorios = {};
+      rels.forEach(item => {
+         relatorios[item["RELATORIO"]] = true;
+      });
+      var filtros = {
+        "UNIDADE": pubCodUni + "",
+        "UNIDADE_NOME": pubDesUni,
+        "POLO": pubCodPol,
+        "POLO_NOME": pubDesPol,
+        "GRUPOOPERACIONAL": pubCodGpo,
+        "GRUPOOPERACIONAL_NOME": pubDesGpo,
+        "DATA": document.getElementById("cbCompetencia").value,
+        "LEVEPESADO" : pubLevPes
+    };
+      exportarRelatorioF10(relatorios, formato, filtros);
+    } 
+
   </script>
 </head>
 
@@ -1685,7 +1734,7 @@ if (isset($_POST["visaogeral"])) {
       </div>
 
       <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
-        <select id="cbLevePesado" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
+        <select id="cbLevePesado" onChange="chngCompetencia()" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
           <option value="LP" selected="selected">Leve/Pesado</option>
           <option value="P">Pesado</option>
           <option value="L">Leve</option>
@@ -1769,8 +1818,8 @@ if (isset($_POST["visaogeral"])) {
         </li>
 
         <li class="dropdown user user-menu">
-          <a href="#" class="dropdown-toggle">
-            <span onClick="exportarRelatorio()" class="hidden-xs">Exportar</span>
+          <a href="#" onClick="exportarRelatorio()" class="dropdown-toggle">
+            <span class="hidden-xs">Exportar</span>
           </a>
         </li>
         <li class="dropdown user user-menu">
