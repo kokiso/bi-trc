@@ -388,9 +388,9 @@
             ,{"id":10 ,"field"          : "MTR_RFID"   
                       ,"labelCol"       : "RFID"
                       ,"obj"            : "edtRfid"
+                      ,"validar"        : ["podeNull"]
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "25"
-                      ,"digitosMinMax"  : [3,20]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|"
                       ,"ajudaCampo"     : ["Nome do motorista com até 20 caracteres."]
                       ,"importaExcel"   : "S"                                          
@@ -809,7 +809,7 @@
               </div>
               <div class="campotexto campo15">
                 <input class="campo_input" id="edtRfid" type="text" maxlength="15" />
-                <label class="campo_label campo_required" for="edtRfid">RFID</label>
+                <label class="campo_label" for="edtRfid">RFID</label>
               </div>
               <div class="campotexto campo10">
                 <input class="campo_input inputF10" id="edtCodUni"

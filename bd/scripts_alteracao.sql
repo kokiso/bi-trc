@@ -154,3 +154,5 @@ create index MOTORISTA_MTR_VEICULO_index
 	on MOTORISTA (MTR_VEICULO)
 go
 
+alter table MOTORISTA alter column MTR_RFID varchar(30) null
+go
