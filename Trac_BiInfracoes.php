@@ -561,9 +561,15 @@
     <link rel="stylesheet" href="adminLTE/ionicons.css">
     <link rel="stylesheet" href="adminLTE/AdminLTE.css">
     <link rel="stylesheet" href="adminLTE/all-skins.css">
+    <link rel="stylesheet" href="css/cssDashboard.css">
+  <link rel="stylesheet" href="css/cssTable2017.css">
+  <link rel="stylesheet" href="css/cssFaTable.css">
     <script src="js/js2017.js"></script>
+    <script src="js/jsTable2017.js"></script>
+    <script src="config/configuracoes.js"></script>
     <link rel="stylesheet" href="css/iframeBi.css">
     <script language="javascript" type="text/javascript"></script>
+    <script src="tabelaTrac/f10/exportacaoDashboardF10.js"></script>
     <style>
       .btn-label {
         background-color: #3c8dbc;
@@ -586,6 +592,7 @@
       });  
       var clsJs;          // Classe responsavel por montar um Json e eviar PHP
       var clsErro;        // Classe para erros            
+      var relatorioF10; // Obrigatório para instanciar o JS relatorioF10
       var fd;             // Formulario para envio de dados para o PHP
       var msg;            // Variavel para guardadar mensagens de retorno/erro 
       var tam             // Para tamanho de arrays
@@ -599,7 +606,9 @@
       let pubCodGpo = "*";
       let pubDesGpo = "";
       var pubLevPes = "LP";   //Buscar por veiculo leve/pesado
-      var pubCompetencia="*";  
+      var pubCompetencia="*";
+      var pubQualInfracaoMotorista = "EV";
+      var pubQualInfracaoTurno = "EV";
       //////////////////////////////////////
       // Opcoes para grafico              //
       //////////////////////////////////////
@@ -891,149 +900,142 @@
         };
       };
 
-      function buscarGpo(){
-        document.getElementById('filtroGpo').innerHTML = '';
-        clsJs   = jsString("lote");  
-        clsJs.add("rotina"      , "quaisGpo"                                  );
-        clsJs.add("login"       , jsPub[0].usr_login                              );
-        clsJs.add("uniCodigo"   , pubCodUni                                       );
-        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
-        fd = new FormData();
-        fd.append("principal" , clsJs.fim());
-        msg     = requestPedido("Trac_BiInfracoes.php",fd); 
-        retPhp  = JSON.parse(msg);
-        if( retPhp[0].retorno == "OK" ){
-          msg=retPhp[0]["dados"].length;  
-          
-          for( var lin=0;lin<msg;lin++ ){
-            ceLi= document.createElement("li"); 
-            ceLi.style.height="25px";
-              ceAnc= document.createElement("a");
-              ceAnc.href="#";
-              ceAnc.setAttribute("onclick",
-              `iniciarBi('${retPhp[0]["dados"][lin]["UNI_CODIGO"] ? retPhp[0]["dados"][lin]["UNI_CODIGO"] : '*'}',
-               '${retPhp[0]["dados"][lin]["UNI_APELIDO"] ? retPhp[0]["dados"][lin]["UNI_APELIDO"] : '*'}',
-                          '${pubCodPol}', 'Todos polos', '${retPhp[0]["dados"][lin]["GPO_CODIGO"]}', 'Todos Grupos Operacionais')`);
-                ceImg= document.createElement("i");
-                ceImg.className="fa fa-object-ungroup text-red";
-                ceAnc.appendChild(ceImg);
-                
-                ceContext = document.createTextNode( " -"+retPhp[0]["dados"][lin]["GPO_NOME"] );  
-              ceAnc.appendChild(ceContext);
-            ceLi.appendChild(ceAnc);
-            document.getElementById("filtroGpo").appendChild(ceLi);
-          };    
-          ceLi= document.createElement("li"); 
-            ceAnc= document.createElement("a");
-            ceAnc.href="#";
-            ceAnc.setAttribute("onclick",
-            `iniciarBi('${pubCodUni}', 'Todas Unidades',
-                          '${pubCodPol}', 'Todos polos', '*', 'Todos Grupos Operacionais')`);
-              ceImg= document.createElement("i");
-              ceImg.className="fa fa-object-ungroup text-red";
-              ceAnc.appendChild(ceImg);
-              
-              ceContext = document.createTextNode( " -TODOS" );  
-            ceAnc.appendChild(ceContext);
+      function buscarGpo() {
+      document.getElementById('filtroGpo').innerHTML = '';
+      clsJs = jsString("lote");
+      clsJs.add("rotina", "quaisGpo");
+      clsJs.add("login", jsPub[0].usr_login);
+      clsJs.add("uniCodigo", pubCodUni);
+      clsJs.add("compet", document.getElementById("cbCompetencia").value);
+      fd = new FormData();
+      fd.append("principal", clsJs.fim());
+      msg = requestPedido("Trac_BiInfracoes.php", fd);
+      retPhp = JSON.parse(msg);
+      if (retPhp[0].retorno == "OK") {
+        msg = retPhp[0]["dados"].length;
+
+        for (var lin = 0; lin < msg; lin++) {
+          ceLi = document.createElement("li");
+          ceLi.style.height = "25px";
+          ceAnc = document.createElement("a");
+          ceAnc.href = "#";
+          ceAnc.setAttribute("onclick", `iniciarBi('${retPhp[0]["dados"][lin]["UNI_CODIGO"] ? retPhp[0]["dados"][lin]["UNI_CODIGO"] : '*'}','${retPhp[0]["dados"][lin]["UNI_APELIDO"] ? retPhp[0]["dados"][lin]["UNI_APELIDO"] : '*'}','${pubCodPol}','${pubDesPol}','${retPhp[0]["dados"][lin]["GPO_CODIGO"]}','${retPhp[0]["dados"][lin]["GPO_NOME"]}')`);
+          ceImg = document.createElement("i");
+          ceImg.className = "fa fa-object-ungroup text-red";
+          ceAnc.appendChild(ceImg);
+
+          ceContext = document.createTextNode(" -" + retPhp[0]["dados"][lin]["GPO_NOME"]);
+          ceAnc.appendChild(ceContext);
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroGpo").appendChild(ceLi);
         };
+        ceLi = document.createElement("li");
+        ceAnc = document.createElement("a");
+        ceAnc.href = "#";
+        ceAnc.setAttribute("onclick", `iniciarBi('${pubCodUni}','${pubDesUni}','${pubCodPol}','${pubDesPol}','*','${pubDesGpo}')`);
+        ceImg = document.createElement("i");
+        ceImg.className = "fa fa-object-ungroup text-red";
+        ceAnc.appendChild(ceImg);
+
+        ceContext = document.createTextNode(" -TODOS");
+        ceAnc.appendChild(ceContext);
+        ceLi.appendChild(ceAnc);
+        document.getElementById("filtroGpo").appendChild(ceLi);
       };
-      ///////////////////////////////////////////////////////////
-      // Buscando apenas as unidades que o usuario tem direito //
-      ///////////////////////////////////////////////////////////
-      function buscarUni(){
-        document.getElementById('filtroUni').innerHTML = '';
-        clsJs   = jsString("lote");  
-        clsJs.add("rotina"      , "quaisUnidade"      );
-        clsJs.add("login"       , jsPub[0].usr_login  );
-        clsJs.add("poloCodigo"  , pubCodPol           );
-        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
-        fd = new FormData();
-        fd.append("principal" , clsJs.fim());
-        msg     = requestPedido("Trac_BiInfracoes.php",fd); 
-        retPhp  = JSON.parse(msg);
-        if( retPhp[0].retorno == "OK" ){
-          msg=retPhp[0]["dados"].length;  
-          
-          for( var lin=0;lin<msg;lin++ ){
-            ceLi= document.createElement("li"); 
-            ceLi.style.height="25px";
-              ceAnc= document.createElement("a");
-              ceAnc.href="#";
-              ceAnc.setAttribute("onclick","iniciarBi('"+retPhp[0]["dados"][lin]["UNI_CODIGO"]
-                                                        +"','"+retPhp[0]["dados"][lin]["UNI_APELIDO"]+"'"
-                                                        +"," + `'${pubCodPol}'` + ",'Todos polos', '*' , 'Todos Grupos Operacionais')");
-                ceImg= document.createElement("i");
-                ceImg.className="fa fa-object-ungroup text-red";
-                ceAnc.appendChild(ceImg);
-                
-                ceContext = document.createTextNode( " -"+retPhp[0]["dados"][lin]["UNI_APELIDO"] );  
-              ceAnc.appendChild(ceContext);
-            ceLi.appendChild(ceAnc);
-            document.getElementById("filtroUni").appendChild(ceLi);
-          };    
-          ceLi= document.createElement("li"); 
-            ceAnc= document.createElement("a");
-            ceAnc.href="#";
-            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
-              ceImg= document.createElement("i");
-              ceImg.className="fa fa-object-ungroup text-red";
-              ceAnc.appendChild(ceImg);
-              
-              ceContext = document.createTextNode( " -TODAS" );  
-            ceAnc.appendChild(ceContext);
+    };
+
+    function buscarUni() {
+      document.getElementById('filtroUni').innerHTML = '';
+      clsJs = jsString("lote");
+      clsJs.add("rotina", "quaisUnidade");
+      clsJs.add("login", jsPub[0].usr_login);
+      clsJs.add("poloCodigo", pubCodPol);
+      clsJs.add("compet", document.getElementById("cbCompetencia").value);
+      fd = new FormData();
+      fd.append("principal", clsJs.fim());
+      msg = requestPedido("Trac_BiInfracoes.php", fd);
+      retPhp = JSON.parse(msg);
+      if (retPhp[0].retorno == "OK") {
+        msg = retPhp[0]["dados"].length;
+
+        for (var lin = 0; lin < msg; lin++) {
+          ceLi = document.createElement("li");
+          ceLi.style.height = "25px";
+          ceAnc = document.createElement("a");
+          ceAnc.href = "#";
+          ceAnc.setAttribute("onclick", "iniciarBi('" + retPhp[0]["dados"][lin]["UNI_CODIGO"] +
+            "','" + retPhp[0]["dados"][lin]["UNI_APELIDO"] + "'" +
+            "," + `'${pubCodPol}','${pubDesPol}','*','${pubDesGpo}')`);
+          ceImg = document.createElement("i");
+          ceImg.className = "fa fa-object-ungroup text-red";
+          ceAnc.appendChild(ceImg);
+
+          ceContext = document.createTextNode(" -" + retPhp[0]["dados"][lin]["UNI_APELIDO"]);
+          ceAnc.appendChild(ceContext);
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroUni").appendChild(ceLi);
         };
+        ceLi = document.createElement("li");
+        ceAnc = document.createElement("a");
+        ceAnc.href = "#";
+        ceAnc.setAttribute("onclick", "iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
+        ceImg = document.createElement("i");
+        ceImg.className = "fa fa-object-ungroup text-red";
+        ceAnc.appendChild(ceImg);
+
+        ceContext = document.createTextNode(" -TODAS");
+        ceAnc.appendChild(ceContext);
+        ceLi.appendChild(ceAnc);
+        document.getElementById("filtroUni").appendChild(ceLi);
       };
-      ///////////////////////////////////////////////////////////
-      //   Buscando apenas os polos que o usuario tem direito  //
-      ///////////////////////////////////////////////////////////
-      function buscarPol(){
-        clsJs   = jsString("lote");
-        document.getElementById('filtroPol').innerHTML = '';  
-        clsJs.add("rotina"      , "quaisPolo"         );
-        clsJs.add("login"       , jsPub[0].usr_login  );
-        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
-        fd = new FormData();
-        fd.append("principal" , clsJs.fim());
-        msg     = requestPedido("Trac_BiInfracoes.php",fd); 
-        retPhp  = JSON.parse(msg);
-        if( retPhp[0].retorno == "OK" ){
-          msg=retPhp[0]["dados"].length;  
-          
-          for( var lin=0;lin<msg;lin++ ){
-            ceLi= document.createElement("li"); 
-            ceLi.style.height="25px";
-              ceAnc= document.createElement("a");
-              ceAnc.href="#";
-              ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','"+retPhp[0]["dados"][lin]["POL_CODIGO"]+"','"
-                +retPhp[0]["dados"][lin]["POL_NOME"]+"', '*', 'Todos Grupos Operacionais')");
-                ceImg= document.createElement("i");
-                ceImg.className="fa fa-object-group text-red";
-                ceAnc.appendChild(ceImg);
-                
-                ceContext = document.createTextNode( " -"+retPhp[0]["dados"][lin]["POL_NOME"] );  
-              ceAnc.appendChild(ceContext);
-            ceLi.appendChild(ceAnc);
-            document.getElementById("filtroPol").appendChild(ceLi);
-          };    
-          ceLi= document.createElement("li"); 
-            ceAnc= document.createElement("a");
-            ceAnc.href="#";
-            ceAnc.setAttribute("onclick","iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
-              ceImg= document.createElement("i");
-              ceImg.className="fa fa-object-group text-red";
-              ceAnc.appendChild(ceImg);
-              
-              ceContext = document.createTextNode( " -TODOS" );  
-            ceAnc.appendChild(ceContext);
+    };
+    ///////////////////////////////////////////////////////////
+    //   Buscando apenas os polos que o usuario tem direito  //
+    ///////////////////////////////////////////////////////////
+    function buscarPol() {
+      document.getElementById('filtroPol').innerHTML = '';
+      clsJs = jsString("lote");
+      clsJs.add("rotina", "quaisPolo");
+      clsJs.add("login", jsPub[0].usr_login);
+      clsJs.add("compet", document.getElementById("cbCompetencia").value);
+      fd = new FormData();
+      fd.append("principal", clsJs.fim());
+      msg = requestPedido("Trac_BiInfracoes.php", fd);
+      retPhp = JSON.parse(msg);
+      if (retPhp[0].retorno == "OK") {
+        msg = retPhp[0]["dados"].length;
+
+        for (var lin = 0; lin < msg; lin++) {
+          ceLi = document.createElement("li");
+          ceLi.style.height = "25px";
+          ceAnc = document.createElement("a");
+          ceAnc.href = "#";
+          ceAnc.setAttribute("onclick", `iniciarBi('0','${pubDesUni}','${retPhp[0]["dados"][lin]["POL_CODIGO"]}','${retPhp[0]["dados"][lin]["POL_NOME"]}','*','${pubDesGpo}')`);
+          ceImg = document.createElement("i");
+          ceImg.className = "fa fa-object-group text-red";
+          ceAnc.appendChild(ceImg);
+
+          ceContext = document.createTextNode(" -" + retPhp[0]["dados"][lin]["POL_NOME"]);
+          ceAnc.appendChild(ceContext);
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroPol").appendChild(ceLi);
         };
+        ceLi = document.createElement("li");
+        ceAnc = document.createElement("a");
+        ceAnc.href = "#";
+        ceAnc.setAttribute("onclick", "iniciarBi('0','Todas unidades','*','Todos polos', '*', 'Todos Grupos Operacionais')");
+        ceImg = document.createElement("i");
+        ceImg.className = "fa fa-object-group text-red";
+        ceAnc.appendChild(ceImg);
+
+        ceContext = document.createTextNode(" -TODOS");
+        ceAnc.appendChild(ceContext);
+        ceLi.appendChild(ceAnc);
+        document.getElementById("filtroPol").appendChild(ceLi);
       };
+    };
       function fncInfracaoTop(qualInfracao){  
+        pubQualInfracaoMotorista = qualInfracao;
         clsJs   = jsString("lote");  
         clsJs.add("rotina"        , "biInfracaoTop"     );
         clsJs.add("login"         , jsPub[0].usr_login  );
@@ -1132,6 +1134,7 @@
       // Infracao por turno //
       ////////////////////////    
       function fncInfracaoTurno(qualInfracao){  
+        pubQualInfracaoTurno = qualInfracao;
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biInfracaoTurno"   );
         clsJs.add("login"       , jsPub[0].usr_login  );
@@ -1384,6 +1387,40 @@
     function chngCompetencia(){
         iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       };
+
+      function exportarRelatorio() {
+      var cards = [
+        ["INFRACOES_MES"],
+        ["COMPARATIVO_INFRACOES"],
+        ["TOP10_MOTORISTAS"],
+        ["INFRACOES_TURNO"],
+        ["MEDIAKM_SEM_INFRACOES"],
+        ["COMPARATIVO_MENSAL_INFRACOES"]
+      ];     
+        fexportarRelatorioF10(cards);
+    }
+
+    function RetF10tblRelatorio(rels, formato) {
+      let relatorios = {};
+      rels.forEach(item => {
+         relatorios[item["RELATORIO"]] = true;
+      });
+      var filtros = {
+        "UNIDADE": pubCodUni + "",
+        "UNIDADE_NOME": pubDesUni,
+        "POLO": pubCodPol,
+        "POLO_NOME": pubDesPol,
+        "GRUPOOPERACIONAL": pubCodGpo,
+        "GRUPOOPERACIONAL_NOME": pubDesGpo,
+        "QUAL_INFRACAO_MOTORISTA": pubQualInfracaoMotorista,
+        "QUAL_INFRACAO_TURNO": pubQualInfracaoTurno,
+        "DATA": document.getElementById("cbCompetencia").value,
+        "LEVEPESADO" : pubLevPes
+    };
+      var caminho = "RelatorioInfracoesServlet";
+      var tipo = "RelatorioInfracoes.";
+      exportarRelatorioF10(relatorios, formato, filtros, caminho, tipo);
+    } 
     
     </script> 
   </head>
@@ -1401,21 +1438,6 @@
             <option value="L">Leve</option>
           </select>
         </div>
-
-        <!-- <div class="form-group" style="width:15%;height:1.5em;float:left;margin-top:0.5em;">
-          <select id="cbCompetencia" class="form-control select2" style="width:70%;height:28px;margin-left:3em;">
-						
-            <option value="201805|201805">MAI/18</option>
-            <option value="201806|201805">JUN/18</option>
-            <option value="201807|201805">JUL/18</option>
-            <option value="201808|201805">AGO/18</option>
-            <option value="201809|201805">SET/18</option>
-            <option value="201810|201805">OUT/18</option>
-            <option value="201811|201805">NOV/18</option>
-            <option value="201812|201805">DEZ/18</option>
-						
-          </select>
-        </div> -->
 
         <?php $mesAntigoPipe=true; include 'classPhp/comum/selectMesDashboard.class.php';?>
         
@@ -1485,6 +1507,12 @@
               </li>
             </ul>
           </li>
+
+          <li class="dropdown user user-menu">
+          <a href="#" onClick="exportarRelatorio()" class="dropdown-toggle">
+            <span class="hidden-xs">Exportar</span>
+          </a>
+        </li>
           
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
