@@ -156,3 +156,19 @@ go
 
 alter table MOTORISTA alter column MTR_RFID varchar(30) null
 go
+
+/* Removendo a coluna de veículo na tabela de motorista */
+
+drop index MOTORISTA_MTR_VEICULO_index on MOTORISTA
+go
+
+alter table MOTORISTA drop column MTR_VEICULO
+go
+
+ALTER VIEW VMOTORISTA AS
+  SELECT A.MTR_CODIGO,A.MTR_NOME,A.MTR_RFID,A.MTR_CODUNI,A.MTR_POSICAO,A.MTR_ATIVO,A.MTR_REG,A.MTR_CODUSR, A.MTR_EXCLUIDO FROM MOTORISTA A
+go
+
+/* Adicionando a coluna de motorista fixo, e código do motorista na tabela de veículo *
+
+/

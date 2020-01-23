@@ -31,7 +31,6 @@ BEGIN
   DECLARE @mtrAtivoNew VARCHAR(1);
   DECLARE @mtrRegNew VARCHAR(1);
   DECLARE @mtrCodUsrNew INTEGER;
-  DECLARE @mtrVeiculoNew VARCHAR(10);
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   ---------------------------------------------------
@@ -49,7 +48,6 @@ BEGIN
          ,@usrApelidoNew = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')         
          ,@direitoNew    = UP.UP_D04
-         ,@mtrVeiculoNew = i.MTR_VEICULO
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.MTR_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO    
@@ -95,8 +93,7 @@ BEGIN
       ,MTR_POSICAO      
       ,MTR_ATIVO
       ,MTR_REG
-      ,MTR_CODUSR
-      ,MTR_VEICULO) VALUES(
+      ,MTR_CODUSR) VALUES(
       @mtrCodigoNew   -- MTR_CODIGO
       ,REPLACE(@mtrNomeNew, '_', ' ') -- MTR_NOME
       ,@mtrRfidNew    -- MTR_RFID
@@ -105,7 +102,6 @@ BEGIN
       ,@mtrAtivoNew   -- MTR_ATIVO
       ,@mtrRegNew     -- MTR_REG
       ,@mtrCodUsrNew  -- MTR_CODUSR
-      ,@mtrVeiculoNew -- MTR_VEICULO
     );
 
   ---------------------------------------------------------------------
@@ -136,8 +132,7 @@ BEGIN
       ,MTR_CODUNI
       ,MTR_ATIVO
       ,MTR_REG
-      ,MTR_CODUSR
-      ,MTR_VEICULO) VALUES(
+      ,MTR_CODUSR) VALUES(
       'I'                         -- MTR_ACAO
       ,@mtrCodigoNew              -- MTR_CODIGO
       ,@mtrNomeNew                -- MTR_NOME
@@ -146,8 +141,7 @@ BEGIN
       ,@mtrAtivoNew               -- MTR_ATIVO
       ,@mtrRegNew                 -- MTR_REG
       ,@mtrCodUsrNew              -- MTR_CODUSR
-      ,@mtrVeiculoNew             -- MTR_VEICULO
-    );  
+    );
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -156,7 +150,7 @@ BEGIN
     DECLARE @ErrorState INT;
     SELECT @ErrorMessage=ERROR_MESSAGE(),@ErrorSeverity=ERROR_SEVERITY(),@ErrorState=ERROR_STATE(), @ErrorCode=ERROR_NUMBER();
     IF @ErrorCode= 1205 -- um deadlock foi detectado
-    SET @ErrorCode = 'Falha ao executar a operação. Tente novamente mais tarde.'
+    SET @ErrorCode = N'Falha ao executar a operação. Tente novamente mais tarde.'
     RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
     RETURN;
   END CATCH

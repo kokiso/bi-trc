@@ -26,7 +26,7 @@ BEGIN
   -------------------------------------------------------
   SELECT @mtrCodigoNew   = i.MTR_CODIGO
          ,@mtrNomeNew    = UPPER(i.MTR_NOME)
-         ,@mtrRfidNew    = UPPER(i.MTR_RFID)
+         ,@mtrRfidNew    = NULLIF(UPPER(i.MTR_RFID), '')
          ,@mtrCodUniNew  = i.MTR_CODUNI
          ,@uniApelidoNew = COALESCE(UNI.UNI_APELIDO,'ERRO')
          ,@mtrAtivoNew   = UPPER(i.MTR_ATIVO)
@@ -73,7 +73,7 @@ BEGIN
          ,@mtrAtivoOld   = o.MTR_ATIVO
          ,@mtrRegOld     = o.MTR_REG
          ,@mtrVeiculoOld = o.MTR_VEICULO
-         ,@mtrCodUsrOld  = o.MTR_CODUSR         
+         ,@mtrCodUsrOld  = o.MTR_CODUSR
     FROM MOTORISTA o WHERE o.MTR_CODIGO=@mtrCodigoNew;  
   ---------------------------------------------------------------------
   -- Primary Key nao pode ser CREATEada
@@ -112,7 +112,7 @@ BEGIN
   ---------------------------------------------------------------------
   -- Ao reativar um motorista, se já houver outro com o mesmo RFID, não permitir
   ---------------------------------------------------------------------
-    IF( @mtrAtivoNew='S' ) BEGIN
+    IF( @mtrAtivoNew='S' AND @mtrRfidNew IS NOT NULL ) BEGIN
       SELECT @fkIntNew=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE MTR_CODIGO <> @mtrCodigoNew AND MTR_RFID=@mtrRfidNew AND MTR_ATIVO='S';
       IF( @fkIntNew<>0 )
         RAISERROR('RFID JA CADASTRADO NA TABELA MOTORISTA NO CODIGO %i',15,1,@fkIntNew);
@@ -174,4 +174,5 @@ BEGIN
     RETURN;
   END CATCH
 END
+go
 

@@ -18,7 +18,6 @@ BEGIN
   DECLARE @mtrAtivoNew VARCHAR(1);
   DECLARE @mtrRegNew VARCHAR(1);
   DECLARE @mtrCodUsrNew INTEGER;
-  DECLARE @mtrVeiculoNew VARCHAR(10);
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   -------------------------------------------------------
@@ -32,7 +31,6 @@ BEGIN
          ,@mtrAtivoNew   = UPPER(i.MTR_ATIVO)
          ,@mtrRegNew     = UPPER(i.MTR_REG)
          ,@mtrCodUsrNew  = i.MTR_CODUSR         
-         ,@mtrVeiculoNew = i.MTR_VEICULO
          ,@usrApelidoNew = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew  = COALESCE(USR.USR_ADMPUB,'P')         
          ,@direitoNew    = UP.UP_D04
@@ -63,7 +61,6 @@ BEGIN
   DECLARE @mtrRfidOld VARCHAR(30);
   DECLARE @mtrCodUniOld INTEGER;
   DECLARE @mtrAtivoOld VARCHAR(1);
-  DECLARE @mtrVeiculoOld VARCHAR(10);
   DECLARE @mtrRegOld VARCHAR(1);
   DECLARE @mtrCodUsrOld INTEGER;
   SELECT @mtrCodigoOld   = o.MTR_CODIGO
@@ -72,7 +69,6 @@ BEGIN
          ,@mtrCodUniOld  = o.MTR_CODUNI
          ,@mtrAtivoOld   = o.MTR_ATIVO
          ,@mtrRegOld     = o.MTR_REG
-         ,@mtrVeiculoOld = o.MTR_VEICULO
          ,@mtrCodUsrOld  = o.MTR_CODUSR         
     FROM MOTORISTA o WHERE o.MTR_CODIGO=@mtrCodigoNew;  
   ---------------------------------------------------------------------
@@ -106,7 +102,6 @@ BEGIN
           ,MTR_ATIVO  = @mtrAtivoNew
           ,MTR_REG    = @mtrRegNew
           ,MTR_CODUSR = @mtrCodUsrNew
-          ,MTR_VEICULO= @mtrVeiculoNew
     WHERE MTR_CODIGO  = @mtrCodigoNew;
 
   ---------------------------------------------------------------------
@@ -151,7 +146,6 @@ BEGIN
         ,MTR_CODUNI
         ,MTR_ATIVO
         ,MTR_REG
-        ,MTR_VEICULO
         ,MTR_CODUSR) VALUES(
         'A'                       -- MTR_ACAO
         ,@mtrCodigoNew            -- MTR_CODIGO
@@ -160,7 +154,6 @@ BEGIN
         ,@mtrCodUniNew            -- MTR_CODUNI
         ,@mtrAtivoNew             -- MTR_ATIVO
         ,@mtrRegNew               -- MTR_REG
-        ,@mtrVeiculoNew           -- MTR_VEICULO
         ,@mtrCodUsrNew            -- MTR_CODUSR
       );
     END

@@ -59,8 +59,7 @@
           $sql.="      ,MTR_RFID";
           $sql.="      ,MTR_CODUNI";
           $sql.="      ,UNI.UNI_APELIDO";
-					$sql.="      ,MTR_POSICAO";										
-					$sql.="      ,MTR_VEICULO";										
+					$sql.="      ,MTR_POSICAO";								
           $sql.="      ,CASE WHEN A.MTR_ATIVO='S' THEN 'SIM' ELSE 'NAO' END AS MTR_ATIVO";
           $sql.="      ,CASE WHEN A.MTR_REG='P' THEN 'PUB' WHEN A.MTR_REG='S' THEN 'SIS' ELSE 'ADM' END AS MTR_REG";
           $sql.="      ,US_APELIDO";
@@ -170,8 +169,7 @@
                 .",MTR_CODUNI"
                 .",MTR_REG"
                 .",MTR_CODUSR"
-                .",MTR_ATIVO"
-                .",MTR_VEICULO) VALUES("
+                .",MTR_ATIVO) VALUES("
                 ."'$codigo'"                  // MTR_CODIGO
                 .",'".$descricao."'"          // MTR_NOME
                 .",'".$rfid."'"               // MTR_RFID
@@ -179,7 +177,6 @@
                 .",'P'"                       // MTR_REG
                 .",".$_SESSION["usr_codigo"]  // MTR_CODUSR
                 .",'S'"                       // MTR_ATIVO
-                .",".$veiculo."'"             // MTR_VEICULO
               .")";
               array_push($arrUpdt,$sql);
             };
@@ -232,8 +229,7 @@
     <link rel="stylesheet" href="css/cssFaTable.css">
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
-    <script src="tabelaTrac/f10/tabelaUnidadeF10.js"></script>        
-    <script src="tabelaTrac/f10/tabelaVeiculoF10.js"></script>        
+    <script src="tabelaTrac/f10/tabelaUnidadeF10.js"></script>  
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -432,33 +428,25 @@
                       ,"ajudaCampo"     : ["Id systemsat."]
                       ,"importaExcel"   : "N"                                          
                       ,"padrao":0}
-            ,{"id":14 ,"field"          : "MTR_VEICULO"
-                      ,"labelCol"       : "VEICULO"
-                      ,"obj"            : "edtVcl"
-                      ,"validar"        : ["podeNull"]
-                      ,"tamGrd"         : "10em"
-                      ,"tamImp"         : "30"              
-                      ,"ajudaCampo"     : ["Placa do veículo."]
-                      ,"padrao":0}  
-            ,{"id":15 ,"field"          : "MTR_ATIVO"  
+            ,{"id":14 ,"field"          : "MTR_ATIVO"  
                       ,"labelCol"       : "ATIVO"   
                       ,"obj"            : "cbAtivo"    
                       ,"padrao":2}                                        
-            ,{"id":16 ,"field"          : "MTR_REG"    
+            ,{"id":15 ,"field"          : "MTR_REG"    
                       ,"labelCol"       : "REG"     
                       ,"obj"            : "cbReg"      
                       ,"lblDetalhe"     : "REGISTRO"     
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"                                         
                       ,"padrao":3}  
-            ,{"id":17 ,"field"          : "US_APELIDO" 
+            ,{"id":16 ,"field"          : "US_APELIDO" 
                       ,"labelCol"       : "USUARIO" 
                       ,"obj"            : "edtUsuario" 
                       ,"padrao":4}                
-            ,{"id":18 ,"field"          : "MTR_CODUSR" 
+            ,{"id":17 ,"field"          : "MTR_CODUSR" 
                       ,"labelCol"       : "CODUSU"  
                       ,"obj"            : "edtCodUsu"  
                       ,"padrao":5}                                   
-            ,{"id":19 ,"labelCol"       : "PP"      
+            ,{"id":18 ,"labelCol"       : "PP"      
                       ,"obj"            : "imgPP"        
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -590,7 +578,6 @@
       var objMtr;                     // Obrigatório para instanciar o JS TFormaCob
       var jsMtr;                      // Obj principal da classe clsTable2017
       var objUniF10;                  // Obrigatório para instanciar o JS CidadeF10      
-      var objVclF10;                  // Obrigatório para instanciar o JS VeiculoF10      
       var objExc;                     // Obrigatório para instanciar o JS Importar excel
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
@@ -706,59 +693,6 @@
           document.getElementById("edtDesUni").value     = ( ret.length == 0 ? ""        : ret[0].APELIDO                         );
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )               );
         };
-        if (document.getElementById("edtVcl").value) {
-          document.getElementById("edtVcl").value = "";
-        }
-        if (!document.getElementById("edtVcl").classList.contains('inputF10')){
-          document.getElementById("edtVcl").classList.add('inputF10');
-        }
-      };
-      // function buscarUni(){
-      //   clsJs   = jsString("lote");  
-      //   clsJs.add("rotina"      , "unidade"           );
-      //   clsJs.add("login"       , jsPub[0].usr_login  );
-      //   fd = new FormData();
-      //   fd.append("motorista" , clsJs.fim());
-      //   msg     = requestPedido("Trac_Motorista.php",fd); 
-      //   retPhp  = JSON.parse(msg);
-      //   if( retPhp[0].retorno == "OK" ){
-      //     msg=retPhp[0]["dados"].length;
-      //     if(msg==0){
-      //       var ceOpt 	= document.createElement("option");        
-      //       ceOpt.value = "*";
-      //       ceOpt.text  = "SEM DIREITO"
-      //       document.getElementById("cbUnidade").appendChild(ceOpt);
-      //     } else {
-      //       var ceOpt 	= document.createElement("option");        
-      //       ceOpt.value = "0";
-      //       ceOpt.text  = "TODAS";
-      //       document.getElementById("cbUnidade").appendChild(ceOpt);
-            
-      //       for( var lin=0;lin<msg;lin++ ){
-      //         var ceOpt 	= document.createElement("option");        
-      //         ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
-      //         ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
-      //         document.getElementById("cbUnidade").appendChild(ceOpt);
-      //       };  
-      //     };
-      //   };  
-      // };  
-
-      function vclF10Click(){
-        if (document.getElementById("edtCodUni").value !== '0000'){
-         const codigoUnidade = document.getElementById("edtCodUni").value;
-         fVeiculoF10(codigoUnidade);
-        } else {
-          document.getElementById("edtVcl").classList.remove('inputF10');
-        }
-      };  
-      function RetF10tblVcl(arr){
-        if (document.getElementById("edtCodUni").value !== '0000'){
-        document.getElementById("edtVcl").value   = arr[0].CODIGO;
-        document.getElementById("edtVcl").setAttribute("data-oldvalue",arr[0].CODIGO);
-        } else {
-          document.getElementById("edtVcl").classList.remove('inputF10');
-        }
       };
     </script>
   </head>
@@ -827,24 +761,16 @@
                 <input class="campo_input_titulo input" id="edtDesUni" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesUni">RAZAO_UNIDADE</label>
               </div>
-                <div class="campotexto campo20">
-                    <input class="campo_input_titulo inputF10" id="edtVcl"
-                           onFocus="uniFocus(this);"
-                           onClick="vclF10Click('edtVcl');" 
-                           autocomplete="off"
-                           type="text" />
-                    <label class="campo_label" for="edtVcl">VEICULO</label>
-                </div>
-              <div class="campotexto campo15">
+              <div class="campotexto campo25">
                 <select class="campo_input_combo" id="cbAtivo">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbAtivo">ATIVO</label>
               </div>
-              <div class="campotexto campo15">
+              <div class="campotexto campo25">
                 <select class="campo_input_combo" id="cbReg">
-                  <option value="P">PUBLICO</option>               
+                  <option value="P">PUBLICO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbReg">REG</label>
               </div>
