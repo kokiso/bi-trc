@@ -828,7 +828,7 @@
           <div style="height: 200px; overflow-y: auto;">
             <input type="hidden" id="sql" name="sql"/>
             <div class="campotexto campo100">
-              <div class="campotexto campo25">
+              <div class="campotexto campo10">
                 <input class="campo_input" id="edtCodigo" type="text" maxlength="7" />
                 <label class="campo_label campo_required" for="edtCodigo">CODIGO</label>
               </div>
@@ -844,6 +844,21 @@
                 <label class="campo_label campo_required" for="cbFrota">FROTA</label>
               </div>
               <div class="campotexto campo15">
+                <select class="campo_input_combo" id="cbMotFixo">
+                  <option value="S">SIM</option>
+                  <option value="N">NÃO</option>
+                </select>
+                <label class="campo_label campo_required" for="cbMotFixo">MOTORISTA_FIXO</label>
+              </div>
+              <div class="campotexto campo20">
+                    <input class="campo_input_titulo inputF10" id="edtMot"
+                           onFocus="uniFocus(this);"
+                           onClick="motF10Click('edtMot');" 
+                           autocomplete="off"
+                           type="text" />
+                    <label class="campo_label" for="edtMot">MOTORISTA</label>
+                </div>
+              <div class="campotexto campo15">
                 <input class="campo_input inputF10" id="edtCodUni"
                                                     OnKeyPress="return mascaraInteiro(event);"
                                                     onBlur="codUniBlur(this);"
@@ -858,14 +873,14 @@
                 <input class="campo_input_titulo input" id="edtDesUni" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesUni">RAZAO_UNIDADE</label>
               </div>
-              <div class="campotexto campo20">
+              <div class="campotexto campo12">
                 <select class="campo_input_combo" id="cbEntraBi">
                   <option value="S">SIM</option>
                   <option value="N">NAO</option>
                 </select>
                 <label class="campo_label campo_required" for="cbEntraBi">ENTRA BI</label>
               </div>
-              <div class="campotexto campo25">
+              <div class="campotexto campo12">
                 <input class="campo_input" id="edtDtCalibracao" type="text" OnKeyUp="mascaraData(this,event);" maxlength="10" />
                 <label class="campo_label campo_required" for="edtDtCalibracao">CALIBRACAO</label>
               </div>
