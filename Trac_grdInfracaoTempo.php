@@ -724,6 +724,11 @@
             gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
           } else {
             if( ret[0].retorno == "OK" ){
+              ret[0].dados.forEach(arr => {
+              const dataHora = converterData(arr[5]);
+              arr[5] = dataHora.dataConvertida;
+              arr.splice(6, 0, dataHora.horaConvertida);
+            });
               jsDet={
                 "titulo":[
                   {"id":0   ,"labelCol"       : "OPC"     
@@ -757,7 +762,7 @@
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "EVENTO"
                             ,"obj"            : "edtFrota"
-                            ,"tamGrd"         : "20em"
+                            ,"tamGrd"         : "25em"
                             ,"tamImp"         : "40"
                             ,"ajudaCampo"     : ["Veiculo pesado/leve"]
                             ,"padrao":0}
@@ -774,11 +779,19 @@
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "DATA"
                             ,"obj"            : "edtDataGps"
-                            ,"tamGrd"         : "15em"
+                            ,"tamGrd"         : "7em"
                             ,"tamImp"         : "30"
                             ,"ajudaCampo"     : ["Data."]
                             ,"padrao":0}
-                  ,{"id":7  ,"field"          : "UNI_APELIDO"   
+                  ,{"id":7  ,"field"          : "MVM_DATAGPS"   
+                            ,"fieldType"      : "str"
+                            ,"labelCol"       : "HORA"
+                            ,"obj"            : "edtHoraGps"
+                            ,"tamGrd"         : "7em"
+                            ,"tamImp"         : "30"
+                            ,"ajudaCampo"     : ["Hora."]
+                            ,"padrao":0}
+                  ,{"id":8  ,"field"          : "UNI_APELIDO"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "UNIDADE"
                             ,"obj"            : "edtUnidade"
@@ -786,7 +799,7 @@
                             ,"tamImp"         : "25"
                             ,"ajudaCampo"     : ["Unidade"]
                             ,"padrao":0}
-                  ,{"id":8  ,"field"          : "UNI_CODPOL"   
+                  ,{"id":9  ,"field"          : "UNI_CODPOL"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "POLO"
                             ,"obj"            : "edtCodPol"
@@ -794,19 +807,19 @@
                             ,"tamImp"         : "15"
                             ,"ajudaCampo"     : ["Polo"]
                             ,"padrao":0}
-                  ,{"id":9 ,"labelCol"       : "LATITUDE"
+                  ,{"id":10 ,"labelCol"       : "LATITUDE"
                             ,"fieldType"      : "flo8" 
                             ,"tamGrd"         : "0em"
                             ,"tamImp"         : "0"
                             ,"excel"          : "S"                      
                             ,"padrao":0}
-                  ,{"id":10 ,"labelCol"       : "LONGITUDE"
+                  ,{"id":11 ,"labelCol"       : "LONGITUDE"
                             ,"fieldType"      : "flo8" 
                             ,"tamGrd"         : "0em"
                             ,"tamImp"         : "0"
                             ,"excel"          : "S"                      
                             ,"padrao":0}
-                  ,{"id":11 ,"fieldType"      : "str"
+                  ,{"id":12 ,"fieldType"      : "str"
                             ,"labelCol"       : "LOCALIZACAO"
                             ,"obj"            : "edtCodPol"
                             ,"tamGrd"         : "0em"
