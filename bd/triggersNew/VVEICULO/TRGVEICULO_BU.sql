@@ -21,8 +21,11 @@ BEGIN
   DECLARE @vclAtivoNew VARCHAR(1);
   DECLARE @vclCodGpoNew INTEGER;
   DECLARE @gpoNomeNew VARCHAR(60);
+  DECLARE @vclMtrFixoNew VARCHAR(1);
+  DECLARE @vclCodMtrNew INTEGER;
   DECLARE @vclRegNew VARCHAR(1);
   DECLARE @vclCodUsrNew INTEGER;
+  DECLARE @mtrNome VARCHAR(40);
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   -------------------------------------------------------
@@ -40,6 +43,8 @@ BEGIN
          ,@vclRegNew          = UPPER(i.VCL_REG)
          ,@vclCodUsrNew       = i.VCL_CODUSR         
          ,@vclCodGpoNew       = i.VCL_CODGPO
+         ,@vclMtrFixoNew      = i.VCL_MTRFIXO
+         ,@vclCodMtrNew       = i.VCL_CODMTR
          ,@gpoNomeNew         = COALESCE(GPO.GPO_NOME, 'ERRO')
          ,@usrApelidoNew      = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew       = COALESCE(USR.USR_ADMPUB,'P')         
@@ -66,6 +71,10 @@ BEGIN
   IF( @direitoNew<3 )
     RAISERROR('USUARIO %s NAO POSSUI DIREITO 09 PARA INCLUIR NA TABELA VEICULO',15,1,@usrApelidoNew);
   --
+    SELECT @mtrNome = MTR_NOME FROM VEICULO INNER JOIN MOTORISTA ON VEICULO.VCL_CODMTR=MOTORISTA.MTR_CODIGO WHERE VEICULO.VCL_CODIGO <> @vclCodigoNew AND VEICULO.VCL_CODMTR = @vclCodMtrNew AND VEICULO.VCL_MTRFIXO = 'S';
+  IF (@mtrNome IS NOT NULL )
+    RAISERROR(N'O MOTORISTA %s SELECIONADO JA ESTA VINCULADO A OUTRO VEICULO FIXO', 15,1, @mtrNome);
+
   --
   ------------------------------------------------------------------------------------
   -- Se checar até aqui verifico os campos que estão no banco de dados antes de gravar  
@@ -79,6 +88,8 @@ BEGIN
   DECLARE @vclDtCalibracaoOld DATE;  
   DECLARE @vclNumFrotaOld VARCHAR(20);
   DECLARE @vclCodGpoOld INTEGER;
+  DECLARE @vclMtrFixoOld VARCHAR(1);
+  DECLARE @vclCodMtrOld INTEGER;
   DECLARE @vclAtivoOld VARCHAR(1);
   DECLARE @vclRegOld VARCHAR(1);
   DECLARE @vclCodUsrOld INTEGER;
@@ -90,6 +101,8 @@ BEGIN
          ,@vclDtCalibracaoOld = o.VCL_DTCALIBRACAO
          ,@vclNumFrotaOld     = o.VCL_NUMFROTA
          ,@vclCodGpoOld       = o.VCL_CODGPO
+         ,@vclMtrFixoOld      = o.VCL_MTRFIXO
+         ,@vclCodMtrOld       = o.VCL_CODMTR
          ,@vclAtivoOld        = o.VCL_ATIVO
          ,@vclRegOld          = o.VCL_REG
          ,@vclCodUsrOld       = o.VCL_CODUSR         
@@ -114,7 +127,14 @@ BEGIN
     SET @erroNew=dbo.fncCampoRegAlt( @usrAdmPubNew,@vclRegOld,@vclRegNew,4 );
     IF( @erroNew <> 'OK' )
       RAISERROR(@erroNew,15,1);
-  END    
+  END
+  ----------------------------------------------------------------------------------------------------
+  -- Se o veiculo for alterado por um com motorista fixo, remover o motorista fixo dos outros veículos
+  ----------------------------------------------------------------------------------------------------
+  IF (@vclMtrFixoNew = 'S')
+    BEGIN
+    UPDATE VEICULO SET VCL_CODMTR = NULL WHERE VEICULO.VCL_CODMTR = @vclCodMtrNew AND VEICULO.VCL_MTRFIXO = 'N';
+  END
   --  
   BEGIN TRY
     UPDATE dbo.VEICULO
@@ -126,9 +146,11 @@ BEGIN
           ,VCL_NUMFROTA     = @vclNumFrotaNew
           ,VCL_ATIVO        = @vclAtivoNew
           ,VCL_CODGPO       = @vclCodGpoNew
+          ,VCL_MTRFIXO      = @vclMtrFixoNew
+          ,VCL_CODMTR       = @vclCodMtrNew
           ,VCL_REG          = @vclRegNew
           ,VCL_CODUSR       = @vclCodUsrNew
-    WHERE VCL_CODIGO  = @vclCodigoNew;     
+    WHERE VCL_CODIGO  = @vclCodigoNew;
     ---------------------------------------------------
     -- Atualizando a qtdade de veiculos em cada unidade
     ---------------------------------------------------
@@ -156,6 +178,8 @@ BEGIN
         ,VCL_NUMFROTA        
         ,VCL_ATIVO
         ,VCL_CODGPO
+        ,VCL_MTRFIXO
+        ,VCL_CODMTR
         ,VCL_REG
         ,VCL_CODUSR) VALUES(
         'A'                       -- VCL_ACAO
@@ -167,7 +191,9 @@ BEGIN
         ,@vclDtCalibracaoNew      -- VCL_DTCALIBRACAO
         ,@vclNumFrotaNew          -- VCL_NUMFROTA        
         ,@vclAtivoNew             -- VCL_ATIVO
-        ,@vclCodGpoNew             -- VCL_CODGPO
+        ,@vclCodGpoNew            -- VCL_CODGPO
+        ,@vclMtrFixoNew           -- VCL_MTRFIXO
+        ,@vclCodMtrNew            -- VCL_CODMTR
         ,@vclRegNew               -- VCL_REG
         ,@vclCodUsrNew            -- VCL_CODUSR
       );
@@ -182,3 +208,5 @@ BEGIN
     RETURN;
   END CATCH
 END
+go
+

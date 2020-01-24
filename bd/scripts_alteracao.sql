@@ -169,6 +169,61 @@ ALTER VIEW VMOTORISTA AS
   SELECT A.MTR_CODIGO,A.MTR_NOME,A.MTR_RFID,A.MTR_CODUNI,A.MTR_POSICAO,A.MTR_ATIVO,A.MTR_REG,A.MTR_CODUSR, A.MTR_EXCLUIDO FROM MOTORISTA A
 go
 
-/* Adicionando a coluna de motorista fixo, e código do motorista na tabela de veículo *
+alter table BKPMOTORISTA drop column MTR_VEICULO
+go
 
-/
+alter table BKPMOTORISTA add MTR_EXCLUIDO VARCHAR(1) default 'S'
+
+/* Adicionando a coluna de motorista fixo, e código do motorista na tabela de veículo */
+
+alter table VEICULO
+	add VCL_MTRFIXO VARCHAR(1) default 'N' not null
+go
+
+alter table VEICULO
+	add VCL_CODMTR int
+go
+
+alter table VEICULO
+	add constraint VEICULO_MOTORISTA_MTR_CODIGO_fk
+		foreign key (VCL_CODMTR) references MOTORISTA
+			on delete set null
+go
+
+alter table BKPVEICULO
+	add VCL_MTRFIXO VARCHAR(1) default 'N' not null
+go
+
+alter table BKPVEICULO
+	add VCL_CODMTR int
+go
+
+ALTER VIEW [dbo].[VVEICULO] AS
+SELECT A.VCL_CODIGO,
+       A.VCL_NOME,
+       A.VCL_FROTA,
+       A.VCL_CODUNI,
+       A.VCL_ENTRABI,
+       VCL_DTCALIBRACAO,
+       VCL_NUMFROTA,
+       VCL_ATIVO,
+       A.VCL_REG,
+       A.VCL_CODUSR,
+       A.VCL_CODGPO,
+			 A.VCL_MTRFIXO,
+			 A.VCL_CODMTR
+FROM VEICULO A
+go
+
+create index VEICULO_VCL_ATIVO_index
+	on VEICULO (VCL_ATIVO)
+go
+
+create index VEICULO_VCL_MTRFIXO_index
+	on VEICULO (VCL_MTRFIXO)
+go
+
+create index VEICULO_VCL_CODMTR_index
+	on VEICULO (VCL_CODMTR)
+go
+

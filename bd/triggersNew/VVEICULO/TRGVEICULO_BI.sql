@@ -36,6 +36,9 @@ BEGIN
   DECLARE @vclAtivoNew VARCHAR(1);
   DECLARE @vclRegNew VARCHAR(1);
   DECLARE @vclCodUsrNew INTEGER;
+  DECLARE @vclMtrFixoNew VARCHAR(1);
+  DECLARE @vclCodMtrNew INTEGER;
+  DECLARE @mtrNome VARCHAR(40);
   DECLARE @usrApelidoNew VARCHAR(15);
   DECLARE @usrAdmPubNew VARCHAR(1);
   ---------------------------------------------------
@@ -52,6 +55,8 @@ BEGIN
          ,@vclAtivoNew        = UPPER(i.VCL_ATIVO)
          ,@vclRegNew          = UPPER(i.VCL_REG)
          ,@vclCodUsrNew       = i.VCL_CODUSR         
+         ,@vclMtrFixoNew      = i.VCL_MTRFIXO
+         ,@vclCodMtrNew       = NULLIF(i.VCL_CODMTR, 0)
          ,@usrApelidoNew      = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew       = COALESCE(USR.USR_ADMPUB,'P')         
          ,@direitoNew         = UP.UP_D09
@@ -69,6 +74,15 @@ BEGIN
   -------------------------------------------------------------
   -- Checando se o usuario tem direito de cadastro nesta tabela
   -------------------------------------------------------------
+  IF( @direitoNew<2 )
+    RAISERROR('USUARIO %s NAO POSSUI DIREITO 09 PARA INCLUIR NA TABELA VEICULO',15,1,@usrApelidoNew);
+  -------------------------------------------------------------
+  -- Checando se o veiculo tem motorista fixo e está tentando ser inserido um que já tem vinculo
+  -------------------------------------------------------------
+  SELECT @mtrNome = MTR_NOME FROM VEICULO INNER JOIN MOTORISTA ON VEICULO.VCL_CODMTR=MOTORISTA.MTR_CODIGO WHERE VEICULO.VCL_CODMTR = @vclCodMtrNew AND VEICULO.VCL_MTRFIXO = 'S';
+  IF (@mtrNome IS NOT NULL )
+    RAISERROR('O MOTORISTA %s SELECIONADO JA ESTA VINCULADO A OUTRO VEICULO FIXO', 15,1, @mtrNome);
+
   IF( @direitoNew<2 )
     RAISERROR('USUARIO %s NAO POSSUI DIREITO 09 PARA INCLUIR NA TABELA VEICULO',15,1,@usrApelidoNew);
   ---------------------------------------------------------------------
@@ -89,7 +103,14 @@ BEGIN
   SET @erroNew=dbo.fncCampoRegInc( @usrAdmPubNew,@vclRegNew,4 );
   IF( @erroNew != 'OK' )
     RAISERROR(@erroNew,15,1);
-  --  
+  ----------------------------------------------------------------------------------------------------
+  -- Se o veiculo for alterado por um com motorista fixo, remover o motorista fixo dos outros veículos
+  ----------------------------------------------------------------------------------------------------
+  IF (@vclMtrFixoNew = 'S')
+    BEGIN
+    UPDATE VEICULO SET VCL_CODMTR = NULL WHERE VEICULO.VCL_CODMTR = @vclCodMtrNew AND VEICULO.VCL_MTRFIXO = 'N';
+  END 
+  --
   BEGIN TRY
     INSERT INTO dbo.VEICULO( 
       VCL_CODIGO
@@ -101,6 +122,8 @@ BEGIN
       ,VCL_NUMFROTA
       ,VCL_ATIVO
       ,VCL_REG
+      ,VCL_MTRFIXO
+      ,VCL_CODMTR
       ,VCL_CODUSR) VALUES(
       @vclCodigoNew        -- VCL_CODIGO
       ,@vclNomeNew         -- VCL_NOME
@@ -111,6 +134,8 @@ BEGIN
       ,@vclNumFrotaNew     -- VCL_NUMFROTA
       ,@vclAtivoNew        -- VCL_ATIVO
       ,@vclRegNew          -- VCL_REG
+      ,@vclMtrFixoNew      -- VCL_MTRFIXO
+      ,@vclCodMtrNew       -- VCL_CODMTR
       ,@vclCodUsrNew       -- VCL_CODUSR
     );
     ---------------------------------------------------
@@ -132,6 +157,8 @@ BEGIN
       ,VCL_NUMFROTA      
       ,VCL_ATIVO
       ,VCL_REG
+      ,VCL_MTRFIXO
+      ,VCL_CODMTR
       ,VCL_CODUSR) VALUES(
       'I'                       -- VCL_ACAO
       ,@vclCodigoNew            -- VCL_CODIGO
@@ -143,6 +170,8 @@ BEGIN
       ,@vclNumFrotaNew          -- VCL_NUMFROTA
       ,@vclAtivoNew             -- VCL_ATIVO
       ,@vclRegNew               -- VCL_REG
+      ,@vclMtrFixoNew           -- VCL_MTRFIXO
+      ,@vclCodMtrNew            -- VCL_CODMTR
       ,@vclCodUsrNew            -- VCL_CODUSR
     );  
   END TRY
@@ -155,3 +184,5 @@ BEGIN
     RETURN;
   END CATCH
 END
+go
+

@@ -20,6 +20,8 @@ BEGIN
   DECLARE @vclNumFrotaOld VARCHAR(20);  
   DECLARE @vclAtivoOld VARCHAR(1);
   DECLARE @vclCodGpoOld INTEGER;
+  DECLARE @vclMtrFixoOld VARCHAR(1);
+  DECLARE @vclCodMtrOld INTEGER;
   DECLARE @vclRegOld VARCHAR(1);
   DECLARE @vclCodUsrOld INTEGER;
   DECLARE @usrApelidoOld VARCHAR(15);
@@ -35,6 +37,8 @@ BEGIN
          ,@vclNumFrotaOld     = d.VCL_NUMFROTA         
          ,@vclAtivoOld        = d.VCL_ATIVO
          ,@vclCodGpoOld       = d.VCL_CODGPO
+         ,@vclMtrFixoOld      = d.VCL_MTRFIXO
+         ,@vclCodMtrOld       = d.VCL_CODMTR
          ,@vclRegOld          = d.VCL_REG
          ,@vclCodUsrOld       = d.VCL_CODUSR         
          ,@usrApelidoOld      = COALESCE(USR.USR_APELIDO,'ERRO')
@@ -86,6 +90,8 @@ BEGIN
       ,VCL_NUMFROTA      
       ,VCL_ATIVO
       ,VCL_CODGPO
+      ,VCL_MTRFIXO
+      ,VCL_CODMTR
       ,VCL_REG
       ,VCL_CODUSR) VALUES(
       'E'                   -- VCL_ACAO
@@ -98,6 +104,8 @@ BEGIN
       ,@vclNumFrotaOld      -- VCL_NUMFROTA      
       ,@vclAtivoOld         -- VCL_ATIVO
       ,@vclCodGpoOld        -- VCL_CODGPO
+      ,@vclMtrFixoOld       -- VCL_MTRFIXO
+      ,@vclCodMtrOld        -- VCL_CODMTR
       ,@vclRegOld           -- VCL_REG
       ,@vclCodUsrOld        -- VCL_CODUSR
     );  
@@ -111,3 +119,5 @@ BEGIN
     RETURN;
   END CATCH
 END
+go
+

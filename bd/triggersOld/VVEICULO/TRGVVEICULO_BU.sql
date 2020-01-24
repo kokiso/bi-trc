@@ -19,6 +19,8 @@ BEGIN
   DECLARE @vclNumFrotaNew VARCHAR(20);    
   DECLARE @uniApelidoNew VARCHAR(15);  
   DECLARE @vclAtivoNew VARCHAR(1);
+  DECLARE @vclCodGpoNew INTEGER;
+  DECLARE @gpoNomeNew VARCHAR(60);
   DECLARE @vclRegNew VARCHAR(1);
   DECLARE @vclCodUsrNew INTEGER;
   DECLARE @usrApelidoNew VARCHAR(15);
@@ -37,13 +39,16 @@ BEGIN
          ,@vclAtivoNew        = UPPER(i.VCL_ATIVO)
          ,@vclRegNew          = UPPER(i.VCL_REG)
          ,@vclCodUsrNew       = i.VCL_CODUSR         
+         ,@vclCodGpoNew       = i.VCL_CODGPO
+         ,@gpoNomeNew         = COALESCE(GPO.GPO_NOME, 'ERRO')
          ,@usrApelidoNew      = COALESCE(USR.USR_APELIDO,'ERRO')
          ,@usrAdmPubNew       = COALESCE(USR.USR_ADMPUB,'P')         
          ,@direitoNew         = UP.UP_D09
     FROM inserted i
     LEFT OUTER JOIN USUARIO USR ON i.VCL_CODUSR=USR.USR_CODIGO AND USR_ATIVO='S'
     LEFT OUTER JOIN USUARIOPERFIL UP ON USR.USR_CODUP=UP.UP_CODIGO
-    LEFT OUTER JOIN UNIDADE UNI ON i.VCL_CODUNI=UNI.UNI_CODIGO;        
+    LEFT OUTER JOIN GRUPOOPERACIONAL GPO ON i.VCL_CODGPO=GPO.GPO_CODIGO
+    LEFT OUTER JOIN UNIDADE UNI ON i.VCL_CODUNI=UNI.UNI_CODIGO;
   -----------------------------
   -- VERIFICANDO A FOREIGN KEYs
   -----------------------------
@@ -51,6 +56,10 @@ BEGIN
     RAISERROR('NAO LOCALIZADO USUARIO %i PARA ESTE REGISTRO',15,1,@vclCodUsrNew);
   IF( @uniApelidoNew='ERRO' )
     RAISERROR('NAO LOCALIZADO UNIDADE %i PARA ESTE REGISTRO',15,1,@vclCodUniNew);
+  IF( @gpoNomeNew='ERRO' )
+  BEGIN
+    SET @vclCodGpoNew=null;
+  END 
   -------------------------------------------------------------
   -- Checando se o usuario tem direito de cadastro nesta tabela
   -------------------------------------------------------------
@@ -69,6 +78,7 @@ BEGIN
   DECLARE @vclEntraBiOld VARCHAR(1);
   DECLARE @vclDtCalibracaoOld DATE;  
   DECLARE @vclNumFrotaOld VARCHAR(20);
+  DECLARE @vclCodGpoOld INTEGER;
   DECLARE @vclAtivoOld VARCHAR(1);
   DECLARE @vclRegOld VARCHAR(1);
   DECLARE @vclCodUsrOld INTEGER;
@@ -79,6 +89,7 @@ BEGIN
          ,@vclEntraBiOld      = o.VCL_ENTRABI
          ,@vclDtCalibracaoOld = o.VCL_DTCALIBRACAO
          ,@vclNumFrotaOld     = o.VCL_NUMFROTA
+         ,@vclCodGpoOld       = o.VCL_CODGPO
          ,@vclAtivoOld        = o.VCL_ATIVO
          ,@vclRegOld          = o.VCL_REG
          ,@vclCodUsrOld       = o.VCL_CODUSR         
@@ -114,6 +125,7 @@ BEGIN
           ,VCL_DTCALIBRACAO = @vclDtCalibracaoNew
           ,VCL_NUMFROTA     = @vclNumFrotaNew
           ,VCL_ATIVO        = @vclAtivoNew
+          ,VCL_CODGPO       = @vclCodGpoNew
           ,VCL_REG          = @vclRegNew
           ,VCL_CODUSR       = @vclCodUsrNew
     WHERE VCL_CODIGO  = @vclCodigoNew;     
@@ -143,6 +155,7 @@ BEGIN
         ,VCL_DTCALIBRACAO        
         ,VCL_NUMFROTA        
         ,VCL_ATIVO
+        ,VCL_CODGPO
         ,VCL_REG
         ,VCL_CODUSR) VALUES(
         'A'                       -- VCL_ACAO
@@ -154,6 +167,7 @@ BEGIN
         ,@vclDtCalibracaoNew      -- VCL_DTCALIBRACAO
         ,@vclNumFrotaNew          -- VCL_NUMFROTA        
         ,@vclAtivoNew             -- VCL_ATIVO
+        ,@vclCodGpoNew             -- VCL_CODGPO
         ,@vclRegNew               -- VCL_REG
         ,@vclCodUsrNew            -- VCL_CODUSR
       );

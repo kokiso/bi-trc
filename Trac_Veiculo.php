@@ -43,6 +43,33 @@
             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]';
           };
         };
+        // if( $rotina=="executa" ){
+        //   $sql=$lote[0]->sql;
+        //   $classe->msgSelect(false);
+        //   $retCls=$classe->selectAssoc($sql);
+        //   if( $retCls['retorno'] != "OK" ){
+        //     $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
+        //   } else {
+        //     $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]';
+        //   };
+        // };
+        if( $rotina=="motorista" ){
+          $sql.="SELECT MTR.MTR_CODIGO AS CODIGO, MTR.MTR_NOME AS NOME, MTR.MTR_RFID AS RFID";
+          $sql.=" FROM MOTORISTA MTR ";
+          $sql.=" INNER JOIN UNIDADE U ON U.UNI_CODIGO=MTR.MTR_CODUNI";                              
+          $sql.=" WHERE MTR.MTR_ATIVO = 'S' AND MTR.MTR_EXCLUIDO = 'N'";
+          if ($lote[0]->codUni != 0) {
+            $sql.=" AND U.UNI_CODIGO = ".$lote[0]->codUni;
+          }                                               
+          $sql.=" GROUP BY MTR.MTR_CODIGO, MTR.MTR_NOME, MTR.MTR_RFID";
+          $classe->msgSelect(false);
+          $retCls=$classe->selectAssoc($sql);
+          if( $retCls['retorno'] != "OK" ){
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
+          } else {
+            $retorno='[{"retorno":"OK","dados":'.json_encode($retCls['dados']).',"erro":""}]';
+          };
+        };
         ///////////////////////////////////////////////////////////
         //   Buscando apenas as unidades que usuario tem direito //
         ///////////////////////////////////////////////////////////
@@ -90,6 +117,9 @@
           $sql.="      ,CASE WHEN A.VCL_FROTA='L' THEN CAST('LEVE' AS VARCHAR(4)) ELSE CAST('PESADA' AS VARCHAR(6)) END AS VCL_FROTA";
           $sql.="      ,VCL_CODUNI";
           $sql.="      ,CASE WHEN A.VCL_ENTRABI='S' THEN 'SIM' ELSE 'NAO' END AS VCL_ENTRABI";
+          $sql.="      ,CASE WHEN A.VCL_MTRFIXO='S' THEN 'SIM' ELSE 'NAO' END AS VCL_MTRFIXO";
+          $sql.="      ,VCL_CODMTR";
+          $sql.="      ,MTR.MTR_NOME";
           $sql.="      ,CONVERT(VARCHAR(10),VCL_DTCALIBRACAO,127) AS VCL_DTCALIBRACAO";
           $sql.="      ,VCL_NUMFROTA";
           $sql.="      ,UNI.UNI_APELIDO";
@@ -104,6 +134,7 @@
           $sql.="  LEFT OUTER JOIN GRUPOOPERACIONAL GPO ON A.VCL_CODGPO=GPO.GPO_CODIGO";
           $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.VCL_CODUNI=UNI.UNI_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
+          $sql.="  LEFT OUTER JOIN MOTORISTA MTR ON A.VCL_CODMTR=MTR.MTR_CODIGO"; 
           $sql.=" WHERE (((VCL_ATIVO='".$lote[0]->ativo."') OR ('* '='".$lote[0]->ativo."')) AND (COALESCE(UU.UU_ATIVO,'')='S'))";
           if( $lote[0]->coduni > 0 ){
             $sql.=" AND (VCL_CODUNI=".$lote[0]->coduni.")";
@@ -317,6 +348,7 @@
     <script src="js/jsTable2017.js"></script>
     <script src="tabelaTrac/f10/tabelaUnidadeF10.js"></script>
     <script src="tabelaTrac/f10/tabelaGrupoOperacionalF10.js"></script>
+    <script src="tabelaTrac/f10/tabelaMotoristaF10.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -370,7 +402,7 @@
             ,{"id":2  ,"field"          : "VCL_NOME"
                       ,"labelCol"       : "DESCRICAO"
                       ,"obj"            : "edtDescricao"
-                      ,"tamGrd"         : "25em"
+                      ,"tamGrd"         : "20em"
                       ,"tamImp"         : "80"
                       ,"digitosMinMax"  : [3,40]
                       ,"digitosValidos" : "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9| "
@@ -411,7 +443,35 @@
                       ,"ajudaCampo"     : ["Se veiculo entra nas estatisticas de BI."]
                       ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":6  ,"field"          : "VCL_DTCALIBRACAO"
+            ,{"id":6  ,"field"          : "VCL_MTRFIXO"
+                      ,"labelCol"       : "MTRFIXO"
+                      ,"obj"            : "cbMtrFixo"
+                      ,"tamGrd"         : "6em"
+                      ,"tamImp"         : "20"
+                      ,"tipo"           : "cb"
+                      ,"newRecord"      : ["N","this","this"]
+                      ,"ajudaCampo"     : ["Se o veículo possui motorista fixo ou não."]
+                      ,"importaExcel"   : "S"
+                      ,"padrao":0}
+            ,{"id":7  ,"field"          : "VCL_CODMTR"
+                      ,"obj"            : "edtCodMtr"
+                      ,"tamGrd"         : "0em"
+                      ,"newRecord"      : ["0000","this","this"]
+                      ,"tamImp"         : "20"
+                      ,"ajudaCampo"     : ["Código do motorista vinculado ao veículo."]
+                      ,"importaExcel"   : "S"
+                      ,"padrao":0}
+            ,{"id":8  ,"field"          : "MTR_NOME"
+                      ,"labelCol"       : "MOTORISTA"
+                      ,"obj"            : "edtDesMtr"
+                      ,"validar"        : ["podeNull"]
+                      ,"insUpDel"       : ["N","N","N"]
+                      ,"tamGrd"         : "15em"
+                      ,"tamImp"         : "20"
+                      ,"ajudaCampo"     : ["Motorista vinculado ao veículo."]
+                      ,"importaExcel"   : "S"
+                      ,"padrao":0}
+            ,{"id":9  ,"field"          : "VCL_DTCALIBRACAO"
                       ,"labelCol"       : "CALIBRACAO"
                       ,"obj"            : "edtDtCalibracao"
                       ,"fieldType"      : "dat"
@@ -421,7 +481,7 @@
                       ,"ajudaCampo"     : ["Data de calibracao veiculo."]
                       ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":7  ,"field"          : "VCL_NUMFROTA"
+            ,{"id":10  ,"field"          : "VCL_NUMFROTA"
                       ,"labelCol"       : "NUMFROTA"
                       ,"obj"            : "edtNumFrota"
                       ,"tamGrd"         : "10em"
@@ -431,7 +491,7 @@
                       ,"ajudaCampo"     : ["Frota do veiculo com até 20 caracteres."]
                       ,"importaExcel"   : "N"
                       ,"padrao":0}
-            ,{"id":8  ,"field"          : "UNI_APELIDO"
+            ,{"id":11  ,"field"          : "UNI_APELIDO"
                       ,"insUpDel"       : ["N","N","N"]
                       ,"labelCol"       : "UNID"
                       ,"obj"            : "edtDesUni"
@@ -441,7 +501,7 @@
                       ,"validar"        : ["notnull"]
                       ,"ajudaCampo"     : ["Nome da unidade."]
                       ,"padrao":0}
-            ,{"id":9  ,"field"          : "VCL_CODGPO"
+            ,{"id":12  ,"field"          : "VCL_CODGPO"
                       ,"labelCol"       : "GRUPO OPERACIONAL"
                       ,"obj"            : "edtCodGpo"
                       ,"fieldType"      : "int"
@@ -451,7 +511,7 @@
                       ,"tamImp"         : "10"
                       ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":10 ,"field"          : "GPO_NOME"
+            ,{"id":13 ,"field"          : "GPO_NOME"
                       ,"insUpDel"       : ["N","N","N"]
                       ,"labelCol"       : "GRUPO OPERACIONAL"
                       ,"validar"        : ["podeNull"]
@@ -463,26 +523,26 @@
                       ,"ajudaCampo"     : ["Nome do grupo operacional."]
                       ,"importaExcel"   : "S"
                       ,"padrao":0}
-            ,{"id":11  ,"field"          : "VCL_ATIVO"
+            ,{"id":14  ,"field"          : "VCL_ATIVO"
                       ,"labelCol"       : "ATIVO"
                       ,"obj"            : "cbAtivo"
                       ,"ajudaDetalhe"   : "Se o veiculo esta ativo para uso"
                       ,"padrao":2}
-            ,{"id":12 ,"field"          : "VCL_REG"
+            ,{"id":15 ,"field"          : "VCL_REG"
                       ,"labelCol"       : "REG"
                       ,"obj"            : "cbReg"
                       ,"lblDetalhe"     : "REGISTRO"
                       ,"ajudaDetalhe"   : "Se o registro é PUBlico/ADMinistrador ou do SIStema"
                       ,"padrao":3}
-            ,{"id":13 ,"field"          : "US_APELIDO"
+            ,{"id":16 ,"field"          : "US_APELIDO"
                       ,"labelCol"       : "USUARIO"
                       ,"obj"            : "edtUsuario"
                       ,"padrao":4}
-            ,{"id":14 ,"field"          : "VCL_CODUSR"
+            ,{"id":17 ,"field"          : "VCL_CODUSR"
                       ,"labelCol"       : "CODUSU"
                       ,"obj"            : "edtCodUsu"
                       ,"padrao":5}
-            ,{"id":15 ,"labelCol"       : "PP"
+            ,{"id":18 ,"labelCol"       : "PP"
                       ,"obj"            : "imgPP"
                       ,"func":"var elTr=this.parentNode.parentNode;"
                         +"elTr.cells[0].childNodes[0].checked=true;"
@@ -616,6 +676,7 @@
       var jsVcl;                      // Obj principal da classe clsTable2017
       var objUniF10;                  // Obrigatório para instanciar o JS CidadeF10
       var objGpoF10;                  // Obrigatório para instanciar o JS GrupoOperacionalF10
+      var objMtrF10;                  // Obrigatório para instanciar o JS MotoristaF10
       var objExc;                     // Obrigatório para instanciar o JS Importar excel
       var jsExc;                      // Obrigatório para instanciar o objeto objExc
       var clsJs;                      // Classe responsavel por montar um Json e eviar PHP
@@ -670,6 +731,7 @@
             jsVcl.registros=objVcl.addIdUnico(retPhp[0]["dados"]);
             objVcl.ordenaJSon(jsVcl.indiceTable,false);
             objVcl.montarBody2017();
+            document.getElementById("edtDesMtr").enabled = true;
           };
         };
       };
@@ -709,6 +771,25 @@
           gerarMensagemErro("Vcl",retPhp[0].erro,"AVISO");
         };
       };
+
+    //   // Custom persistencia 
+
+    //   function verificaTipoInstrucao(status, sql) {
+    //     updateDados(sql);
+    // }
+
+    // function updateDados(sql) {
+    //   clsJs   = jsString("lote");  
+    //   clsJs.add("rotina"      , "executa"         );
+    //   clsJs.add("login"       , jsPub[0].usr_login  );
+    //   clsJs.add("sql"         , sql  );
+    //   fd = new FormData();
+    //   fd.append("veiculo" , clsJs.fim());
+    //   msg     = requestPedido("Trac_Veiculo.php",fd); 
+    //   retPhp  = JSON.parse(msg);
+    //   document.getElementById('unidadeSelect').innerHTML = '';
+
+
       ////////////////////////
       // AJUDA PARA UNIDADE //
       ////////////////////////
@@ -725,7 +806,7 @@
         document.getElementById("edtDesUni").value   = arr[0].APELIDO;
         document.getElementById("edtCodUni").setAttribute("data-oldvalue",arr[0].CODIGO);
       };
-      function RetF10tblGpo(arr){
+    function RetF10tblGpo(arr){
         document.getElementById("edtCodGpo").value   = arr[0].CODIGO;
         document.getElementById("edtDesGpo").value   = arr[0].NOME;
         document.getElementById("edtCodGpo").setAttribute("data-oldvalue",arr[0].CODIGO);
@@ -740,36 +821,21 @@
           document.getElementById(obj.id).setAttribute("data-oldvalue",( ret.length == 0 ? "0000" : ret[0].CODIGO )               );
         };
       };
-      // function buscarUni(){
-      //   clsJs   = jsString("lote");
-      //   clsJs.add("rotina"      , "unidade"           );
-      //   clsJs.add("login"       , jsPub[0].usr_login  );
-      //   fd = new FormData();
-      //   fd.append("veiculo" , clsJs.fim());
-      //   msg     = requestPedido("Trac_Veiculo.php",fd);
-      //   retPhp  = JSON.parse(msg);
-      //   if( retPhp[0].retorno == "OK" ){
-      //     msg=retPhp[0]["dados"].length;
-      //     if(msg==0){
-      //       var ceOpt 	= document.createElement("option");
-      //       ceOpt.value = "*";
-      //       ceOpt.text  = "SEM DIREITO"
-      //       document.getElementById("cbUnidade").appendChild(ceOpt);
-      //     } else {
-      //       var ceOpt 	= document.createElement("option");
-      //       ceOpt.value = "0";
-      //       ceOpt.text  = "TODOS";
-      //       document.getElementById("cbUnidade").appendChild(ceOpt);
 
-      //       for( var lin=0;lin<msg;lin++ ){
-      //         var ceOpt 	= document.createElement("option");
-      //         ceOpt.value = retPhp[0]["dados"][lin]["UNI_CODIGO"];
-      //         ceOpt.text  = retPhp[0]["dados"][lin]["UNI_APELIDO"]
-      //         document.getElementById("cbUnidade").appendChild(ceOpt);
-      //       };
-      //     };
-      //   };
-      // };
+      function mtrF10Click(){
+        let codUni = document.getElementById('edtCodUni').value;
+        if (codUni == 0) {
+          return gerarMensagemErro("", "Selecione uma Unidade antes de escolher o motorista", "Erro");
+        }
+         fMotoristaF10("edtDesMtr",codUni);
+       };
+
+       function RetF10tblMtr(arr){
+        document.getElementById("edtCodMtr").value   = arr[0].CODIGO;
+        document.getElementById("edtDesMtr").value   = arr[0].NOME;
+        document.getElementById("edtCodUni").setAttribute("data-oldvalue",arr[0].CODIGO);
+      };
+
       function montaGrupoOperacional() {
         var cbUnidadeValue = document.getElementById("cbUnidade").value;
         var divGrupoOperacional = document.getElementById("divCbGrupoOperacional");
@@ -843,23 +909,8 @@
                 </select>
                 <label class="campo_label campo_required" for="cbFrota">FROTA</label>
               </div>
-              <div class="campotexto campo15">
-                <select class="campo_input_combo" id="cbMotFixo">
-                  <option value="S">SIM</option>
-                  <option value="N">NÃO</option>
-                </select>
-                <label class="campo_label campo_required" for="cbMotFixo">MOTORISTA_FIXO</label>
-              </div>
-              <div class="campotexto campo20">
-                    <input class="campo_input_titulo inputF10" id="edtMot"
-                           onFocus="uniFocus(this);"
-                           onClick="motF10Click('edtMot');" 
-                           autocomplete="off"
-                           type="text" />
-                    <label class="campo_label" for="edtMot">MOTORISTA</label>
-                </div>
-              <div class="campotexto campo15">
-                <input class="campo_input inputF10" id="edtCodUni"
+              <div class="campotexto campo15 naoDesabilitar">
+                <input class="campo_input inputF10 naoDesabilitar" id="edtCodUni"
                                                     OnKeyPress="return mascaraInteiro(event);"
                                                     onBlur="codUniBlur(this);"
                                                     onFocus="uniFocus(this);"
@@ -873,6 +924,27 @@
                 <input class="campo_input_titulo input" id="edtDesUni" type="text" disabled />
                 <label class="campo_label campo_required" for="edtDesUni">RAZAO_UNIDADE</label>
               </div>
+              <div class="campotexto campo15">
+                <select class="campo_input_combo" id="cbMtrFixo">
+                  <option value="S">SIM</option>
+                  <option value="N">NAO</option>
+                </select>
+                <label class="campo_label campo_required" for="cbMtrFixo">MOTORISTA_FIXO</label>
+              </div>
+              <div class="inactive">
+                <input id="edtCodMtr" type="text" />
+              </div>
+              <div class="campotexto campo20">
+                    <input class="campo_input inputF10" id="edtDesMtr"
+                           onFocus="uniFocus(this);"
+                           onClick="mtrF10Click('edtCodMtr');" 
+                           autocomplete="off"
+                           data-oldvalue=""
+                           type="text"
+                     />
+                           
+                    <label class="campo_label" for="edtDesMtr">MOTORISTA</label>
+                </div>
               <div class="campotexto campo12">
                 <select class="campo_input_combo" id="cbEntraBi">
                   <option value="S">SIM</option>

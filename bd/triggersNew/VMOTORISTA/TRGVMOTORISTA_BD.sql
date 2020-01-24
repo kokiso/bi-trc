@@ -87,8 +87,11 @@ BEGIN
        SET MTR_ATIVO  = 'N',
            MTR_EXCLUIDO = 'S'
     WHERE MTR_CODIGO = @mtrCodigoOld;
-
     UPDATE UNIDADE SET UNI_QTOSMTR=(UNI_QTOSMTR-1) WHERE UNI_CODIGO=@mtrCodUniOld;
+
+    UPDATE dbo.VEICULO
+        SET VCL_CODMTR = NULL 
+    WHERE VCL_CODMTR = @mtrCodigoOld
     ---------------
     -- Gravando LOG
     ---------------
@@ -100,7 +103,8 @@ BEGIN
       ,MTR_CODUNI
       ,MTR_ATIVO
       ,MTR_REG
-      ,MTR_CODUSR) VALUES(
+      ,MTR_CODUSR
+      ,MTR_EXCLUIDO) VALUES(
       'E'                       -- MTR_ACAO
       ,@mtrCodigoOld            -- MTR_CODIGO
       ,@mtrNomeOld              -- MTR_NOME
@@ -109,7 +113,8 @@ BEGIN
       ,@mtrAtivoOld             -- MTR_ATIVO
       ,@mtrRegOld               -- MTR_REG
       ,@mtrCodUsrOld            -- MTR_CODUSR
-    );  
+      ,'S'                      -- MTR_EXCLUIDO
+    );
   END TRY
   BEGIN CATCH
     DECLARE @ErrorMessage NVARCHAR(4000);
@@ -120,3 +125,5 @@ BEGIN
     RETURN;
   END CATCH
 END
+go
+

@@ -54,6 +54,7 @@ BEGIN
   DECLARE @mvmCodVei INTEGER;
   DECLARE @mvmPlaca VARCHAR(10);
   DECLARE @vclEntraBi VARCHAR(1);
+  DECLARE @vclCodMtr INTEGER;
   DECLARE @vclFrota VARCHAR(1);
   DECLARE @mvmCodUni INTEGER;
   DECLARE @uniApelido VARCHAR(15);
@@ -84,6 +85,7 @@ BEGIN
          ,@mvmCodVei       =  i.TMVM_CODVEI
          ,@mvmPlaca        =  i.TMVM_PLACA
          ,@vclEntraBi      =  COALESCE(VCL.VCL_ENTRABI,'*')
+         ,@vclCodMtr       =  VCL.VCL_CODMTR
          ,@mvmCodUni       =  i.TMVM_CODUNI
          ,@mvmCodPol       =  UNI.UNI_CODPOL
          ,@uniApelido      =  COALESCE(UNI.UNI_APELIDO,'ERRO')
@@ -108,8 +110,10 @@ BEGIN
   LEFT OUTER JOIN VEICULO VCL ON i.TMVM_PLACA=VCL.VCL_CODIGO
   LEFT OUTER JOIN UNIDADE UNI ON i.TMVM_CODUNI=UNI.UNI_CODIGO;
 
-   IF (@mvmRfid IS NULL OR @mvmDesMtr IS NULL) BEGIN
-        SELECT TOP 1 @mvmRfid = MTR_RFID , @mvmDesMtr = MTR_NOME FROM MOTORISTA WHERE MTR_VEICULO = @mvmPlaca AND MTR_ATIVO = 'S'
+    IF (@mvmRfid IS NULL OR @mvmDesMtr IS NULL) BEGIN
+        SELECT @mvmRfid = MTR.MTR_RFID , @mvmDesMtr = MTR.MTR_NOME FROM VEICULO VCL
+            INNER JOIN MOTORISTA MTR ON @vclCodMtr = MTR.MTR_CODIGO
+        WHERE VCL_MTRFIXO = 'S' AND VCL_CODMTR = MTR_CODIGO
    END
 
   -----------------------------------------------------
@@ -131,8 +135,8 @@ BEGIN
       IF( @varCodVcl='OK' ) BEGIN
         SET @vclFrota='P';
         INSERT INTO dbo.VVEICULO(
-          VCL_CODIGO  ,VCL_NOME               ,VCL_FROTA,VCL_CODUNI ,VCL_ENTRABI,VCL_DTCALIBRACAO,VCL_ATIVO,VCL_REG,VCL_CODUSR) VALUES(
-          @mvmPlaca   ,'CADASTRO AUTOMATICO'  ,'P'      ,@mvmCodUni ,'S'        ,'1900-01-01'    ,'S'      ,'P'    ,1
+          VCL_CODIGO  ,VCL_NOME               ,VCL_FROTA,VCL_CODUNI, VCL_NUMFROTA ,VCL_ENTRABI,VCL_DTCALIBRACAO,VCL_ATIVO,VCL_REG,VCL_CODUSR, VCL_MTRFIXO, VCL_CODMTR) VALUES(
+          @mvmPlaca   ,'CADASTRO AUTOMATICO'  ,'P'      ,@mvmCodUni, 'NSA'        ,'S'        ,'1900-01-01'    ,'S'      ,'P'    ,1         , 'N'        , NULL
         );
       END
       --
@@ -199,16 +203,16 @@ BEGIN
       -- Tem que ser na view para atualizar UNI_QTOSMTR
       ---------------------------------------------------------
       SELECT @varCodMtr=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mvmRfid) AND (MTR_NOME=@mvmDesMtr) AND (MTR_ATIVO='S'));
+      SELECT @vclCodMtr=VCL_CODMTR FROM VEICULO WHERE VCL_CODIGO=@mvmPlaca AND VCL_ATIVO = 'S';
       IF( @varCodMtr=0 ) BEGIN
         IF (@mvmRfid IS NOT NULL AND @mvmDesMtr IS NOT NULL) BEGIN
         SELECT @varCodMtr=(MAX(MTR_CODIGO)+1) FROM MOTORISTA;
         INSERT INTO dbo.VMOTORISTA(
-          MTR_CODIGO  ,MTR_NOME    ,MTR_RFID ,MTR_CODUNI,MTR_ATIVO ,MTR_REG,MTR_POSICAO,MTR_CODUSR, MTR_VEICULO) VALUES(
-          @varCodMtr  ,@mvmDesMtr  ,@mvmRfid ,@mvmCodUni,'S'       ,'P'    ,@mvmPosicao,1, COALESCE(@mvmPlaca, '')
-        );
+          MTR_CODIGO  ,MTR_NOME    ,MTR_RFID ,MTR_CODUNI,MTR_ATIVO ,MTR_REG,MTR_POSICAO,MTR_CODUSR, MTR_EXCLUIDO) VALUES(
+          @varCodMtr  ,@mvmDesMtr  ,@mvmRfid ,@mvmCodUni,'S'       ,'P'    ,@mvmPosicao,1, 'N');
         END
       END ELSE BEGIN
-        UPDATE MOTORISTA SET MTR_POSICAO=@mvmPosicao WHERE MTR_CODIGO=@varCodMtr;
+        UPDATE MOTORISTA SET MTR_POSICAO=@mvmPosicao WHERE MTR_CODIGO=@varCodMtr ;
       END
       --
       ------------------------------------------------------------------------------------------------------------------
@@ -253,7 +257,7 @@ BEGIN
         ,@mvmPlaca        -- MVM_PLACA
         ,@mvmCodUni       -- MVM_CODUNI
         ,@mvmCodPol       -- MVM_CODPOL
-        ,COALESCE(@mvmRfid, '-') -- MVM_RFID
+        ,@mvmRfid         -- MVM_RFID
         ,@varCodMtr       -- MVM_CODMTR
         ,@mvmCodEveSS     -- MVM_CODEVESS
         ,@varCodEve       -- MVM_CODEVE

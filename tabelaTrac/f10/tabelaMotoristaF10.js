@@ -9,13 +9,13 @@ function fMotoristaF10(foco, codUni) {
   retPhp = JSON.parse(msg);
   if (retPhp[0].retorno == "OK") {
     retPhp[0].dados = converterObjeto(retPhp[0].dados);
-    var jsMotF10 = {
+    var jsMtrF10 = {
       titulo: [
         {
           id: 0,
           labelCol: "OPC",
           tipo: "chk",
-          tamGrd: "5em",
+          tamGrd: "3em",
           fieldType: "chk"
         },
         {
@@ -32,7 +32,7 @@ function fMotoristaF10(foco, codUni) {
           id: 2,
           labelCol: "NOME",
           tipo: "edt",
-          tamGrd: "30em",
+          tamGrd: "35em",
           fieldType: "str",
           ordenaColuna: "S"
         },
@@ -40,7 +40,7 @@ function fMotoristaF10(foco, codUni) {
           id: 3,
           labelCol: "RFID",
           tipo: "edt",
-          tamGrd: "10em",
+          tamGrd: "13em",
           fieldType: "str",
           ordenaColuna: "S",
           align: "center"
@@ -49,29 +49,29 @@ function fMotoristaF10(foco, codUni) {
       registros: retPhp[0].dados, // Recebe um Json vindo da classe clsBancoDados
       opcRegSeek: true, // Opção para numero registros/botão/procurar
       checarTags: "N", // Somente em tempo de desenvolvimento(olha as pricipais tags)
-      tbl: "tblMot", // Nome da table
-      prefixo: "Mot", // Prefixo para elementos do HTML em jsTable2017.js
+      tbl: "tblMtr", // Nome da table
+      prefixo: "Mtr", // Prefixo para elementos do HTML em jsTable2017.js
       tabelaBD: "MOTORISTA", // Nome da tabela no banco de dados
-      width: "52em", // Tamanho da table
+      width: "72em", // Tamanho da table
       height: "37em", // Altura da table
       indiceTable: "NOME" // Indice inicial da table
     };
-    if (objMotF10 === undefined) {
-      objMotF10 = new clsTable2017("objMotF10");
-      objMotF10.tblF10 = true;
+    if (objMtrF10 === undefined) {
+      objMtrF10 = new clsTable2017("objMtrF10");
+      objMtrF10.tblF10 = true;
       if (foco != undefined) {
-        objMotF10.focoF10 = foco;
+        objMtrF10.focoF10 = foco;
       }
     }
-    var html = objMotF10.montarHtmlCE2017(jsMotF10);
+    var html = objMtrF10.montarHtmlCE2017(jsMtrF10);
     var ajudaF10 = new clsMensagem("Ajuda");
     ajudaF10.divHeight = "400px"; /* Altura container geral*/
-    ajudaF10.divWidth = "42%";
+    ajudaF10.divWidth = "62%";
     ajudaF10.tagH2 = false;
     ajudaF10.mensagem = html;
-    ajudaF10.Show("ajudaMot");
-    document.getElementById("tblMot").rows[0].cells[2].click();
+    ajudaF10.Show("ajudaMtr");
+    document.getElementById("tblMtr").rows[0].cells[2].click();
     delete ajudaF10;
-    delete objMotF10;
+    delete objMtrF10;
   }
 }
