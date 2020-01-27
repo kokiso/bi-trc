@@ -1412,9 +1412,9 @@
         "POLO_NOME": pubDesPol,
         "GRUPOOPERACIONAL": pubCodGpo,
         "GRUPOOPERACIONAL_NOME": pubDesGpo,
-        "QUAL_INFRACAO_MOTORISTA": pubQualInfracaoMotorista,
-        "QUAL_INFRACAO_TURNO": pubQualInfracaoTurno,
-        "DATA": document.getElementById("cbCompetencia").value,
+        "TIPO_INFRACAO_MOTORISTA": pubQualInfracaoMotorista,
+        "TIPO_INFRACAO_TURNO": pubQualInfracaoTurno,
+        "DATA": document.getElementById("cbCompetencia").value.substring(0,6),
         "LEVEPESADO" : pubLevPes
     };
       var caminho = "RelatorioInfracoesServlet";
