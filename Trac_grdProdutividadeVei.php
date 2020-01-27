@@ -141,6 +141,7 @@
     <link rel="stylesheet" href="css/Acordeon.css">    
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
+    <script src="js/converterData.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -174,7 +175,7 @@
              {"id":0  ,"labelCol":"OPC"     
                       ,"padrao":1}            
             ,{"id":1  ,"labelCol"       : "DATA"
-                      ,"fieldType"      : "int"
+                      ,"fieldType"      : "str"
                       ,"align"          : "center"                                      
                       ,"tamGrd"         : "5em"
                       ,"tamImp"         : "15"
@@ -419,6 +420,8 @@
             pFim=(lin.KMFIM).indexOf(".");
             velocMedia=((parseFloat(lin.KMFIM)-parseFloat(lin.KMINI))/(lin.RODANDO/3600));
             //
+            lin.ANOMES = lin.ANOMES + "";
+            lin.ANOMES = lin.ANOMES.substring(4,6) + "/" + lin.ANOMES.substring(0,4);
             retJs.push([
               lin.ANOMES                                                  // DATA
               ,lin.CODUNI                                                 //
@@ -466,11 +469,12 @@
           if( chkds[0].MES==0 ){
             gerarMensagemErro("vel","Nenhuma infração do mês para detalhe!","Aviso");            
           } else {
+            let data = chkds[0].DATA.substring(3,7) + chkds[0].DATA.substring(0,2);
             clsJs       = jsString("lote");  
             clsJs.add("rotina"  , "detalhe"                                   );
             clsJs.add("login"   , jsPub[0].usr_login                          );
             clsJs.add("codusu"  , jsPub[0].usr_codigo                         );
-            clsJs.add("dtini"   , chkds[0].DATA                               );
+            clsJs.add("dtini"   , data                                        );
             clsJs.add("codvcl"  , chkds[0].PLACA                              );
             clsJs.add("prdini"  , chkds[0].PRDINI                             );
             clsJs.add("prdfim"  , chkds[0].PRDFIM                             );
@@ -482,6 +486,14 @@
               gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
             } else {
               if( retPhp[0].retorno == "OK" ){
+                retPhp[0].dados.forEach(arr => {
+              const dataHoraInicial = converterData(arr[11]);
+              const dataHoraFinal = converterData(arr[16]);
+              arr[11] = dataHoraInicial.dataConvertida;
+              arr.splice(12, 0, dataHoraInicial.horaConvertida); 
+              arr[16] = dataHoraFinal.dataConvertida;
+              arr.splice(17, 0, dataHoraFinal.horaConvertida);
+            });
                 /////////////////////////////
                 //Convertendo segundos em hms
                 /////////////////////////////
@@ -568,44 +580,56 @@
                               ,"tamImp"         : "15"
                               ,"excel"          : "S"                              
                               ,"padrao":0}
-					,{"id":12 ,"labelCol"       : "DATAGPSINI"
+				          	,{"id":12 ,"labelCol"       : "DATAGPSINI"
                               ,"fieldType"      : "str"
-                              ,"tamGrd"         : "14em"
+                              ,"tamGrd"         : "7em"
                               ,"tamImp"         : "15"
                               ,"excel"          : "S"                              
                               ,"padrao":0}		  
-                    ,{"id":13 ,"labelCol"       : "LOCINI"
+				          	,{"id":13 ,"labelCol"       : "HORAGPSINI"
+                              ,"fieldType"      : "str"
+                              ,"tamGrd"         : "7em"
+                              ,"tamImp"         : "15"
+                              ,"excel"          : "S"                              
+                              ,"padrao":0}		  
+                    ,{"id":14 ,"labelCol"       : "LOCINI"
                               ,"fieldType"      : "str"
                               ,"tamGrd"         : "20em"
                               ,"tamImp"         : "15"
                               ,"excel"          : "S"                              
                               ,"padrao":0}
-					,{"id":14 ,"labelCol"       : "IDFIM"
+			            	,{"id":15 ,"labelCol"       : "IDFIM"
                               ,"fieldType"      : "str"
                               ,"tamGrd"         : "9em"
                               ,"tamImp"         : "15"
                               ,"excel"          : "S"                              
                               ,"padrao":0}		  
-                    ,{"id":15 ,"labelCol"       : "DATAGPSFIM"
+                    ,{"id":16 ,"labelCol"       : "DATAGPSFIM"
                               ,"fieldType"      : "str"
-                              ,"tamGrd"         : "14em"
+                              ,"tamGrd"         : "7em"
                               ,"tamImp"         : "30"
                               ,"excel"          : "S"                              
                               ,"padrao":0}
-                    ,{"id":16 ,"labelCol"       : "LOCFIM"
+                    ,{"id":17 ,"labelCol"       : "HORAGPSFIM"
+                              ,"fieldType"      : "str"
+                              ,"tamGrd"         : "7em"
+                              ,"tamImp"         : "30"
+                              ,"excel"          : "S"                              
+                              ,"padrao":0}
+                    ,{"id":18 ,"labelCol"       : "LOCFIM"
                               ,"fieldType"      : "str"
                               ,"tamGrd"         : "20em"
                               ,"tamImp"         : "30"
                               ,"excel"          : "S"                              
                               ,"padrao":0}
-                    ,{"id":17 ,"labelCol"       : "UNIDADE"
+                    ,{"id":19 ,"labelCol"       : "UNIDADE"
                               ,"fieldType"      : "str"
                               ,"tamGrd"         : "10em"
                               ,"tamImp"         : "25"
                               ,"excel"          : "S"
                               ,"ordenaColuna"   : "S"
                               ,"padrao":0}
-                    ,{"id":18 ,"labelCol"       : "POLO"
+                    ,{"id":20 ,"labelCol"       : "POLO"
                               ,"fieldType"      : "str"
                               ,"align"          : "center"
                               ,"tamGrd"         : "4em"
@@ -613,7 +637,7 @@
                               ,"excel"          : "S"
                               ,"ordenaColuna"   : "S"
                               ,"padrao":0}
-                    ,{"id":19 ,"labelCol"       : "ERR"
+                    ,{"id":21 ,"labelCol"       : "ERR"
                               ,"fieldType"      : "str"
                               ,"tamGrd"         : "1em"
                               ,"tamImp"         : "0"
