@@ -644,6 +644,7 @@
           msg     = requestPedido("Trac_grdInfracaoTempo.php",fd); 
           retPhp  = JSON.parse(msg);
           if( retPhp[0].retorno == "OK" ){
+            // Arrumando a exibição de data para data e hora no padrão brasileiro
             retPhp[0].dados.forEach(arr => {
               const dataHoraInicial = converterData(arr[4]);
               const dataHoraFinal = converterData(arr[6]);
@@ -724,6 +725,7 @@
             gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
           } else {
             if( ret[0].retorno == "OK" ){
+              // Arrumando a exibição de data para data e hora no padrão brasileiro
               ret[0].dados.forEach(arr => {
               const dataHora = converterData(arr[5]);
               arr[5] = dataHora.dataConvertida;
@@ -1042,12 +1044,6 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-
-      <!--<div class="campotexto campo10">      
-        <select class="campo_input_combo" id="cbIni">
-        </select>
-        <label class="campo_label campo_required" for="cbIni">MÊS</label>
-      </div>-->
 
       <?php include 'classPhp/comum/selectMes.class.php';?>
       

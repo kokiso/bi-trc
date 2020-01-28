@@ -419,7 +419,8 @@
             pIni=(lin.KMINI).indexOf(".");
             pFim=(lin.KMFIM).indexOf(".");
             velocMedia=((parseFloat(lin.KMFIM)-parseFloat(lin.KMINI))/(lin.RODANDO/3600));
-            //
+            // Correção exibição do ano mes para padrão brasileiro (mm/aaaa)
+            // sendo necessario tratar no envio do form para detalhes
             lin.ANOMES = lin.ANOMES + "";
             lin.ANOMES = lin.ANOMES.substring(4,6) + "/" + lin.ANOMES.substring(0,4);
             retJs.push([
@@ -469,6 +470,7 @@
           if( chkds[0].MES==0 ){
             gerarMensagemErro("vel","Nenhuma infração do mês para detalhe!","Aviso");            
           } else {
+            // Reajuste da data formatada no padrão brasileiro para busca no banco
             let data = chkds[0].DATA.substring(3,7) + chkds[0].DATA.substring(0,2);
             clsJs       = jsString("lote");  
             clsJs.add("rotina"  , "detalhe"                                   );
@@ -486,13 +488,14 @@
               gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
             } else {
               if( retPhp[0].retorno == "OK" ){
+                // Ajustando data para data e hora no padrão brasileiro  
                 retPhp[0].dados.forEach(arr => {
-              const dataHoraInicial = converterData(arr[11]);
-              const dataHoraFinal = converterData(arr[16]);
-              arr[11] = dataHoraInicial.dataConvertida;
-              arr.splice(12, 0, dataHoraInicial.horaConvertida); 
-              arr[16] = dataHoraFinal.dataConvertida;
-              arr.splice(17, 0, dataHoraFinal.horaConvertida);
+                const dataHoraInicial = converterData(arr[11]);
+                const dataHoraFinal = converterData(arr[14]);
+                arr[11] = dataHoraInicial.dataConvertida;
+                arr.splice(12, 0, dataHoraInicial.horaConvertida); 
+                arr[15] = dataHoraFinal.dataConvertida;
+                arr.splice(16, 0, dataHoraFinal.horaConvertida);
             });
                 /////////////////////////////
                 //Convertendo segundos em hms

@@ -292,6 +292,7 @@
     <link rel="stylesheet" href="css/Acordeon.css">    
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
+    <script src="js/converterData.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -536,7 +537,8 @@
   			msg     = requestPedido("Trac_grdPeriodoIndevido.php",fd); 
 				retPhp  = JSON.parse(msg);
 				if( retPhp[0].retorno == "OK" ){
-          retPhp[0].dados.forEach(arr => {
+            // Arrumando a exibição de data para data e hora no padrão brasileiro
+            retPhp[0].dados.forEach(arr => {
               const dataHoraInicial = converterData(arr[4]);
               const dataHoraFinal = converterData(arr[6]);
               arr[4] = dataHoraInicial.dataConvertida;
@@ -586,6 +588,12 @@
             gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
           } else {
             if( ret[0].retorno == "OK" ){
+              // Arrumando a exibição de data para data e hora no padrão brasileiro
+              ret[0].dados.forEach(arr => {
+                const dataHora = converterData(arr[5]);
+                arr[5] = dataHora.dataConvertida;
+                arr.splice(6, 0, dataHora.horaConvertida);
+            });
               jsDet={
                 "titulo":[
                   {"id":0   ,"labelCol"       : "OPC"     
@@ -636,11 +644,19 @@
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "DATA"
                             ,"obj"            : "edtDataGps"
-                            ,"tamGrd"         : "15em"
+                            ,"tamGrd"         : "7em"
                             ,"tamImp"         : "30"
                             ,"ajudaCampo"     : ["Data."]
                             ,"padrao":0}
-                  ,{"id":7  ,"field"          : "UNI_APELIDO"   
+                  ,{"id":7  ,"field"          : "MVM_DATAGPS"   
+                            ,"fieldType"      : "str"
+                            ,"labelCol"       : "HORA"
+                            ,"obj"            : "edtDataGps"
+                            ,"tamGrd"         : "7em"
+                            ,"tamImp"         : "30"
+                            ,"ajudaCampo"     : ["Hora."]
+                            ,"padrao":0}
+                  ,{"id":8  ,"field"          : "UNI_APELIDO"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "UNIDADE"
                             ,"obj"            : "edtUnidade"
@@ -648,7 +664,7 @@
                             ,"tamImp"         : "25"
                             ,"ajudaCampo"     : ["Unidade"]
                             ,"padrao":0}
-                  ,{"id":8  ,"field"          : "UNI_CODPOL"   
+                  ,{"id":9  ,"field"          : "UNI_CODPOL"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "POLO"
                             ,"obj"            : "edtCodPol"
@@ -656,26 +672,26 @@
                             ,"tamImp"         : "15"
                             ,"ajudaCampo"     : ["Polo"]
                             ,"padrao":0}
-                  ,{"id":9 ,"labelCol"       : "LATITUDE"
+                  ,{"id":10 ,"labelCol"       : "LATITUDE"
                             ,"fieldType"      : "flo8" 
                             ,"tamGrd"         : "12em"
                             ,"tamImp"         : "0"
                             ,"excel"          : "S"                      
                             ,"padrao":0}
-                  ,{"id":10 ,"labelCol"       : "LONGITUDE"
+                  ,{"id":11 ,"labelCol"       : "LONGITUDE"
                             ,"fieldType"      : "flo8" 
                             ,"tamGrd"         : "12em"
                             ,"tamImp"         : "0"
                             ,"excel"          : "S"                      
                             ,"padrao":0}
-                  ,{"id":11 ,"fieldType"      : "str"
+                  ,{"id":12 ,"fieldType"      : "str"
                             ,"labelCol"       : "LOCALIZACAO"
                             ,"obj"            : "edtCodPol"
                             ,"tamGrd"         : "30em"
                             ,"tamImp"         : "45"
                             ,"ajudaCampo"     : ["Polo"]
                             ,"padrao":0}
-                  ,{"id":12 ,"field"          : "MVM_IGNICAO"   
+                  ,{"id":13 ,"field"          : "MVM_IGNICAO"   
                             ,"fieldType"      : "int"
                             ,"align"          : "center"
                             ,"labelCol"       : "IGN"
@@ -884,11 +900,6 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-      <!-- <div class="campotexto campo10">      
-        <select class="campo_input_combo" id="cbIni">
-        </select>
-        <label class="campo_label campo_required" for="cbFrota">MÊS</label>
-      </div> -->
 
       <?php include 'classPhp/comum/selectMes.class.php';?>
 			
