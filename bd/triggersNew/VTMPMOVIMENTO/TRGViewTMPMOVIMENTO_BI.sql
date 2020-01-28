@@ -61,7 +61,7 @@ BEGIN
   DECLARE @mvmCodPol VARCHAR(3);
   DECLARE @mvmRfid VARCHAR(30);
   DECLARE @mvmCodMtr INTEGER;
-  DECLARE @mvmDesMtr VARCHAR(30);
+  DECLARE @mvmDesMtr VARCHAR(60); --28/01/2020 alterado de 30 para 60 caracteres 
   DECLARE @mvmCodEveSS VARCHAR(13);   --Codigo do evento vindo da SistemSat
   DECLARE @mvmDesEve VARCHAR(80);
   DECLARE @mvmNumeroSerie VARCHAR(40);
@@ -90,7 +90,7 @@ BEGIN
          ,@mvmCodPol       =  UNI.UNI_CODPOL
          ,@uniApelido      =  COALESCE(UNI.UNI_APELIDO,'ERRO')
          ,@mvmRfid         =  NULLIF(i.TMVM_RFID, '-')
-         ,@mvmDesMtr       =  NULLIF(i.TMVM_DESMTR, 'NAO INFORMADO')
+         ,@mvmDesMtr       =  NULLIF(dbo.fncTranslate(REPLACE(i.TMVM_DESMTR, '_', ' '), 60), 'NAO INFORMADO') -- Removendo espaços em branco antes do nome
          ,@mvmCodEveSS     =  i.TMVM_CODEVESS
          ,@mvmDesEve       =  i.TMVM_DESEVE
          ,@mvmNumeroSerie  =  i.TMVM_NUMEROSERIE
@@ -203,6 +203,7 @@ BEGIN
       -- Tem que ser na view para atualizar UNI_QTOSMTR
       ---------------------------------------------------------
       SELECT @varCodMtr=COALESCE(MTR_CODIGO,0) FROM MOTORISTA WHERE ((MTR_RFID=@mvmRfid) AND (MTR_NOME=@mvmDesMtr) AND (MTR_ATIVO='S'));
+      -- Verificar se existe um motorista vinculado ao veículo
       SELECT @vclCodMtr=VCL_CODMTR FROM VEICULO WHERE VCL_CODIGO=@mvmPlaca AND VCL_ATIVO = 'S';
       IF( @varCodMtr=0 ) BEGIN
         IF (@mvmRfid IS NOT NULL AND @mvmDesMtr IS NOT NULL) BEGIN
@@ -212,7 +213,7 @@ BEGIN
           @varCodMtr  ,@mvmDesMtr  ,@mvmRfid ,@mvmCodUni,'S'       ,'P'    ,@mvmPosicao,1, 'N');
         END
       END ELSE BEGIN
-        UPDATE MOTORISTA SET MTR_POSICAO=@mvmPosicao WHERE MTR_CODIGO=@varCodMtr ;
+        UPDATE MOTORISTA SET MTR_POSICAO=@mvmPosicao WHERE MTR_CODIGO=@varCodMtr;
       END
       --
       ------------------------------------------------------------------------------------------------------------------
