@@ -69,7 +69,7 @@ BEGIN
          ,@mtrCodUniOld  = o.MTR_CODUNI
          ,@mtrAtivoOld   = o.MTR_ATIVO
          ,@mtrRegOld     = o.MTR_REG
-         ,@mtrCodUsrOld  = o.MTR_CODUSR         
+         ,@mtrCodUsrOld  = o.MTR_CODUSR
     FROM MOTORISTA o WHERE o.MTR_CODIGO=@mtrCodigoNew;  
   ---------------------------------------------------------------------
   -- Primary Key nao pode ser CREATEada
@@ -122,6 +122,16 @@ BEGIN
             UPDATE dbo.MOTORISTA
        SET MTR_ATIVO  = 'N'
     WHERE MTR_CODIGO <> @mtrCodigoNew AND MTR_RFID = @mtrRfidNew AND MTR_ATIVO = 'S';
+    END
+  END
+  ---------------------------------------------------------------------
+  -- Caso o motorista seja inativado por alteração, deve ser subtraído um da qte de motoristas
+  ---------------------------------------------------------------------
+  IF( @mtrRfidOld<>@mtrRfidNew ) BEGIN
+    IF( @mtrAtivoNew='S' ) BEGIN
+      SELECT @fkIntNew=COALESCE(MTR_CODUNI,0) FROM MOTORISTA WHERE MTR_RFID=@mtrRfidNew AND MTR_ATIVO='S';
+      IF( @fkIntNew<>0 )
+        UPDATE UNIDADE SET UNI_QTOSMTR=(UNI_QTOSMTR-1) WHERE UNI_CODIGO=@fkIntNew;
     END
   END
     ---------------------------------------------------

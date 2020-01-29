@@ -119,7 +119,7 @@ BEGIN
     ---------------------------------------------------
     -- Atualizando a qtdade de veiculos em cada unidade
     ---------------------------------------------------
-    IF( @mtrAtivoNew='S' )
+    IF( @mtrAtivoNew='S' AND @fkIntNew<>0 )
       UPDATE UNIDADE SET UNI_QTOSMTR=(UNI_QTOSMTR+1) WHERE UNI_CODIGO=@mtrCodUniNew;
     ---------------
     -- Gravando LOG
