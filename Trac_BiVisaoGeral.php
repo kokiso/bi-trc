@@ -215,7 +215,7 @@
           $classe->msgSelect(false);
           $retCls=$classe->selectAssoc($sql);
           if( $retCls['retorno'] != "OK" ){
-            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
+            $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
           } else { 
             $tblMtr=$retCls["dados"];
             $tam=count($tblMtr);
@@ -275,9 +275,45 @@
                   ,"COLCLASS"   => $colClass
                 ]);  
             };
-            $retorno='[{"retorno":"OK","dados":'.json_encode($arrJava).',"erro":""}]'; 
+            $retorno='[{"retorno":"OK","dados":'.json_encode($arrJava).',"erro":""}]';
           };  
         };
+        ////////////////
+        /// INFR. GPO //
+        ////////////////
+        if( $rotina=="biInfracaoGpo" ){
+            switch( $lote[0]->levpes ){
+                case "LP" : $frota=" AND (V.VCL_FROTA IN('L','P'))" ;break;
+                case "L"  : $frota=" AND (V.VCL_FROTA='L')"         ;break;
+                case "P"  : $frota=" AND (V.VCL_FROTA='P')"         ;break;
+            };
+            $sql = "SELECT TOP 10 COUNT(INF.ID) AS INFRACOES, GPO_NOME AS NOME FROM VEICULO V";
+            $sql.= " INNER JOIN INFRACAO INF ON V.VCL_CODIGO = INF.PLACA AND INF.ANO_MES =".$codmes;
+            $sql.= " LEFT OUTER JOIN GRUPOOPERACIONAL GPO ON V.VCL_CODGPO = GPO.GPO_CODIGO";
+            $sql.= " LEFT OUTER JOIN UNIDADE UNI ON V.VCL_CODUNI=UNI.UNI_CODIGO";
+            $sql.= " LEFT OUTER JOIN USUARIOUNIDADE UU ON V.VCL_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR =".$_SESSION['usr_codigo'];
+            $sql.= " WHERE VCL_CODGPO IS NOT NULL ";
+            $sql.=$frota;
+            $sql.=" GROUP BY VCL_CODGPO, GPO_NOME ORDER BY INFRACOES DESC";
+            $classe->msgSelect(false);
+            $retCls=$classe->selectAssoc($sql);
+            if( $retCls['retorno'] != "OK" ){
+                $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';
+            } else {
+                $qteRegistros = 0;
+                $total = 0;
+                foreach ($retCls['dados'] as $dado) {
+                    $total+=$dado['INFRACOES'];
+                    $qteRegistros++;
+                }
+                $retCls['dados']['total'] = $total;
+                $retCls['dados']['qteRegistros'] = $qteRegistros;
+                $retorno='[{"retorno":"OK","dados":'.json_encode($retCls["dados"]).',"erro":""}]';
+
+            }
+
+        }
+
         /////////////////
         // BI INFRACAO //
         /////////////////
@@ -506,8 +542,8 @@
             usort($tblInfN,"cmp");
             usort($tblInfU,"cmp");
             usort($tblInfP,"cmp");
-            
-            $retorno='[{"retorno":"OK"
+
+              $retorno='[{"retorno":"OK"
               ,"tblN":'.json_encode($tblInfN).'
               ,"tblU":'.json_encode($tblInfU).'
               ,"tblP":'.json_encode($tblInfP).'
@@ -675,6 +711,23 @@
         //String - Um modelo de legenda
         legendTemplate       : '<ul class="<%=name.toLowerCase()%>-legend"><% for (var i=0; i<segments.length; i++){%><li><span style="background-color:<%=segments[i].fillColor%>"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>'
       };
+      ////////////////////////////////////////////
+      // Opcoes para grafico pizza              //
+      ////////////////////////////////////////////
+      var pieOptionsPizza     = {
+        segmentShowStroke    : true,              //Boolean - Se devemos mostrar um traço em cada segmento
+        segmentStrokeColor   : '#fff',            //String - A cor de cada traço de segmento
+        segmentStrokeWidth   : 2,                 //Number - A largura de cada traço de segmento
+        percentageInnerCutout: 0,                // Este é 0 para gráficos de pizza  Number - A porcentagem do gráfico que cortamos do meio
+        animationSteps       : 100,               //Number - Quantidade de etapas de animação
+        animationEasing      : 'easeOutBounce',   //String - Efeito de facilitação de animação
+        animateRotate        : true,              //Boolean - Se nós animamos a rotação do Donut
+        animateScale         : false,             //Boolean - Se nós animamos escalando o Donut do centro
+        responsive           : true,              //Boolean - seja para tornar o gráfico responsivo ao redimensionamento da janela
+        maintainAspectRatio  : true,              // Boolean - se deseja manter a relação de aspecto inicial ou não quando responsivo, se definido como falso, ocupará todo o contêiner
+        //String - Um modelo de legenda
+        legendTemplate       : '<ul class="<%=name.toLowerCase()%>-legend"><% for (var i=0; i<segments.length; i++){%><li><span style="background-color:<%=segments[i].fillColor%>"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>'
+      };
       //////////////////////////////////////
       // Criando as variaveis para tables //
       //////////////////////////////////////
@@ -732,6 +785,7 @@
         // tblInfP = As mesmas infracoes mas quebradas por polo     //
         //////////////////////////////////////////////////////////////
         fncFiltrarTableInfracao("infracao"        ,"tblinfN"  ,"divInfracaoN"  ,"qtosInfracaoN" ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
+        fncFiltrarGraficoGrupoOperacional("infracao"        ,"tblinfN"  ,"divInfracaoN"  ,"qtosInfracaoN" ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         document.getElementById("smllDesUni").innerHTML=ibDesUni;
       };
       //    
@@ -934,7 +988,53 @@ function criarElemento(elem,attr,app){
     return elem;
 }
       
-      
+
+    function fncFiltrarGraficoGrupoOperacional(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes) {
+        clsJs   = jsString("lote");
+        clsJs.add("rotina"      , "biInfracaoGpo"                                    );
+        clsJs.add("login"       , jsPub[0].usr_login                              );
+        clsJs.add("qualSelect"  , qualSelect                                      );
+        clsJs.add("coduni"      , qualCodUni                                      );
+        clsJs.add("codpol"      , qualCodPol                                      );
+        clsJs.add("levpes"      , qualLevPes                                      );
+        clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );
+        fd = new FormData();
+        fd.append("visaogeral" , clsJs.fim());
+        msg     = requestPedido("Trac_BiVisaoGeral.php",fd);
+        retPhp  = JSON.parse(msg);
+        let arrPieData = {
+          labels: [],
+          datasets: [
+            {
+              label: '',
+              data: [],
+            }
+          ]
+        };
+        for (let index = 0; index < retPhp[0]["dados"]["qteRegistros"]; index++) {
+          let valor = retPhp[0]["dados"][index]['INFRACOES'] / retPhp[0]["dados"]["total"];
+            valor=jsNmrs(valor).dec(2).dolar().ret();
+            arrPieData['labels'].push(retPhp[0]['dados'][index]['NOME'])
+            arrPieData['datasets'][0]['data'].push(valor);
+        }
+        var pieChartCanvas = document.getElementById("pieChartGpo").getContext("2d");
+        var pieChart       = new Chart(pieChartCanvas, {
+            type:'pie',
+            data: arrPieData,
+            options: {
+              legend:{
+                position:'right'
+              },
+              plugins: {
+                  colorschemes: {
+                      scheme: 'brewer.SetOne5'
+                  }
+        }
+    }
+          });
+    }
+
+
       
       //
       //  
@@ -1108,28 +1208,44 @@ function criarElemento(elem,attr,app){
           document.getElementById("divPieChart").appendChild(ceCanvas);
           //
           var pieChartCanvas = document.getElementById("pieChart").getContext("2d");
-          var pieChart       = new Chart(pieChartCanvas);
           var valor          = 0;
           var tblGra=retPhp[0]["tblN"];
           var arrColor=["#f56954","#00a65a","#f39c12"];
           var iCor=0;
-          var arrPieData=[];
+          let arrPieData = {
+          labels: [],
+          datasets: [
+            {
+              label: '',
+              data: [],
+            }
+          ]
+        };
           for( var linR=0;  linR<qtdRow;  linR++ ){
-            if( tblGra[linR]["GRAFICO"]=="S" ){
+            if (tblGra[linR]["SIGLA"] == "EV" || tblGra[linR]["SIGLA"] == "EVC" || tblGra[linR]["SIGLA"] == "FB") {
               valor=((tblGra[linR]["QTOS"]*100)/totGra);
-							valor=jsNmrs(valor).dec(2).dolar().ret();
-              arrPieData.push({
-                "value":valor//parseInt(valor)
-                ,"color":arrColor[iCor]
-                ,"highlight":arrColor[iCor]
-                ,"label":tblGra[linR]["SIGLA"]
-              });  
-              iCor++;
-            }  
+              valor=jsNmrs(valor).dec(2).dolar().ret();
+              arrPieData['labels'].push(tblGra[linR]["NOME"]);
+              arrPieData['datasets'][0]['data'].push(valor); 
+            }
           }  
           // Criar gráfico de torta ou rosquinha
           // Você pode alternar entre torta e rosca usando o método abaixo.
-          pieChart.Doughnut(arrPieData, pieOptions)
+          var pieChart       = new Chart(pieChartCanvas, {
+            type:'doughnut',
+            data: arrPieData,
+            options: {
+              legend:{
+                position:'right'
+              },
+              plugins: {
+                  colorschemes: {
+                      scheme: 'brewer.SetOne5'
+                  }
+        }
+    }
+          });
+          // pieChart.Doughnut(arrPieData, pieOptions)
           //
           //
           //////////////////////////////////////////////////////////
@@ -1770,17 +1886,10 @@ function criarElemento(elem,attr,app){
             </div>
             <div class="box-body" style="padding-top:15px;">
               <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-9 col-md-offset-2">
                   <div id="divPieChart" class="chart-responsive">
                     <canvas id="pieChart" height="150"></canvas>
                   </div>
-                </div>
-                <div class="col-md-4">
-                  <ul class="chart-legend clearfix">
-                    <li><i class="fa fa-circle-o text-red"></i> Excesso veloc</li>
-                    <li><i class="fa fa-circle-o text-green"></i> Excesso veloc chuva</li>
-                    <li><i class="fa fa-circle-o text-yellow"></i> Freada brusca</li>
-                  </ul>
                 </div>
               </div>
             </div>
@@ -1811,6 +1920,30 @@ function criarElemento(elem,attr,app){
           </div>
         </div>
       </div>
+
+      <div class="row">
+      <div class="col-md-6">
+          <div class="box box-default" style="height: 315px;">
+            <div class="box-header with-border">
+              <h3 class="box-title">Infrações por Grupo Operacional</h3>
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+            <div class="box-body" style="padding-top:15px;">
+              <div class="row">
+                <div class="col-md-9 col-md-offset-2">
+                  <div id="divPieChartGpo" class="chart-responsive">
+                    <canvas id="pieChartGpo" height="150"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
       
       
       
@@ -1825,6 +1958,7 @@ function criarElemento(elem,attr,app){
     <script src="adminLTE/fastclick.js"></script>
     <script src="adminLTE/adminlte.js"></script>
     <script src="adminLTE/demo.js"></script>
-    <script src="adminLTE/Chart.js"></script>
+    <script src="adminLTE/libs/Chart.bundle.min.js"></script>
+    <script src="adminLTE/libs/chartjs-plugin-colorschemes.min.js"></script>
   </body>
 </html>

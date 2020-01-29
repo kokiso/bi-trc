@@ -6,7 +6,7 @@
       require("classPhp/conectaSqlServer.class.php");
       require("classPhp/validaJson.class.php"); 
       require("classPhp/removeAcento.class.php");
-      require("classPhp/selectRepetidoTrac.class.php");       			
+      require("classPhp/selectRepetidoTrac.class.php");       	
       
       function diferenca($parI,$parF){
         $dtI      = new DateTime($parI); 
@@ -74,7 +74,7 @@
           $sql="";
           $sql.="SELECT TOP 10000";
           $sql.="  MVM_POSICAO";
-          $sql.="  ,MTR_NOME";
+          $sql.="  ,COALESCE(MTR_NOME, 'NÃO INFORMADO') as MTR_NOME";
           $sql.="  ,MVM_PLACA";
           $sql.="  ,VCL.VCL_FROTA";
           $sql.="  ,MVM_TURNO";
@@ -84,7 +84,7 @@
           $sql.="  ,MVM_VELOCIDADE";
           $sql.="  ,CONVERT(VARCHAR(23),MVM_DATAGPS,127) AS MVM_DATAGPS";
           $sql.="  ,MVM_HORAGPS";
-          $sql.="  ,MTR_RFID";
+          $sql.="  ,COALESCE(MTR_RFID, '-') AS MTR_RFID";
           $sql.="  ,MVM_ODOMETRO";
           $sql.="  FROM MOVIMENTO";
           $sql.="  LEFT OUTER JOIN EVENTO EVE ON MVM_CODEVE=EVE.EVE_CODIGO";
@@ -349,6 +349,7 @@
     <link rel="stylesheet" href="css/Acordeon.css">    
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
+    <script src="js/converterData.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -411,34 +412,48 @@
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
             ,{"id":5  ,"labelCol"       : "DTINI"
-                      ,"fieldType"      : "str"
-                      ,"tamGrd"         : "12em"
-                      ,"tamImp"         : "35"
-                      ,"excel"          : "S"
-                      ,"ordenaColuna"   : "S"
-                      ,"padrao":0} 
-            ,{"id":6  ,"labelCol"       : "IDFIM"
+                        ,"fieldType"      : "str"
+                        ,"tamGrd"         : "7em"
+                        ,"tamImp"         : "35"
+                        ,"excel"          : "S"
+                        ,"ordenaColuna"   : "S"
+                        ,"padrao":0} 
+            ,{"id":6  ,"labelCol"       : "HRINI"
+                        ,"fieldType"      : "str"
+                        ,"tamGrd"         : "6em"
+                        ,"tamImp"         : "18"
+                        ,"excel"          : "S"
+                        ,"ordenaColuna"   : "S"
+                        ,"padrao":0}
+            ,{"id":7  ,"labelCol"       : "IDFIM"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "7em"
                       ,"tamImp"         : "18"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":7  ,"labelCol"       : "DTFIM"
+            ,{"id":8  ,"labelCol"       : "DTFIM"
                       ,"fieldType"      : "str"
-                      ,"tamGrd"         : "12em"
+                      ,"tamGrd"         : "7em"
+                      ,"tamImp"         : "35"
+                      ,"excel"          : "S"
+                      ,"ordenaColuna"   : "S"
+                      ,"padrao":0}
+            ,{"id":9  ,"labelCol"       : "HRFIM"
+                      ,"fieldType"      : "str"
+                      ,"tamGrd"         : "6em"
                       ,"tamImp"         : "35"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}		  
-            ,{"id":8  ,"labelCol"       : "TEMPO"
+            ,{"id":10  ,"labelCol"       : "TEMPO"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "6em"
                       ,"tamImp"         : "18"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":9  ,"labelCol"       : "VEL"
+            ,{"id":11  ,"labelCol"       : "VEL"
                       ,"fieldType"      : "int"
                       ,"align"          : "center"                                      
                       ,"tamGrd"         : "3em"
@@ -446,7 +461,7 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":10 ,"labelCol"       : "MAX"
+            ,{"id":12 ,"labelCol"       : "MAX"
                       ,"fieldType"      : "int"
                       ,"align"          : "center"                                      
                       ,"tamGrd"         : "3em"
@@ -454,14 +469,14 @@
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":11 ,"labelCol"       : "MOTORISTA"
+            ,{"id":13 ,"labelCol"       : "MOTORISTA"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "20em"
                       ,"tamImp"         : "60"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":12 ,"labelCol"       : "DES"
+            ,{"id":14 ,"labelCol"       : "DES"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
@@ -469,21 +484,21 @@
                       ,"ordenaColuna"   : "S"
                       ,"funcCor"        : "(objCell.innerHTML=='SIM'  ? objCell.classList.add('corVermelho') : objCell.classList.remove('corVermelho'))"
                       ,"padrao":0}
-            ,{"id":13 ,"labelCol"       : "EVE"
+            ,{"id":15 ,"labelCol"       : "EVE"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "3em"
                       ,"tamImp"         : "10"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":14 ,"labelCol"       : "RFID"
+            ,{"id":16 ,"labelCol"       : "RFID"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "0"
                       ,"excel"          : "S"
                       ,"ordenaColuna"   : "S"
                       ,"padrao":0}
-            ,{"id":15 ,"labelCol"       : "DISTPERC"
+            ,{"id":17 ,"labelCol"       : "DISTPERC"
                       ,"fieldType"      : "str"
                       ,"tamGrd"         : "10em"
                       ,"tamImp"         : "0"
@@ -629,6 +644,15 @@
           msg     = requestPedido("Trac_grdInfracaoTempo.php",fd); 
           retPhp  = JSON.parse(msg);
           if( retPhp[0].retorno == "OK" ){
+            // Arrumando a exibição de data para data e hora no padrão brasileiro
+            retPhp[0].dados.forEach(arr => {
+              const dataHoraInicial = converterData(arr[4]);
+              const dataHoraFinal = converterData(arr[6]);
+              arr[4] = dataHoraInicial.dataConvertida;
+              arr.splice(5, 0, dataHoraInicial.horaConvertida); 
+              arr[7] = dataHoraFinal.dataConvertida;
+              arr.splice(8, 0, dataHoraFinal.horaConvertida);
+            });
             //////////////////////////////////////////////////////////////////////////////////
             // O novo array não tem o campo idUnico mas a montarHtmlCE2017 ja foi executada //
             // Campo obrigatório se existir rotina de manutenção na table devido Json       //
@@ -701,6 +725,12 @@
             gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
           } else {
             if( ret[0].retorno == "OK" ){
+              // Arrumando a exibição de data para data e hora no padrão brasileiro
+              ret[0].dados.forEach(arr => {
+              const dataHora = converterData(arr[5]);
+              arr[5] = dataHora.dataConvertida;
+              arr.splice(6, 0, dataHora.horaConvertida);
+            });
               jsDet={
                 "titulo":[
                   {"id":0   ,"labelCol"       : "OPC"     
@@ -734,7 +764,7 @@
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "EVENTO"
                             ,"obj"            : "edtFrota"
-                            ,"tamGrd"         : "20em"
+                            ,"tamGrd"         : "25em"
                             ,"tamImp"         : "40"
                             ,"ajudaCampo"     : ["Veiculo pesado/leve"]
                             ,"padrao":0}
@@ -751,11 +781,19 @@
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "DATA"
                             ,"obj"            : "edtDataGps"
-                            ,"tamGrd"         : "15em"
+                            ,"tamGrd"         : "7em"
                             ,"tamImp"         : "30"
                             ,"ajudaCampo"     : ["Data."]
                             ,"padrao":0}
-                  ,{"id":7  ,"field"          : "UNI_APELIDO"   
+                  ,{"id":7  ,"field"          : "MVM_DATAGPS"   
+                            ,"fieldType"      : "str"
+                            ,"labelCol"       : "HORA"
+                            ,"obj"            : "edtHoraGps"
+                            ,"tamGrd"         : "7em"
+                            ,"tamImp"         : "30"
+                            ,"ajudaCampo"     : ["Hora."]
+                            ,"padrao":0}
+                  ,{"id":8  ,"field"          : "UNI_APELIDO"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "UNIDADE"
                             ,"obj"            : "edtUnidade"
@@ -763,7 +801,7 @@
                             ,"tamImp"         : "25"
                             ,"ajudaCampo"     : ["Unidade"]
                             ,"padrao":0}
-                  ,{"id":8  ,"field"          : "UNI_CODPOL"   
+                  ,{"id":9  ,"field"          : "UNI_CODPOL"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "POLO"
                             ,"obj"            : "edtCodPol"
@@ -771,19 +809,19 @@
                             ,"tamImp"         : "15"
                             ,"ajudaCampo"     : ["Polo"]
                             ,"padrao":0}
-                  ,{"id":9 ,"labelCol"       : "LATITUDE"
+                  ,{"id":10 ,"labelCol"       : "LATITUDE"
                             ,"fieldType"      : "flo8" 
                             ,"tamGrd"         : "0em"
                             ,"tamImp"         : "0"
                             ,"excel"          : "S"                      
                             ,"padrao":0}
-                  ,{"id":10 ,"labelCol"       : "LONGITUDE"
+                  ,{"id":11 ,"labelCol"       : "LONGITUDE"
                             ,"fieldType"      : "flo8" 
                             ,"tamGrd"         : "0em"
                             ,"tamImp"         : "0"
                             ,"excel"          : "S"                      
                             ,"padrao":0}
-                  ,{"id":11 ,"fieldType"      : "str"
+                  ,{"id":12 ,"fieldType"      : "str"
                             ,"labelCol"       : "LOCALIZACAO"
                             ,"obj"            : "edtCodPol"
                             ,"tamGrd"         : "0em"
@@ -1006,12 +1044,6 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-
-      <!--<div class="campotexto campo10">      
-        <select class="campo_input_combo" id="cbIni">
-        </select>
-        <label class="campo_label campo_required" for="cbIni">MÊS</label>
-      </div>-->
 
       <?php include 'classPhp/comum/selectMes.class.php';?>
       

@@ -333,6 +333,7 @@
     <link rel="stylesheet" href="css/Acordeon.css">    
     <script src="js/js2017.js"></script>
     <script src="js/jsTable2017.js"></script>
+    <script src="js/converterData.js"></script>
     <script language="javascript" type="text/javascript"></script>
     <style>
       .comboSobreTable {
@@ -919,6 +920,11 @@
             gerarMensagemErro("ALV","NENHUM REGISTRO LOCALIZADO","AVISO");  
           } else {
             if( ret[0].retorno == "OK" ){
+              ret[0].dados.forEach(arr => {
+              const dataHora = converterData(arr[1]);
+              arr[1] = dataHora.dataConvertida;
+              arr.splice(2, 0, dataHora.horaConvertida);
+            });
               jsDet={
                 "titulo":[
                   {"id":0   ,"labelCol"       : "OPC"     
@@ -936,11 +942,19 @@
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "DATA"
                             ,"obj"            : "edtDataGps"
-                            ,"tamGrd"         : "13em"
+                            ,"tamGrd"         : "7em"
                             ,"tamImp"         : "30"
                             ,"ajudaCampo"     : ["Data."]
                             ,"padrao":0}
-                  ,{"id":3  ,"field"          : "UNI_APELIDO"   
+                  ,{"id":3  ,"field"          : "BIEV_DATAGPS"   
+                            ,"fieldType"      : "str"
+                            ,"labelCol"       : "HORA"
+                            ,"obj"            : "edtHoraGps"
+                            ,"tamGrd"         : "7em"
+                            ,"tamImp"         : "30"
+                            ,"ajudaCampo"     : ["Hora."]
+                            ,"padrao":0}
+                  ,{"id":4  ,"field"          : "UNI_APELIDO"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "UNIDADE"
                             ,"obj"            : "edtUnidade"
@@ -948,7 +962,7 @@
                             ,"tamImp"         : "20"
                             ,"ajudaCampo"     : ["Unidde"]
                             ,"padrao":0}
-                  ,{"id":4  ,"field"          : "MVM_CODPOL"   
+                  ,{"id":5  ,"field"          : "MVM_CODPOL"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "POLO"
                             ,"obj"            : "edtPolo"
@@ -956,7 +970,7 @@
                             ,"tamImp"         : "10"
                             ,"ajudaCampo"     : ["Polo"]
                             ,"padrao":0}
-                  ,{"id":5  ,"field"          : "MVM_PLACA"   
+                  ,{"id":6  ,"field"          : "MVM_PLACA"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "PLACA"
                             ,"obj"            : "edtPlaca"
@@ -964,7 +978,7 @@
                             ,"tamImp"         : "15"
                             ,"ajudaCampo"     : ["Placa do veiculo"]
                             ,"padrao":0}
-                  ,{"id":6  ,"field"          : "VCL_FROTA"   
+                  ,{"id":7  ,"field"          : "VCL_FROTA"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "PL"
                             ,"obj"            : "edtFrota"
@@ -972,7 +986,7 @@
                             ,"tamImp"         : "5"
                             ,"ajudaCampo"     : ["Veiculo pesado/leve"]
                             ,"padrao":0}
-                  ,{"id":7  ,"field"          : "MVM_RFID"   
+                  ,{"id":8  ,"field"          : "MVM_RFID"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "RFID"
                             ,"obj"            : "edtRfid"
@@ -980,7 +994,7 @@
                             ,"tamImp"         : "15"
                             ,"ajudaCampo"     : ["RFID do motorista"]
                             ,"padrao":0}
-                  ,{"id":8  ,"field"          : "MVM_VELOCIDADE"   
+                  ,{"id":9  ,"field"          : "MVM_VELOCIDADE"   
                             ,"fieldType"      : "int"
                             ,"align"          : "center"
                             ,"labelCol"       : "VEL"
@@ -989,7 +1003,7 @@
                             ,"tamImp"         : "10"
                             ,"ajudaCampo"     : ["Velocidade"]
                             ,"padrao":0}
-                  ,{"id":9  ,"field"          : "MVM_RPM"   
+                  ,{"id":10  ,"field"          : "MVM_RPM"   
                             ,"fieldType"      : "int"
                             ,"align"          : "center"
                             ,"labelCol"       : "RPM"
@@ -998,7 +1012,7 @@
                             ,"tamImp"         : "10"
                             ,"ajudaCampo"     : ["Rpm"]
                             ,"padrao":0}
-                  ,{"id":10 ,"field"          : "MTR_CODEG"   
+                  ,{"id":11 ,"field"          : "MTR_CODEG"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "INFRACAO"
                             ,"obj"            : "edtInfracao"
@@ -1006,14 +1020,14 @@
                             ,"tamImp"         : "15"
                             ,"ajudaCampo"     : ["Tipo infracao"]
                             ,"padrao":0}
-                  ,{"id":11 ,"field"          : "MVM_TURNO"   
+                  ,{"id":12 ,"field"          : "MVM_TURNO"   
                             ,"labelCol"       : "T"
                             ,"obj"            : "edtTurno"
                             ,"tamGrd"         : "1em"
                             ,"tamImp"         : "5"
                             ,"ajudaCampo"     : ["Turno"]
                             ,"padrao":0}
-                  ,{"id":12 ,"field"          : "MTR_NOME"   
+                  ,{"id":13 ,"field"          : "MTR_NOME"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "MOTORISTA"
                             ,"obj"            : "edtMotorista"
@@ -1021,7 +1035,7 @@
                             ,"tamImp"         : "80"
                             ,"ajudaCampo"     : ["Motorista"]
                             ,"padrao":0}
-                  ,{"id":13 ,"field"          : "BIEV_LOCALIZACAO"   
+                  ,{"id":14 ,"field"          : "BIEV_LOCALIZACAO"   
                             ,"fieldType"      : "str"
                             ,"labelCol"       : "LOCALIZACAO"
                             ,"obj"            : "edtLocalizacao"

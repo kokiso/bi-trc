@@ -333,13 +333,7 @@
   <body>
     <div id="divCabec" class="comboSobreTable" style="margin-top:5px;float:left;">
       <a name="ancoraCabec"></a> 
-
-      <!--<div class="campotexto campo10">      
-        <select class="campo_input_combo" id="cbIni">
-        </select>
-        <label class="campo_label campo_required" for="cbIni">MÊS</label>
-      </div>-->
-
+      
       <?php include '../../comum/selectMes.class.php';?>
       
       <div class="campotexto campo15">
