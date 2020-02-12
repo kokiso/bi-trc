@@ -70,6 +70,7 @@
           $sql.="  LEFT OUTER JOIN UNIDADE UNI ON A.MTR_CODUNI=UNI.UNI_CODIGO";
           $sql.="  LEFT OUTER JOIN USUARIOUNIDADE UU ON A.MTR_CODUNI=UU.UU_CODUNI AND UU.UU_CODUSR=".$_SESSION['usr_codigo'];
           $sql.=" WHERE (((MTR_ATIVO='".$lote[0]->ativo."') OR ('*'='".$lote[0]->ativo."')) AND (COALESCE(UU.UU_ATIVO,'')='S'))"; 
+          $sql.=" AND MTR_EXCLUIDO = 'N'";
           if( $lote[0]->coduni > 0 ){
             $sql.=" AND (MTR_CODUNI=".$lote[0]->coduni.")";
           };          
