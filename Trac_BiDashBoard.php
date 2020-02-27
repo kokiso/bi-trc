@@ -64,7 +64,6 @@
           <ul class="treeview-menu">
             <li><a href="#" onClick="window.open('Trac_BiVisaoGeral.php','iframeCorpo');"><i class="fa fa-circle-o text-gray"></i> Visão Geral</a></li>
             <li><a href="#" onClick="window.open('Trac_BiInfracoes.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Infrações</a></li>
-						<li><a href="#" ><i class="fa fa-circle-o text-aqua"></i> Produtividade</a></li>
 						<li><a href="#" onClick="window.open('Trac_BiVeiculos.php','iframeCorpo');"><i class="fa fa-circle-o text-blue"></i> Veículos</a></li>
 						<li><a href="#" onClick="window.open('Trac_BiMotorista.php','iframeCorpo');"><i class="fa fa-circle-o text-green"></i> Motoristas</a></li>
           </ul>
@@ -114,7 +113,7 @@
   </aside>
   <div class="content-wrapper">
     <!--<iframe src="Trac_BiMotoristaInicial.php" name="iframeCorpo" id="iframeCorpo">-->
-		<iframe src="Trac_BiVisaoGeral.php" name="iframeCorpo" id="iframeCorpo">
+		<iframe src="Trac_BiVisaoGeral.php" name="iframeCorpo" id="iframeCorpo" style="width: 100%; height: 120em;">
     </iframe>
   </div>
 
@@ -135,3 +134,5 @@
 <script src="adminLTE/Chart.js"></script>
 </body>
 </html>
+
+
