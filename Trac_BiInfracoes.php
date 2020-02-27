@@ -578,7 +578,7 @@
       "use strict";
       document.addEventListener("DOMContentLoaded", function(){
 				// comboCompetencia("classif_mot",document.getElementById("cbCompetencia"));
-        window.parent.document.getElementById("iframeCorpo").height="50em";
+        window.parent.document.getElementById("iframeCorpo").style="height: 137em; width: 100%;";
         buscarUni();
         buscarPol();
         buscarGpo();
@@ -644,6 +644,7 @@
       //////////////////////////////////////
       // Criando as variaveis para tables //
       //////////////////////////////////////
+      let extractArray = [];
       var ceAnc;
       var ceCanvas;
       var ceContext;
@@ -689,6 +690,7 @@
 				fncInfracaoTop('EV');
 				fncInfracaoTurno('EV');
 				fncInfracaoTurno('EV');
+        graficoLine();
       };
       //    
       //  
@@ -716,6 +718,7 @@
       // Somente tabelas infracao         //  
       //////////////////////////////////////
       function fncFiltrarTableInfracao(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes, qualCodGpo){
+        extractArray = [];
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biInfracao"        );
         clsJs.add("login"       , jsPub[0].usr_login  );
@@ -729,6 +732,7 @@
         fd.append("principal" , clsJs.fim());
         msg     = requestPedido("Trac_BiInfracoes.php",fd); 
         retPhp  = JSON.parse(msg);
+        extractArray.push(retPhp[0].dados);
         if( retPhp[0].retorno == "OK" ){
           var arrTitulo = ["ID"   ,"DESCRITIVO","GRAFICO","%"  ,"QTOS"];
           var arrColW   = ["8%"   ,"35%"       ,"37%"    ,"10%","10%"];
@@ -889,6 +893,7 @@
           // Você pode alternar entre torta e rosca usando o método abaixo.
           pieChart.Doughnut(arrPieData, pieOptions)
         };
+        sessionDados();
       };
 
       function buscarGpo(){
@@ -904,7 +909,6 @@
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           msg=retPhp[0]["dados"].length;  
-          
           for( var lin=0;lin<msg;lin++ ){
             ceLi= document.createElement("li"); 
             ceLi.style.height="25px";
@@ -938,6 +942,7 @@
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroGpo").appendChild(ceLi);
         };
+        sessionDados();
       };
       ///////////////////////////////////////////////////////////
       // Buscando apenas as unidades que o usuario tem direito //
@@ -986,6 +991,7 @@
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroUni").appendChild(ceLi);
         };
+        sessionDados();
       };
       ///////////////////////////////////////////////////////////
       //   Buscando apenas os polos que o usuario tem direito  //
@@ -1032,6 +1038,7 @@
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroPol").appendChild(ceLi);
         };
+        sessionDados();
       };
       function fncInfracaoTop(qualInfracao){  
         clsJs   = jsString("lote");  
@@ -1126,7 +1133,8 @@
           };     
           document.getElementById("divTblInfracaoTop").appendChild(ceTable);
           document.getElementById("infracaoTop").innerHTML=jsNmrs(parseInt(msg)).emZero(4).ret();        
-        };  
+        };
+        sessionDados();
       };
       ////////////////////////
       // Infracao por turno //
@@ -1227,6 +1235,8 @@
       fd.append("principal"   , clsJs.fim());
       msg     = requestPedido("Trac_BiInfracoes.php",fd); 
       retPhp  = JSON.parse(msg);
+      extractArray.push(retPhp[0].dados);
+      console.log(extractArray);
       if( retPhp[0].retorno == "OK" ){
         tam=retPhp[0]["dados"].length;
         var arrLabel  = [];
@@ -1378,7 +1388,8 @@
       }
 
       barChartOptions.datasetFill = false
-      barChart.Bar(barChartData, barChartOptions)
+      barChart.Bar(barChartData, barChartOptions);
+      sessionDados();
     }
 
     function chngCompetencia(){
@@ -1491,7 +1502,9 @@
               <span onClick="window.parent.document.getElementById('iframeCorpo').src='';"class="hidden-xs">Fechar</span>
             </a>
           </li>  
-          
+          <li>
+            <button id="extractTotal" class="btn btn-primary" style="margin-top: 8px; margin-left: 50px;">Extração dos Dados.</button>
+          </li>
         </ul>
       </div>
     </nav>
@@ -1504,7 +1517,19 @@
               <h3 id="infracaoCompet" class="box-title">...</h3>
               <span id="qtosInfracao" class="badge bg-light-blue" style="width:50px;">0</span>
             </div>
-            <div id="divInfracao" class="box-body" style="height: 270px; overflow-y:auto;">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsHome" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracao" role="tab" aria-controls="divInfracao" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsHome" role="tabpanel" aria-labelledby="pills-home-tab">
+              </div>
+              <div class="grafic tab-pane fade active in" id="divInfracao" class="box-body" style="height: 250px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">            
+            </div>
             </div>
           </div>
         </div>
@@ -1521,25 +1546,36 @@
             
             <div class="box-body" style="padding-top:15px;">
               <div class="row">
-                <div class="col-md-8">
-                  <div id="divPieChart" class="chart-responsive">
-                    <canvas id="pieChart" height="150"></canvas>
+                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                  <li class="nav-item liNoGrafic">
+                    <a class="nav-link" id="pills-inframesGraf-tab" data-toggle="pill" href="#pillsInframesGraf" role="tab" aria-controls="pills-inframesGraf" aria-selected="true">Tabela</a>
+                  </li>
+                  <li class="nav-item liGrafic active">
+                    <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divPieChart" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
+                  </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent">
+                  <div class="noGrafic tab-pane fade" id="pillsInframesGraf" role="tabpanel" aria-labelledby="pills-inframesGraf-tab">
                   </div>
-                </div>
-                <div class="col-md-4">
-                  <ul class="chart-legend clearfix">
-                    <li><i class="fa fa-circle-o text-red"></i> Excesso veloc</li>
-                    <li><i class="fa fa-circle-o text-green"></i> Excesso veloc chuva</li>
-                    <li><i class="fa fa-circle-o text-yellow"></i> Freada brusca</li>
-                  </ul>
+                  <div class="grafic tab-pane fade active in col-md-6" id="divPieChart" class="box-body" role="tabpanel" aria-labelledby="pills-profile-tab">
+                    <div class="col-md-6">
+                      <ul class="chart-legend clearfix">
+                        <li><i class="fa fa-circle-o text-red"></i> Excesso veloc</li>
+                        <li><i class="fa fa-circle-o text-green"></i> Excesso veloc chuva</li>
+                        <li><i class="fa fa-circle-o text-yellow"></i> Freada brusca</li>
+                      </ul>
+                    </div>
+                    <div id="divPieChart" class="chart-responsive ">
+                      <canvas id="pieChart"></canvas>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+         </div>
       </div>
-      
-      <div class="row">
+      </div>
+      <div class="row" style="width:100%;">
         <div class="box box-sucess ">
           <div class="box-header with-border" style="height:5em;">
             <table class="table table-bordered">
@@ -1676,4 +1712,44 @@
     <script src="adminLTE/demo.js"></script>
     <script src="adminLTE/Chart.js"></script>
   </body>
+  <script>
+       
+       // EXTRAÇÃO TOTAL RICHELMY
+       // window.onload = sessionDados;
+       function sessionDados(){
+         localStorage.removeItem('tituloMes');
+         localStorage.removeItem('chave');
+         mesInfracao = document.getElementById("infracaoCompet").innerHTML;
+         sessionStorage.setItem('tituloMes', mesInfracao);
+         arrayEnvio = JSON.stringify(extractArray);
+         sessionStorage.setItem('chave', arrayEnvio);
+       }
+ 
+       
+       $( "#extractTotal" ).click(function() {
+           window.open('relatorios/Trac_RelatorioInfracoes.php');
+        });
+ 
+   </script>
 </html>
+
+<style>
+/* .table {
+  width: 100% !important;
+}
+
+.dataTables_scrollHead, .dataTables_scrollHeadInner{
+  width : 100% !important;
+} */
+
+
+#iframeCorpo {
+  height: 137em !important;
+}
+
+#pieChart { 
+  position: relative;
+  right: -150px;
+  top: -80px;
+}
+</style>

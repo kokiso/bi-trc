@@ -97,6 +97,7 @@
             $retorno='[{"retorno":"ERR","dados":"","erro":"'.$retCls['erro'].'"}]';  
           } else { 
             $retorno='[{"retorno":"OK","dados":'.json_encode($retCls["dados"]).',"erro":""}]';
+            // print_r($retCls["dados"]);
           }  
         };    
         ////////////////
@@ -614,7 +615,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Connect Plus | Total Trac</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css"> -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.bootstrap4.min.css">
     <link rel="stylesheet" href="adminLTE/bootstrap.css">
     <link rel="stylesheet" href="adminLTE/font-awesome.css">
     <link rel="stylesheet" href="adminLTE/ionicons.css">
@@ -678,6 +681,15 @@
       //////////////////////////////////////
       // Criando as variaveis para tables //
       //////////////////////////////////////
+      // Count usado pra montar datatables
+      let countM = 0;
+      // array com todos os dados de visaoGeral
+      let extractArray = [];
+      // array com os dados do cabeçalho(Numeros);
+      let arrayNumerosCabecalho = [];
+      // array para troca entre POLO E UNIDADE
+      let poloUni = 0;
+      let arrayPoloUni = [];
       var ceAnc;
       var ceCanvas;
       var ceContext;
@@ -699,6 +711,8 @@
       // Tb eh usada qdo selecionado filtro por uma unidade                     //
       ////////////////////////////////////////////////////////////////////////////
       function iniciarBi(ibCodUni,ibDesUni,ibCodPol,ibDesPol, ibCodGpo, ibDesGpo){
+        extractArray = [];
+        arrayNumerosCabecalho = [];
         document.getElementById("infracaoCompet").innerHTML="Infrações "+document.getElementById("cbCompetencia").options[document.getElementById("cbCompetencia").selectedIndex].text+" ";
         pubCodUni=ibCodUni;
         pubDesUni=ibDesUni;
@@ -713,7 +727,7 @@
         fncContar("contarUnidade"   	,"qtosUni"	,pubCodUni,pubCodPol,"*","*");
         fncContar("contarGpo"   	    ,"qtosGpo"	,pubCodUni,pubCodPol,"*",pubCodGpo);
 				fncContar("contarKm"        	,"qtosKm" 	,pubCodUni,pubCodPol,"*", pubCodGpo);
-				fncContar("contarHoraRodando"	,"qtosHRod"	,pubCodUni,pubCodPol,"*", pubCodGpo);				
+				fncContar("contarHoraRodando"	,"qtosHRod"	,pubCodUni,pubCodPol,"*", pubCodGpo);
         fncContar("contarHoraParado"	,"qtosHPar"	,pubCodUni,pubCodPol,"*", pubCodGpo);
         if (pubCodPol != '*') {
           buscarPol();
@@ -722,7 +736,6 @@
           buscarUni();
           buscarGpo();
         }
-        
         fncFiltrarTableSimples("bisMotoristaUni"  ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
         fncFiltrarTableSimples("bisVeiculoUni"    ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         //////////////////////////////////////////////////////////////
@@ -733,6 +746,8 @@
         //////////////////////////////////////////////////////////////
         fncFiltrarTableInfracao("infracao"        ,"tblinfN"  ,"divInfracaoN"  ,"qtosInfracaoN" ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         document.getElementById("smllDesUni").innerHTML=ibDesUni;
+        // função pra sempre mostar o grafico ao reload de qualquer informção
+        setGrafico();
       };
       //    
       //  
@@ -749,8 +764,11 @@
         fd = new FormData();
         fd.append("visaogeral" , clsJs.fim());
         msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
-//debugger;
+        //debugger;
         retPhp  = JSON.parse(msg);
+
+        // PEGANDO NUMEROS PRA IR PRO RELATORIO GREAL
+        arrayNumerosCabecalho.push(retPhp[0]["dados"][0][0]);
         if( retPhp[0].retorno == "OK" ){
           //- 09jul document.getElementById(qualSpan).innerHTML=parseInt(retPhp[0]["dados"][0]);
           //- 09jul if(qualSpan=="qtosKm")
@@ -763,9 +781,14 @@
 						case "qtosKm"		: velocMedia[0]=parseInt(parseFloat(retPhp[0]["dados"][0])); break;
 						case "qtosHRod"	: velocMedia[1]=parseInt(parseFloat(retPhp[0]["dados"][0])); break;
 					};	
+
 					if( (velocMedia[0]>0) && (velocMedia[1]>0) ){
-						document.getElementById("qtosVclMed").innerHTML=jsNmrs((velocMedia[0]/velocMedia[1])).dolar().sepMilhar(4).ret();	
-					};	
+            let velocidadeMedia = jsNmrs((velocMedia[0]/velocMedia[1])).dolar().sepMilhar(4).ret();
+						document.getElementById("qtosVclMed").innerHTML= velocidadeMedia;
+            arrayNumerosCabecalho.push(velocidadeMedia);
+            velocMedia[0] = 0;
+            velocMedia[1] = 0;
+					};
         };  
       };
       //
@@ -774,6 +797,7 @@
       // Somente tabelas com duas colunas //  
       //////////////////////////////////////
       function fncFiltrarTableSimples(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes,qualCodGpo){
+        arrayPoloUni = [];
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biSimples"                                     );
         clsJs.add("login"       , jsPub[0].usr_login                              );
@@ -787,8 +811,12 @@
         fd = new FormData();
         fd.append("visaogeral" , clsJs.fim());
         msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
-
         retPhp  = JSON.parse(msg);
+        // Array geral com todos os dados
+        extractArray.push(retPhp[0].dados);
+
+        // Array usado pra troca entre POLO E UNIDADE
+        arrayPoloUni.push(retPhp[0].dados);
         if( retPhp[0].retorno == "OK" ){
           var arrTitulo = ["DESCRITIVO","GRAFICO","%","QTOS"];
           var arrColW  = ["40%","40%","10%","10%"];
@@ -901,6 +929,8 @@
             document.getElementById(qualTot).innerHTML=totQtos;
           };
         };
+        // função pra sempre mostar o grafico ao reload de qualquer informção
+        setGrafico();
       };
       
 function criarElemento(elem,attr,app){
@@ -955,6 +985,9 @@ function criarElemento(elem,attr,app){
         fd.append("visaogeral" , clsJs.fim());
         msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
         retPhp  = JSON.parse(msg);
+        extractArray.push(retPhp[0].tblN);
+        extractArray.push(retPhp[0].tblU);
+        extractArray.push(retPhp[0].tblP);
         if( retPhp[0].retorno == "OK" ){
           var arrTitulo = ["ID"   ,"DESCRITIVO","GRAFICO","%"  ,"QTOS"];
           var arrColW   = ["8%"   ,"35%"       ,"37%"    ,"10%","10%"];
@@ -1090,10 +1123,11 @@ function criarElemento(elem,attr,app){
           //////////////////////////////////////////////////////////////////
           if(document.getElementById(qualTot) != undefined ){
             document.getElementById(qualTot).innerHTML=totQtos;
-						document.getElementById("qtosInfra").innerHTML=totQtos;						
+						document.getElementById("qtosInfra").innerHTML=totQtos;
+            arrayNumerosCabecalho.push(totQtos);
           };
           
-          
+
           
           
           //////////////////////////////////////////////////
@@ -1123,7 +1157,7 @@ function criarElemento(elem,attr,app){
                 ,"color":arrColor[iCor]
                 ,"highlight":arrColor[iCor]
                 ,"label":tblGra[linR]["SIGLA"]
-              });  
+              });
               iCor++;
             }  
           }  
@@ -1140,6 +1174,9 @@ function criarElemento(elem,attr,app){
           /////////////////////
           // Criando a table //  
           /////////////////////
+
+          // JUNTANDO DADOS PARA ENVIAR PRA OUTRA TABELA
+          extractArray.push(arrayNumerosCabecalho);
           for( var loo=0;loo<2;loo++){ 
             totQtos=0;
             if( loo==0 ){
@@ -1260,7 +1297,309 @@ function criarElemento(elem,attr,app){
             };
           };
         };
+        
+        // FUNÇÃO LA DE BAIXO QUE ENVIA OS DADOS PRO RELATORIO GERAL EM OUTRA PAGINA
+        sessionDados();
+        criandoTabelas();
+        criandoTabelaComparativo();
       };
+
+
+      let arrayIds = [];
+      arrayIds.push('pillsHome');
+      arrayIds.push('pillsVeiculo');
+      arrayIds.push('pillsInframes');
+      arrayIds.push('pillsInfraUni');
+      arrayIds.push('pillsInfraPolo');
+      function criandoTabelas(poloOuUni){
+        if(poloUni == 0){
+          for(let i = 0; i <= 4; i++){
+            if(countM == 5){
+                removeElement();
+            }
+            let idTableComHash = '#example' + arrayIds[i];
+            let idTableSemHash = 'example' + arrayIds[i];
+            let idTableWrapper = '#example' + arrayIds[i] + '_wrapper .col-md-6:eq(0)';
+            $(document).ready(function() {
+            var table = $(idTableComHash).DataTable( {
+                lengthChange: false,
+                scrollY:        "200px",
+                scrollCollapse: true,
+                buttons: ['excel', 'pdf' ]
+            } );
+        
+            table.buttons().container()
+                .appendTo( idTableWrapper );
+            } );
+
+            // ARRAY CRIADO PRA SER USADO NA CRIAÇAO DE TABELAS, O ID DE CADA DIV QUE TERA UMA TABELA A SER CRIADA DENTRO TEM QUE ESTAR AQUI
+            // let arrayIds = [];
+            // arrayIds.push("pills-home");
+            // arrayIds.push("pills-veiculo");
+            
+
+  
+              var newArrayInfracaoMes = extractArray[i].map(function(obj) {
+                  return Object.keys(obj).map(function(chave) {
+                      return obj[chave];
+                  });
+              });
+              countM ++;
+              // let tabela = document.getElementById("example");
+              let tabela = document.createElement("table");
+              tabela.id = idTableSemHash;
+              tabela.classList.add('table');
+              tabela.classList.add('table-striped');
+              tabela.classList.add('table-bordered');
+              tabela.classList.add('cabecalhoTable');
+              let corpo = document.createElement("tbody");
+              let cabecalho = document.createElement("thead");
+
+
+
+              // MONTANDO CABEÇALHO ESTATICO PADRAO
+              let tr = document.createElement("tr");
+              let th1 = document.createElement("th");
+              let th2 = document.createElement("th");
+              let th3 = document.createElement("th");
+              let th4 = document.createElement("th");
+
+              th1.innerHTML = 'ID';
+              tr.appendChild(th1);
+
+              th2.innerHTML = 'Nome';
+              tr.appendChild(th2);
+
+              th3.innerHTML = 'QTOS';
+              tr.appendChild(th3);
+
+              th4.innerHTML = 'Percentual';
+              tr.appendChild(th4);
+
+              cabecalho.appendChild(tr);
+            
+              tabela.appendChild(cabecalho);
+              // tabela.appendChild(corpo);
+
+              newArrayInfracaoMes.forEach((item)=> {
+                let tr = document.createElement("tr");
+                let td = document.createElement("td");
+                for(let i = 0; i <= 3; i++){
+                  let tdAux = document.createElement("td");
+                  tdAux.innerHTML = item[i];
+                  tr.appendChild(tdAux);
+                }
+                corpo.appendChild(tr);
+              })
+              tabela.appendChild(corpo);
+              document.getElementById(arrayIds[i]).appendChild(tabela);
+
+            }
+
+        }else {
+            let idTableComHash = '#example' + poloOuUni;
+            let idTableSemHash = 'example' + poloOuUni;
+            let idTableWrapper = '#example' + poloOuUni + '_wrapper .col-md-6:eq(0)';
+            if(poloOuUni == 'pillsHome'){
+              document.getElementById('examplepillsHome_wrapper').remove();
+            }else if(poloOuUni == 'pillsVeiculo'){
+              document.getElementById('examplepillsVeiculo_wrapper').remove();
+            }
+            $(document).ready(function() {
+            var table = $(idTableComHash).DataTable( {
+                lengthChange: false,
+                scrollY:        "200px",
+                scrollCollapse: true,
+                buttons: ['excel', 'pdf' ]
+            } );
+        
+            table.buttons().container()
+                .appendTo( idTableWrapper );
+            } );
+
+            // ARRAY CRIADO PRA SER USADO NA CRIAÇAO DE TABELAS, O ID DE CADA DIV QUE TERA UMA TABELA A SER CRIADA DENTRO TEM QUE ESTAR AQUI
+            // let arrayIds = [];
+            // arrayIds.push("pills-home");
+            // arrayIds.push("pills-veiculo");
+            
+
+  
+              var newArrayInfracaoMes = arrayPoloUni[0].map(function(obj) {
+                  return Object.keys(obj).map(function(chave) {
+                      return obj[chave];
+                  });
+              });
+              // let tabela = document.getElementById("example");
+              let tabela = document.createElement("table");
+              tabela.id = idTableSemHash;
+              tabela.classList.add('table');
+              tabela.classList.add('table-striped');
+              tabela.classList.add('table-bordered');
+              tabela.classList.add('cabecalhoTable');
+              let corpo = document.createElement("tbody");
+              let cabecalho = document.createElement("thead");
+
+
+
+              // MONTANDO CABEÇALHO ESTATICO PADRAO
+              let tr = document.createElement("tr");
+              let th1 = document.createElement("th");
+              let th2 = document.createElement("th");
+              let th3 = document.createElement("th");
+              let th4 = document.createElement("th");
+
+              th1.innerHTML = 'ID';
+              tr.appendChild(th1);
+
+              th2.innerHTML = 'Nome';
+              tr.appendChild(th2);
+
+              th3.innerHTML = 'QTOS';
+              tr.appendChild(th3);
+
+              th4.innerHTML = 'Percentual';
+              tr.appendChild(th4);
+
+              cabecalho.appendChild(tr);
+            
+              tabela.appendChild(cabecalho);
+              // tabela.appendChild(corpo);
+              newArrayInfracaoMes.forEach((item)=> {
+                let tr = document.createElement("tr");
+                let td = document.createElement("td");
+                for(let i = 0; i <= 3; i++){
+                  let tdAux = document.createElement("td");
+                  tdAux.innerHTML = item[i];
+                  tr.appendChild(tdAux);
+                }
+                corpo.appendChild(tr);
+
+              })
+              tabela.appendChild(corpo);
+              document.getElementById(poloOuUni).appendChild(tabela);
+              poloUni = 0;
+            }
+
+        }
+
+
+        // ESSA TABLE CRIEI SEPARADA PRO GRAFICO
+        function criandoTabelaComparativo(){
+            if(document.getElementById('examplepillsInframesGraf_wrapper')){
+              document.getElementById('examplepillsInframesGraf_wrapper').remove();
+            }
+            let idTableComHash = '#examplepillsInframesGraf';
+            let idTableSemHash = 'examplepillsInframesGraf';
+            let idTableWrapper = '#examplepillsInframesGraf_wrapper .col-md-6:eq(0)';
+            $(document).ready(function() {
+            var table = $(idTableComHash).DataTable( {
+                lengthChange: false,
+                scrollY:        "200px",
+                scrollCollapse: true,
+                buttons: ['excel', 'pdf' ]
+            } );
+        
+            table.buttons().container()
+                .appendTo( idTableWrapper );
+            } );
+
+            // ARRAY CRIADO PRA SER USADO NA CRIAÇAO DE TABELAS, O ID DE CADA DIV QUE TERA UMA TABELA A SER CRIADA DENTRO TEM QUE ESTAR AQUI
+            // let arrayIds = [];
+            // arrayIds.push("pills-home");
+            // arrayIds.push("pills-veiculo");
+            
+              var newArrayInfracaoMes = extractArray[2].map(function(obj) {
+                  return Object.keys(obj).map(function(chave) {
+                      return obj[chave];
+                  });
+              });
+              // let tabela = document.getElementById("example");
+              let tabela = document.createElement("table");
+              tabela.id = idTableSemHash;
+              tabela.classList.add('table');
+              tabela.classList.add('table-striped');
+              tabela.classList.add('table-bordered');
+              tabela.classList.add('cabecalhoTable');
+              let corpo = document.createElement("tbody");
+              let cabecalho = document.createElement("thead");
+
+
+
+              // MONTANDO CABEÇALHO ESTATICO PADRAO
+              let tr = document.createElement("tr");
+              let th1 = document.createElement("th");
+              let th2 = document.createElement("th");
+              let th3 = document.createElement("th");
+              let th4 = document.createElement("th");
+
+              th1.innerHTML = 'ID';
+              tr.appendChild(th1);
+
+              th2.innerHTML = 'Nome';
+              tr.appendChild(th2);
+
+              th3.innerHTML = 'QTOS';
+              tr.appendChild(th3);
+
+              th4.innerHTML = 'Percentual';
+              tr.appendChild(th4);
+
+              cabecalho.appendChild(tr);
+            
+              tabela.appendChild(cabecalho);
+              // tabela.appendChild(corpo);
+
+              newArrayInfracaoMes.forEach((item)=> {
+                if(item[item.length -1] == 'S'){
+                  let tr = document.createElement("tr");
+                  let td = document.createElement("td");
+                  for(let i = 0; i <= 3; i++){
+                    let tdAux = document.createElement("td");
+                    tdAux.innerHTML = item[i];
+                    tr.appendChild(tdAux);
+                  }
+                  corpo.appendChild(tr);
+                }
+
+              })
+              tabela.appendChild(corpo);
+              document.getElementById('pillsInframesGraf').appendChild(tabela);
+            }
+
+      // REMOVE AS TABELAS PRA CRIAÇAO DE NOVAS COM A NOVA BUSCA
+      function removeElement(){
+              document.getElementById('examplepillsHome_wrapper').remove();
+              document.getElementById('examplepillsVeiculo_wrapper').remove();
+              document.getElementById('examplepillsInframes_wrapper').remove();
+              document.getElementById('examplepillsInfraUni_wrapper').remove();
+              document.getElementById('examplepillsInfraPolo_wrapper').remove();
+              countM = 0;
+        }
+
+      // função pra sempre mostar o grafico ao reload de qualquer informção
+      function setGrafico(){
+        let grafic = document.getElementsByClassName("grafic");
+        let liGrafic =  document.getElementsByClassName("liGrafic");
+
+        let noGrafic = document.getElementsByClassName("noGrafic");
+        let liNoGrafic =  document.getElementsByClassName("liNoGrafic");
+        for (let item of grafic) {
+            item.classList.add('active');
+            item.classList.add('in');
+        }
+        for (let item of liGrafic) {
+            item.classList.add('active');
+        }
+
+
+        for (let item of noGrafic) {
+            item.classList.remove('active');
+            item.classList.remove('in');
+        }
+        for (let item of liNoGrafic) {
+            item.classList.remove('active');
+        }
+      }
       ///////////////////////////
       // Buscando competencias //
       ///////////////////////////
@@ -1329,6 +1668,7 @@ function criarElemento(elem,attr,app){
             ceAnc.appendChild(ceContext);
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroGpo").appendChild(ceLi);
+          sessionDados();
         };
       };
       function buscarUni(){
@@ -1374,6 +1714,7 @@ function criarElemento(elem,attr,app){
             ceAnc.appendChild(ceContext);
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroUni").appendChild(ceLi);
+          sessionDados();
         };
       };
       ///////////////////////////////////////////////////////////
@@ -1420,6 +1761,7 @@ function criarElemento(elem,attr,app){
             ceAnc.appendChild(ceContext);
           ceLi.appendChild(ceAnc);
           document.getElementById("filtroPol").appendChild(ceLi);
+          sessionDados();
         };
       };
       ////////////////////////
@@ -1495,7 +1837,8 @@ function criarElemento(elem,attr,app){
           document.getElementById("totalKm").innerHTML="Total KM`s: "+jsNmrs(parseInt(msg)).emZero(5).ret();
           // Criar gráfico de torta ou rosquinha
           // Você pode alternar entre torta e rosca usando o método abaixo.
-          pieChartKm.Doughnut(arrPieData, pieOptions)
+          pieChartKm.Doughnut(arrPieData, pieOptions);
+          sessionDados();
         }  
       }
       /////////////////////////////////////////////
@@ -1504,20 +1847,39 @@ function criarElemento(elem,attr,app){
       function chngMotUP(){
         if( document.getElementById("cbMotUP").value=="UNI" ){
           fncFiltrarTableSimples("bisMotoristaUni" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsHome');
         } else {
           fncFiltrarTableSimples("bisMotoristaPol" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
-        }    
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsHome');
+        }
       }; 
       function chngVeiUP(){
         if( document.getElementById("cbVeiUP").value=="UNI" ){
           fncFiltrarTableSimples("bisVeiculoUni" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsVeiculo');
         } else {
           fncFiltrarTableSimples("bisVeiculoPol" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsVeiculo');
         }    
+
       }; 
       function chngCompetencia(){
         iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
+        sessionDados();
       };
+
+
+
+
+
      </script> 
   </head>
   <body>
@@ -1616,7 +1978,9 @@ function criarElemento(elem,attr,app){
               <span onClick="window.parent.document.getElementById('iframeCorpo').src='';"class="hidden-xs">Fechar</span>
             </a>
           </li>  
-          
+          <li>
+            <button id="extractTotal" class="btn btn-primary" style="margin-top: 8px; margin-left: 50px;">Extração Total dos Dados.</button>
+          </li>
         </ul>
       </div>
     </nav>
@@ -1723,10 +2087,24 @@ function criarElemento(elem,attr,app){
                 </select>
               </div> 
             </div>
-            <div id="divUniMtr" class="box-body" style="height: 250px; overflow-y:auto;">            
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsHome" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divUniMtr" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsHome" role="tabpanel" aria-labelledby="pills-home-tab">
+              </div>
+              <div class="grafic tab-pane fade active in" id="divUniMtr" class="box-body" style="height: 250px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">            
             </div>
-          </div>
+            </div>
+
+
         </div>
+      </div>
          
         <div class="col-md-6">
           <div class="box">
@@ -1738,10 +2116,23 @@ function criarElemento(elem,attr,app){
                   <option value="UNI" selected="selected">Unidade</option>
                   <option value="POL">Polo</option>
                 </select>
-              </div> 
-              
+              </div>
             </div>
-            <div id="divPolMtr" class="box-body" style="height: 250px; overflow-y:auto;">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" id="pills-veiculo-tab" data-toggle="pill" href="#pillsVeiculo" role="tab" aria-controls="pills-veiculo" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-veiculo-tabela" data-toggle="pill" href="#divPolMtr" role="tab" aria-controls="divPolMtr" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsVeiculo" role="tabpanel" aria-labelledby="pills-veiculo-tab">
+              </div>
+              <div class="grafic tab-pane fade active in" id="divPolMtr" class="box-body" style="height: 250px; overflow-y:auto;"  role="tabpanel" aria-labelledby="pills-veiculo-tabela">        
+            </div>
+            </div>
+
             </div>
           </div>
         </div>
@@ -1754,8 +2145,21 @@ function criarElemento(elem,attr,app){
               <h3 id="infracaoCompet" class="box-title">...</h3>
               <span id="qtosInfracaoN" class="badge bg-light-blue" style="width:50px;">0</span>
             </div>
-            <div id="divInfracaoN" class="box-body" style="height: 270px; overflow-y:auto;">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsInframes" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracaoN" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsInframes" role="tabpanel" aria-labelledby="pills-home-tab">
+              </div>
+              <div  class="grafic tab-pane fade active in" id="divInfracaoN" class="box-body" style="height: 270px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">
             </div>
+            </div>
+
           </div>
         </div>
         
@@ -1770,17 +2174,29 @@ function criarElemento(elem,attr,app){
             </div>
             <div class="box-body" style="padding-top:15px;">
               <div class="row">
-                <div class="col-md-8">
-                  <div id="divPieChart" class="chart-responsive">
-                    <canvas id="pieChart" height="150"></canvas>
+                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                  <li class="nav-item liNoGrafic">
+                    <a class="nav-link" id="pills-inframesGraf-tab" data-toggle="pill" href="#pillsInframesGraf" role="tab" aria-controls="pills-inframesGraf" aria-selected="true">Tabela</a>
+                  </li>
+                  <li class="nav-item liGrafic active">
+                    <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divPieChart" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
+                  </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent">
+                  <div class="noGrafic tab-pane fade" id="pillsInframesGraf" role="tabpanel" aria-labelledby="pills-inframesGraf-tab">
                   </div>
-                </div>
-                <div class="col-md-4">
-                  <ul class="chart-legend clearfix">
-                    <li><i class="fa fa-circle-o text-red"></i> Excesso veloc</li>
-                    <li><i class="fa fa-circle-o text-green"></i> Excesso veloc chuva</li>
-                    <li><i class="fa fa-circle-o text-yellow"></i> Freada brusca</li>
-                  </ul>
+                  <div class="grafic tab-pane fade active in col-md-6" id="divPieChart" class="box-body" role="tabpanel" aria-labelledby="pills-profile-tab">
+                    <div class="col-md-6">
+                      <ul class="chart-legend clearfix">
+                        <li><i class="fa fa-circle-o text-red"></i> Excesso veloc</li>
+                        <li><i class="fa fa-circle-o text-green"></i> Excesso veloc chuva</li>
+                        <li><i class="fa fa-circle-o text-yellow"></i> Freada brusca</li>
+                      </ul>
+                    </div>
+                    <div id="divPieChart" class="chart-responsive ">
+                      <canvas id="pieChart"></canvas>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1795,7 +2211,19 @@ function criarElemento(elem,attr,app){
               <h3 id="infracaoUni" class="box-title">Ranking Infrações por UNIDADE</h3>
               <span id="qtosInfracaoU" class="badge bg-light-blue" style="width:50px;">0</span>
             </div>
-            <div id="divInfracaoU" class="box-body" style="height: 270px; overflow-y:auto;">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsInfraUni" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracaoU" role="tab" aria-controls="divInfracaoU" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsInfraUni" role="tabpanel" aria-labelledby="pills-home-tab">
+              </div>
+              <div class="grafic tab-pane fade active in" id="divInfracaoU" class="box-body" style="height: 270px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">
+            </div>
             </div>
           </div>
         </div>
@@ -1806,7 +2234,19 @@ function criarElemento(elem,attr,app){
               <h3 id="infracaoPol" class="box-title">Ranking Infrações por POLO</h3>
               <span id="qtosInfracaoP" class="badge bg-light-blue" style="width:50px;">0</span>
             </div>
-            <div id="divInfracaoP" class="box-body" style="height: 270px; overflow-y:auto;">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsInfraPolo" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracaoP" role="tab" aria-controls="divInfracaoP" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsInfraPolo" role="tabpanel" aria-labelledby="pills-home-tab">
+              </div>
+              <div class="grafic tab-pane fade active in" id="divInfracaoP" class="box-body" style="height: 270px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">
+              </div>
             </div>
           </div>
         </div>
@@ -1819,7 +2259,20 @@ function criarElemento(elem,attr,app){
       
     </section>
     <div class="control-sidebar-bg"></div>
-    <script src="adminLTE/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.colVis.min.js"></script>
+
+    <!-- <script src="adminLTE/jquery.js"></script> -->
     <script src="adminLTE/bootstrap.js"></script>
     <script src="adminLTE/jquery.slimscroll.js"></script>
     <script src="adminLTE/fastclick.js"></script>
@@ -1827,4 +2280,44 @@ function criarElemento(elem,attr,app){
     <script src="adminLTE/demo.js"></script>
     <script src="adminLTE/Chart.js"></script>
   </body>
+  <!-- FIZ ASSIM PRA PODER PEGAR NO PHP E ENVIAR PRA OUTRA PAGINA, SOMENTE O POST N FUNCIONA -->
+  <script>
+       
+      // EXTRAÇÃO TOTAL RICHELMY
+      // window.onload = sessionDados;
+      function sessionDados(){
+        localStorage.removeItem('tituloMes');
+        localStorage.removeItem('chave');
+        mesInfracao = document.getElementById("infracaoCompet").innerHTML;
+        sessionStorage.setItem('tituloMes', mesInfracao);
+        // console.log(extractArray);
+        arrayEnvio = JSON.stringify(extractArray);
+        sessionStorage.setItem('chave', arrayEnvio);
+      }
+
+      
+      $( "#extractTotal" ).click(function() {
+          window.open('relatorios/Trac_RelatorioGeral.php');
+       });
+
+  </script>
 </html>
+
+
+<style>
+
+.table {
+  width: 100% !important;
+}
+
+.dataTables_scrollHead, .dataTables_scrollHeadInner{
+  width : 100% !important;
+}
+
+#pieChart {
+  position: relative;
+  right: -150px;
+  top: -80px;
+}
+
+</style>
