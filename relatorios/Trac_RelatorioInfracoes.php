@@ -121,7 +121,7 @@ labels: graficoInfraNome,
 datasets: [{
 label: 'Infraçoes',
 data: graficoInfraQTOS,
-backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF"],
+backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6"],
     }]
   },
   options: {
@@ -185,7 +185,7 @@ labels: graficoComparativoNome,
 datasets: [{
 label: 'Comparativo',
 data: graficoComparativoQTOS,
-backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF"],
+backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6"],
     }]
   },
   options: {
@@ -274,19 +274,10 @@ type: 'bar',
 data: {
 labels: labelsGrafLine,
 datasets: [{
-label: '# of Votes',
+label: 'Comparativo Mensal Infrações Velocidade',
 data: dataGrafBarra,
-backgroundColor: [
-'rgba(54, 162, 235, 0.2)',
-'rgba(255, 206, 86, 0.2)',
-'rgba(153, 102, 255, 0.2)',
-],
-borderColor: [
-'rgba(54, 162, 235, 1)',
-'rgba(255, 206, 86, 1)',
-'rgba(153, 102, 255, 1)'
-
-],
+backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6","#820402","#060387","#886999"],
+borderColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6",,"#820402","#060387","#886999"],
 borderWidth: 1
 }]
 },
@@ -415,6 +406,7 @@ table {
 
 .divs-grafico {
   max-width: 500px !important;
+  min-width: 500px !important;
   margin-right: 10px;
 }
 

@@ -556,6 +556,9 @@
     <title>Connect Plus | Total Trac</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.bootstrap4.min.css">
+
     <link rel="stylesheet" href="adminLTE/bootstrap.css">
     <link rel="stylesheet" href="adminLTE/font-awesome.css">
     <link rel="stylesheet" href="adminLTE/ionicons.css">
@@ -579,9 +582,9 @@
       document.addEventListener("DOMContentLoaded", function(){
 				// comboCompetencia("classif_mot",document.getElementById("cbCompetencia"));
         window.parent.document.getElementById("iframeCorpo").style="height: 137em; width: 100%;";
-        buscarUni();
+        // buscarUni();
         buscarPol();
-        buscarGpo();
+        // buscarGpo();
         iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       });  
       var clsJs;          // Classe responsavel por montar um Json e eviar PHP
@@ -645,6 +648,7 @@
       // Criando as variaveis para tables //
       //////////////////////////////////////
       let extractArray = [];
+      let countM = 0;
       var ceAnc;
       var ceCanvas;
       var ceContext;
@@ -733,6 +737,7 @@
         msg     = requestPedido("Trac_BiInfracoes.php",fd); 
         retPhp  = JSON.parse(msg);
         extractArray.push(retPhp[0].dados);
+        
         if( retPhp[0].retorno == "OK" ){
           var arrTitulo = ["ID"   ,"DESCRITIVO","GRAFICO","%"  ,"QTOS"];
           var arrColW   = ["8%"   ,"35%"       ,"37%"    ,"10%","10%"];
@@ -894,6 +899,8 @@
           pieChart.Doughnut(arrPieData, pieOptions)
         };
         sessionDados();
+        criandoTabelas();
+
       };
 
       function buscarGpo(){
@@ -1219,7 +1226,7 @@
           // Criar gráfico de torta ou rosquinha
           // Você pode alternar entre torta e rosca usando o método abaixo.
           pieChartTurno.Doughnut(arrPieData, pieOptions);
-        };  
+        }; 
       };
     function graficoLine(){
       pubCompetencia=(document.getElementById("cbCompetencia").value).split("|");
@@ -1236,7 +1243,7 @@
       msg     = requestPedido("Trac_BiInfracoes.php",fd); 
       retPhp  = JSON.parse(msg);
       extractArray.push(retPhp[0].dados);
-      console.log(extractArray);
+      // console.log(extractArray);
       if( retPhp[0].retorno == "OK" ){
         tam=retPhp[0]["dados"].length;
         var arrLabel  = [];
@@ -1395,7 +1402,168 @@
     function chngCompetencia(){
         iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       };
-    
+
+
+
+
+
+
+
+
+
+      // FUNÇAO PARA CRIAR DATATABLES
+      function criandoTabelas(poloOuUni){
+      // usado no for pra criar tabelas
+      // variavel usado pra criar datatables
+        let arrayIds = 'pillsHome';
+        let countInterno = 0;
+          for(let i = 0; i <= 1; i++){
+            countInterno++;
+            // console.log(countM);
+            if(countM == 2){
+                removeElement();
+            }
+            if(countInterno > 1){
+              arrayIds = 'pillsInframesGraf';
+            }
+            let idTableComHash = '#example' + arrayIds;
+            let idTableSemHash = 'example' + arrayIds;
+            let idTableWrapper = '#example' + arrayIds + '_wrapper .col-md-6:eq(0)';
+            $(document).ready(function() {
+              let table = $(idTableComHash).DataTable( {
+                  lengthChange: false,
+                  scrollY:        "200px",
+                  scrollCollapse: true,
+                  buttons: ['excel', 'pdf' ],
+                
+              } );
+            
+              table.buttons().container()
+                  .appendTo( idTableWrapper );
+                
+              } );
+
+            // ARRAY CRIADO PRA SER USADO NA CRIAÇAO DE TABELAS, O ID DE CADA DIV QUE TERA UMA TABELA A SER CRIADA DENTRO TEM QUE ESTAR AQUI
+            // let arrayIds = [];
+            // arrayIds.push("pills-home");
+            // arrayIds.push("pills-veiculo");
+            
+
+              // console.log('TESTE' + extractArray);
+              var newArrayInfracaoMes = extractArray[0].map(function(obj) {
+                  return Object.keys(obj).map(function(chave) {
+                      return obj[chave];
+                  });
+              });
+              
+              countM ++;
+              // let tabela = document.getElementById("example");
+              let tabela = document.createElement("table");
+              tabela.id = idTableSemHash;
+              tabela.classList.add('table');
+              tabela.classList.add('table-striped');
+              tabela.classList.add('table-bordered');
+              tabela.classList.add('cabecalhoTable');
+              let corpo = document.createElement("tbody");
+              let cabecalho = document.createElement("thead");
+
+
+
+              // MONTANDO CABEÇALHO ESTATICO PADRAO
+              let tr = document.createElement("tr");
+              let th1 = document.createElement("th");
+              let th2 = document.createElement("th");
+              let th3 = document.createElement("th");
+              let th4 = document.createElement("th");
+              let th5 = document.createElement("th");
+
+              th1.innerHTML = 'ID';
+              tr.appendChild(th1);
+
+              th2.innerHTML = 'Sigla';
+              tr.appendChild(th2);
+
+              th3.innerHTML = 'Nome';
+              tr.appendChild(th3);
+
+              th4.innerHTML = 'QTDS';
+              tr.appendChild(th4);
+
+              th5.innerHTML = 'Percentual';
+              tr.appendChild(th5);
+
+              cabecalho.appendChild(tr);
+            
+              tabela.appendChild(cabecalho);
+              // tabela.appendChild(corpo);
+
+              newArrayInfracaoMes.forEach((item)=> {
+                if(arrayIds == 'pillsInframesGraf'){
+                  if(item[item.length -1] == 'S'){
+                    let tr = document.createElement("tr");
+                    let td = document.createElement("td");
+                    for(let i = 0; i <= 4; i++){
+                      let tdAux = document.createElement("td");
+                      tdAux.innerHTML = item[i];
+                      tr.appendChild(tdAux);
+                    }
+                    corpo.appendChild(tr);
+                  }
+                }else {
+                  let tr = document.createElement("tr");
+                  let td = document.createElement("td");
+                  for(let i = 0; i <= 4; i++){
+                    let tdAux = document.createElement("td");
+                    tdAux.innerHTML = item[i];
+                    tr.appendChild(tdAux);
+                  }
+                corpo.appendChild(tr);
+                }
+              })
+              tabela.appendChild(corpo);
+              document.getElementById(arrayIds).appendChild(tabela);
+            }
+          }      
+        function removeElement(){
+              document.getElementById('examplepillsHome_wrapper').remove();
+              document.getElementById('examplepillsInframesGraf_wrapper').remove();
+              countM = 0;
+        }
+
+
+        function setGrafico(){
+        let grafic = document.getElementsByClassName("grafic");
+        let liGrafic =  document.getElementsByClassName("liGrafic");
+
+        let noGrafic = document.getElementsByClassName("noGrafic");
+        let liNoGrafic =  document.getElementsByClassName("liNoGrafic");
+        for (let item of grafic) {
+            item.classList.add('active');
+            item.classList.add('in');
+        }
+        for (let item of liGrafic) {
+            item.classList.add('active');
+        }
+
+
+        for (let item of noGrafic) {
+            item.classList.remove('active');
+            item.classList.remove('in');
+        }
+        for (let item of liNoGrafic) {
+            item.classList.remove('active');
+        }
+      }
+
+    function adjustTable(id){
+      let idComHash = '#' + id;
+      let table = $(idComHash).DataTable();
+      setTimeout(() => {
+        table.columns.adjust();
+      }, 1000);
+
+    }
+
     </script> 
   </head>
   <body>
@@ -1432,7 +1600,7 @@
         
         <ul class="nav navbar-nav">
           <li class="dropdown notifications-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <a href="#" onClick="setGrafico()" class="dropdown-toggle" data-toggle="dropdown">
               <i class="fa fa-filter">&nbsp;Polo</i>
               <span class="label label-success" style="top:5px;font-size:0.9em;" id="qtosPol"></span>
             </a>
@@ -1447,7 +1615,7 @@
           </li>
           
           <li class="dropdown notifications-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <a href="#" onClick="setGrafico()" class="dropdown-toggle" data-toggle="dropdown">
               <i class="fa fa-filter">&nbsp;Unid</i>
               <span class="label label-warning" style="top:5px;" id="qtosUni"></span>
             </a>
@@ -1461,7 +1629,7 @@
             </ul>
           </li>
           <li class="dropdown notifications-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <a href="#" onClick="setGrafico()" class="dropdown-toggle" data-toggle="dropdown">
               <i class="fa fa-filter">&nbsp;Grupo Operacional</i>
               <span class="label label-warning" style="top:5px;" id="qtosGpo"></span>
             </a>
@@ -1519,7 +1687,7 @@
             </div>
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
               <li class="nav-item liNoGrafic">
-                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsHome" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+                <a class="nav-link" onClick="adjustTable('examplepillsHome')" id="pills-home-tab" data-toggle="pill" href="#pillsHome" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
               </li>
               <li class="nav-item liGrafic active">
                 <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracao" role="tab" aria-controls="divInfracao" aria-selected="false">Gráfico</a>
@@ -1529,7 +1697,7 @@
               <div class="noGrafic tab-pane fade" id="pillsHome" role="tabpanel" aria-labelledby="pills-home-tab">
               </div>
               <div class="grafic tab-pane fade active in" id="divInfracao" class="box-body" style="height: 250px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">            
-            </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1548,7 +1716,7 @@
               <div class="row">
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                   <li class="nav-item liNoGrafic">
-                    <a class="nav-link" id="pills-inframesGraf-tab" data-toggle="pill" href="#pillsInframesGraf" role="tab" aria-controls="pills-inframesGraf" aria-selected="true">Tabela</a>
+                    <a class="nav-link" onClick="adjustTable('examplepillsInframesGraf')" id="pills-inframesGraf-tab" data-toggle="pill" href="#pillsInframesGraf" role="tab" aria-controls="pills-inframesGraf" aria-selected="true">Tabela</a>
                   </li>
                   <li class="nav-item liGrafic active">
                     <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divPieChart" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
@@ -1704,7 +1872,20 @@
       </div>
     </section>
     <div class="control-sidebar-bg"></div>
-    <script src="adminLTE/jquery.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.colVis.min.js"></script>
+
+    <!-- <script src="adminLTE/jquery.js"></script> -->
     <script src="adminLTE/bootstrap.js"></script>
     <script src="adminLTE/jquery.slimscroll.js"></script>
     <script src="adminLTE/fastclick.js"></script>
@@ -1722,6 +1903,7 @@
          mesInfracao = document.getElementById("infracaoCompet").innerHTML;
          sessionStorage.setItem('tituloMes', mesInfracao);
          arrayEnvio = JSON.stringify(extractArray);
+         
          sessionStorage.setItem('chave', arrayEnvio);
        }
  
@@ -1734,6 +1916,7 @@
 </html>
 
 <style>
+
 /* .table {
   width: 100% !important;
 }
@@ -1741,7 +1924,6 @@
 .dataTables_scrollHead, .dataTables_scrollHeadInner{
   width : 100% !important;
 } */
-
 
 #iframeCorpo {
   height: 137em !important;

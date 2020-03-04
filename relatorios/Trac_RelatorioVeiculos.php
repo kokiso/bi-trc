@@ -45,9 +45,6 @@
             <li>Motoristas: <span id="motoristas"></span></li>
             <li>Veiculos: <span id="veiculos"></span></li>
             <li>KM Percorrido: <span id="kmPercorrido"></span></li>
-            <li>Horas em Motimento: <span id="horasMovimento"></span></li>
-            <li>Horas Parado: <span id="horasParado"></span></li>
-            <li>Velocidade Media: <span id="velocidadeMedia"></span></li>
             <li>Infrações: <span id="infracoes"></span></li>
           </ul>
         </div>
@@ -66,13 +63,13 @@
         </div>
         <div>
             <div class="divs2-grafico">
-                <h6 class=h6>Ranking Infrações por UNIDADE.</h6>
+                <h6 class=h6>Motoristas.</h6>
                 <canvas id="labelRankUn"></canvas>
             </div>
         </div>
         <div>
           <div class="divs2-grafico">
-              <h6 class=h6>Ranking Infrações por POLO.</h6>
+              <h6 class=h6>Veiculos.</h6>
               <canvas id="labelRankPolo"></canvas>
           </div>
         </div>
@@ -107,7 +104,7 @@
 
 <script>
 let arrayEnvio = JSON.parse(sessionStorage.getItem('chave'));
-// console.log(arrayEnvio);
+console.log(arrayEnvio);
 // FOR PARA O PRIMEIRO GRAFICO -- infraçoes/MES
 let mesInfracao = sessionStorage.getItem('tituloMes');
 let graficoInfraDez = [];
@@ -242,8 +239,8 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
 let graficoRankUni = [];
 let graficoRankUniQTOS = [];
 let graficoRankUniNome = []
-for(let i = 0; i < arrayEnvio[3].length; i++){
-    graficoRankUni.push(arrayEnvio[3][i]);
+for(let i = 0; i < arrayEnvio[0].length; i++){
+    graficoRankUni.push(arrayEnvio[0][i]);
     graficoRankUniQTOS.push(graficoRankUni[i].QTOS);
     graficoRankUniNome.push(graficoRankUni[i].NOME + '- QTD:' + graficoRankUni[i].QTOS +  ' - ' + graficoRankUni[i].PERCENTUAL +'%');
 }
@@ -303,8 +300,8 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
 let graficoRankPolo = [];
 let graficoRankPoloQTOS = [];
 let graficoRankPoloNome = []
-for(let i = 0; i < arrayEnvio[4].length; i++){
-    graficoRankPolo.push(arrayEnvio[4][i]);
+for(let i = 0; i < arrayEnvio[1].length; i++){
+    graficoRankPolo.push(arrayEnvio[1][i]);
     graficoRankPoloQTOS.push(graficoRankPolo[i].QTOS);
     graficoRankPoloNome.push(graficoRankPolo[i].NOME + '- QTD:' + graficoRankPolo[i].QTOS +  ' - ' + graficoRankPolo[i].PERCENTUAL +'%');
 }
@@ -329,7 +326,7 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
       labels: {
         padding: 20,
         boxWidth: 15,
-        fontSize: 13
+        fontSize: 7
       }
     },
     plugins: {
@@ -362,18 +359,12 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
     [1]- NUMERO DE VEICULOS
     [5] - KM PERCORRIDO
     [6] - HORAS MOVIMENTO
-    [7] - HORAS PARADO
-    [8] - VELOCIADDE MEDIA
-    [9] - INFRAÇOES (UNICO QUE VEM COMO INTEGER, O RESTO É STRING);
   */
 
-  document.getElementById("motoristas").innerText = arrayEnvio[5][0];
-  document.getElementById("veiculos").innerText = arrayEnvio[5][1];
-  document.getElementById("kmPercorrido").innerText = arrayEnvio[5][5];
-  document.getElementById("horasMovimento").innerText = arrayEnvio[5][6];
-  document.getElementById("horasParado").innerText = arrayEnvio[5][8];
-  document.getElementById("velocidadeMedia").innerText = arrayEnvio[5][7];
-  document.getElementById("infracoes").innerText = arrayEnvio[5][9];
+  document.getElementById("motoristas").innerText = arrayEnvio[3][0];
+  document.getElementById("veiculos").innerText = arrayEnvio[3][1];
+  document.getElementById("kmPercorrido").innerText = arrayEnvio[3][5];
+  document.getElementById("infracoes").innerText = arrayEnvio[3][6];
 
 
     setTimeout(() => {
@@ -453,8 +444,9 @@ table {
   font-size: 14px;
 }
 
-
-
+.divs-grafico-2 {
+    width: 580px;
+}
 
 
 
@@ -471,19 +463,21 @@ table {
 }
 
 .divs-grafico {
-  max-width: 522px !important;
-  min-width: 522px !important;
+  max-width: 580px !important;
+  min-width: 580px !important;
 }
+
 
 .divs2-grafico{
   max-width: 650px !important;
-  min-width: 650px !important;
+  min-width: 750px !important;
 }
 
 .div-principal-grafico {
   display: flex;
   margin-bottom: 50px;
 }
+
 
 .header {
   margin: 40px auto 40px auto;
@@ -503,7 +497,6 @@ table {
 
 
 /* parte dos graficos */
-
 .titulo-graficos {
   font-size: 33px;
   margin-bottom: 80px;

@@ -1305,6 +1305,7 @@ function criarElemento(elem,attr,app){
       };
 
 
+      // array criado com todos IDS que vao ser inseridas as
       let arrayIds = [];
       arrayIds.push('pillsHome');
       arrayIds.push('pillsVeiculo');
@@ -1330,6 +1331,7 @@ function criarElemento(elem,attr,app){
         
             table.buttons().container()
                 .appendTo( idTableWrapper );
+                console.log(table);
             } );
 
             // ARRAY CRIADO PRA SER USADO NA CRIAÇAO DE TABELAS, O ID DE CADA DIV QUE TERA UMA TABELA A SER CRIADA DENTRO TEM QUE ESTAR AQUI
@@ -1877,6 +1879,14 @@ function criarElemento(elem,attr,app){
       };
 
 
+      function adjustTable(id){
+        let idComHash = '#' + id;
+        let table = $(idComHash).DataTable();
+        setTimeout(() => {
+          table.columns.adjust();
+        }, 1000);
+
+      }
 
 
 
@@ -2089,7 +2099,7 @@ function criarElemento(elem,attr,app){
             </div>
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
               <li class="nav-item liNoGrafic">
-                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsHome" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+                <a class="nav-link" onClick="adjustTable('examplepillsHome')" id="pills-home-tab" data-toggle="pill" href="#pillsHome" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
               </li>
               <li class="nav-item liGrafic active">
                 <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divUniMtr" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
@@ -2101,9 +2111,7 @@ function criarElemento(elem,attr,app){
               <div class="grafic tab-pane fade active in" id="divUniMtr" class="box-body" style="height: 250px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">            
             </div>
             </div>
-
-
-        </div>
+          </div>
       </div>
          
         <div class="col-md-6">
@@ -2120,7 +2128,7 @@ function criarElemento(elem,attr,app){
             </div>
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
               <li class="nav-item liNoGrafic">
-                <a class="nav-link" id="pills-veiculo-tab" data-toggle="pill" href="#pillsVeiculo" role="tab" aria-controls="pills-veiculo" aria-selected="true">Tabela</a>
+                <a class="nav-link" onClick="adjustTable('examplepillsVeiculo')" id="pills-veiculo-tab" data-toggle="pill" href="#pillsVeiculo" role="tab" aria-controls="pills-veiculo" aria-selected="true">Tabela</a>
               </li>
               <li class="nav-item liGrafic active">
                 <a class="nav-link" id="pills-veiculo-tabela" data-toggle="pill" href="#divPolMtr" role="tab" aria-controls="divPolMtr" aria-selected="false">Gráfico</a>
@@ -2147,7 +2155,7 @@ function criarElemento(elem,attr,app){
             </div>
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
               <li class="nav-item liNoGrafic">
-                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsInframes" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+                <a class="nav-link" onClick="adjustTable('examplepillsInframes')" id="pills-home-tab" data-toggle="pill" href="#pillsInframes" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
               </li>
               <li class="nav-item liGrafic active">
                 <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracaoN" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
@@ -2176,7 +2184,7 @@ function criarElemento(elem,attr,app){
               <div class="row">
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                   <li class="nav-item liNoGrafic">
-                    <a class="nav-link" id="pills-inframesGraf-tab" data-toggle="pill" href="#pillsInframesGraf" role="tab" aria-controls="pills-inframesGraf" aria-selected="true">Tabela</a>
+                    <a class="nav-link" onClick="adjustTable('examplepillsInframesGraf')" id="pills-inframesGraf-tab" data-toggle="pill" href="#pillsInframesGraf" role="tab" aria-controls="pills-inframesGraf" aria-selected="true">Tabela</a>
                   </li>
                   <li class="nav-item liGrafic active">
                     <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divPieChart" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
@@ -2213,7 +2221,7 @@ function criarElemento(elem,attr,app){
             </div>
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
               <li class="nav-item liNoGrafic">
-                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsInfraUni" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+                <a class="nav-link" onClick="adjustTable('examplepillsInfraUni')" id="pills-home-tab" data-toggle="pill" href="#pillsInfraUni" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
               </li>
               <li class="nav-item liGrafic active">
                 <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracaoU" role="tab" aria-controls="divInfracaoU" aria-selected="false">Gráfico</a>
@@ -2236,7 +2244,7 @@ function criarElemento(elem,attr,app){
             </div>
             <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
               <li class="nav-item liNoGrafic">
-                <a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pillsInfraPolo" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+                <a class="nav-link" onClick="adjustTable('examplepillsInfraPolo')" id="pills-home-tab" data-toggle="pill" href="#pillsInfraPolo" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
               </li>
               <li class="nav-item liGrafic active">
                 <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracaoP" role="tab" aria-controls="divInfracaoP" aria-selected="false">Gráfico</a>
@@ -2282,7 +2290,7 @@ function criarElemento(elem,attr,app){
   </body>
   <!-- FIZ ASSIM PRA PODER PEGAR NO PHP E ENVIAR PRA OUTRA PAGINA, SOMENTE O POST N FUNCIONA -->
   <script>
-       
+
       // EXTRAÇÃO TOTAL RICHELMY
       // window.onload = sessionDados;
       function sessionDados(){

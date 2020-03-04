@@ -43,38 +43,21 @@
         <div>
           <ul class="lista-header">
             <li>Motoristas: <span id="motoristas"></span></li>
-            <li>Veiculos: <span id="veiculos"></span></li>
-            <li>KM Percorrido: <span id="kmPercorrido"></span></li>
-            <li>Horas em Motimento: <span id="horasMovimento"></span></li>
-            <li>Horas Parado: <span id="horasParado"></span></li>
-            <li>Velocidade Media: <span id="velocidadeMedia"></span></li>
-            <li>Infrações: <span id="infracoes"></span></li>
           </ul>
         </div>
       </header>
       <section>
         <h2 class="titulo-graficos">Graficos Demonstrativos</h2>
         <div class="div-principal-grafico">
-          <div class="divs-grafico">
-          <h6 class="h6" id="tituloInfraMes">Infrações DEZ/19 74102</h6>
-              <canvas id="labelInfraMes"></canvas>
-          </div>
-          <div class="divs-grafico">
-            <h6 class="h6">Comparativo EV/EVC/FB em %</h6>
-            <canvas id="labelComparativo"></canvas>
-          </div>
-        </div>
-        <div>
-            <div class="divs2-grafico">
-                <h6 class=h6>Ranking Infrações por UNIDADE.</h6>
-                <canvas id="labelRankUn"></canvas>
+            <div class="divs-grafico">
+                <h6 class=h6>Motoristas</h6>
+                <canvas id="labelMotorista"></canvas>
             </div>
-        </div>
-        <div>
-          <div class="divs2-grafico">
-              <h6 class=h6>Ranking Infrações por POLO.</h6>
-              <canvas id="labelRankPolo"></canvas>
-          </div>
+
+            <div class="divs-grafico">
+                <h6 class=h6>Veiculos</h6>
+                <canvas id="labelVeiculo"></canvas>
+            </div>
         </div>
       <!-- End your project here-->
       </section>
@@ -107,157 +90,32 @@
 
 <script>
 let arrayEnvio = JSON.parse(sessionStorage.getItem('chave'));
-// console.log(arrayEnvio);
-// FOR PARA O PRIMEIRO GRAFICO -- infraçoes/MES
-let mesInfracao = sessionStorage.getItem('tituloMes');
-let graficoInfraDez = [];
-let graficoInfraQTOS = [];
-let graficoInfraNome = [];
+console.log(arrayEnvio);
 
 
 
-// SETANDO TITULO DINAMICO PRA MES
-document.getElementById("tituloInfraMes").innerHTML = mesInfracao;
-
-
-// MONTA ARRAY COM OS DADOS DE INFRA/MES
-for(let i = 0; i < arrayEnvio[2].length; i++){
-    graficoInfraDez.push(arrayEnvio[2][i]);
-    graficoInfraQTOS.push(graficoInfraDez[i].QTOS);
-    graficoInfraNome.push(graficoInfraDez[i].NOME + '- QTD:' + graficoInfraDez[i].QTOS +  ' - ' + graficoInfraDez[i].PERCENTUAL +'%');
-}
-
-
-var ctxP  = document.getElementById("labelInfraMes").getContext('2d');
-var myPieChart  = new Chart(ctxP, {
-type: 'doughnut',
-data: {
-labels: graficoInfraNome,
-datasets: [{
-label: 'Infraçoes',
-data: graficoInfraQTOS,
-backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6"],
-    }]
-  },
-  options: {
-    responsive: true,
-    legend: {
-      position: 'right',
-      labels: {
-        padding: 20,
-        boxWidth: 10,
-        fontSize: 14
-      }
-    },
-    plugins: {
-      datalabels: {
-        formatter: (value, ctx) => {
-          let sum = 0;
-          let dataArr = ctx.chart.data.datasets[0].data;
-          dataArr.map(data => {
-            sum += data;
-          });
-          let percentage = (value * 100 / sum).toFixed(2) + "%";
-          return percentage;
-        },
-        color: 'white',
-        labels: {
-          title: {
-            font: {
-              size: '16'
-            }
-          }
-        }
-      }
-    }
-  }
-});
-
-
-// GRAFICO DO COMPARATIVO EV/EVC/FB EM %
-let graficoComparativo = [];
-let graficoComparativoQTOS = [];
-let graficoComparativoNome = [];
-// USADA DENTRO DO IF PQ O I FICA PRO ESCOPO DE FORA E O J PRA DENTRO COMEÇANDO COM 0
-let j = 0;
-// MONTA ARRAY COM OS DADOS COMPARATIVO
-for(let i = 0; i < arrayEnvio[2].length; i++){
-  // console.log(arrayEnvio[2][i]);
-  if(arrayEnvio[2][i].GRAFICO == 'S'){
-    graficoComparativo.push(arrayEnvio[2][i]);
-    graficoComparativoQTOS.push(graficoComparativo[j].QTOS);
-    graficoComparativoNome.push(graficoComparativo[j].NOME + '- QTD:' + graficoComparativo[j].QTOS +  ' - ' + graficoComparativo[j].PERCENTUAL +'%');
-    j++;
-  }
-}
-
-
-var ctxP  = document.getElementById("labelComparativo").getContext('2d');
-var myPieChart  = new Chart(ctxP, {
-type: 'doughnut',
-data: {
-labels: graficoComparativoNome,
-datasets: [{
-label: 'Comparativo',
-data: graficoComparativoQTOS,
-backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6"],
-    }]
-  },
-  options: {
-    responsive: true,
-    legend: {
-      position: 'right',
-      labels: {
-        padding: 20,
-        boxWidth: 10,
-        fontSize: 14
-      }
-    },
-    plugins: {
-      datalabels: {
-        formatter: (value, ctx) => {
-          let sum = 0;
-          let dataArr = ctx.chart.data.datasets[0].data;
-          dataArr.map(data => {
-            sum += data;
-          });
-          let percentage = (value * 100 / sum).toFixed(2) + "%";
-          return percentage;
-        },
-        color: 'white',
-        labels: {
-          title: {
-            font: {
-              size: '16'
-            }
-          }
-        }
-      }
-    }
-  }
-});
 
 
 // GRAFICO RANKING UNIDADE
-let graficoRankUni = [];
-let graficoRankUniQTOS = [];
-let graficoRankUniNome = []
-for(let i = 0; i < arrayEnvio[3].length; i++){
-    graficoRankUni.push(arrayEnvio[3][i]);
-    graficoRankUniQTOS.push(graficoRankUni[i].QTOS);
-    graficoRankUniNome.push(graficoRankUni[i].NOME + '- QTD:' + graficoRankUni[i].QTOS +  ' - ' + graficoRankUni[i].PERCENTUAL +'%');
+let graficoMotorista = [];
+let graficoMotoQTOS = [];
+let graficoMotoNome = []
+for(let i = 0; i < arrayEnvio[0].length; i++){
+    graficoMotorista.push(arrayEnvio[0][i]);
+    graficoMotoQTOS.push(graficoMotorista[i].QTOS);
+    graficoMotoNome.push(graficoMotorista[i].NOME + '- QTD:' + graficoMotorista[i].QTOS +  ' - ' + graficoMotorista[i].PERCENTUAL +'%');
 }
 
 
 
-var ctxP  = document.getElementById("labelRankUn").getContext('2d');
+var ctxP  = document.getElementById("labelMotorista").getContext('2d');
 var myPieChart  = new Chart(ctxP, {
 type: 'pie',
 data: {
-labels: graficoRankUniNome,
+labels: graficoMotoNome,
 datasets: [{
 label: 'Ranking Unidades',
-data: graficoRankUniQTOS,
+data: graficoMotoQTOS,
 backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6"],
     }]
   },
@@ -299,26 +157,27 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
 
 
 
+
 // GRAFICO RANKING UNIDADE
-let graficoRankPolo = [];
-let graficoRankPoloQTOS = [];
-let graficoRankPoloNome = []
-for(let i = 0; i < arrayEnvio[4].length; i++){
-    graficoRankPolo.push(arrayEnvio[4][i]);
-    graficoRankPoloQTOS.push(graficoRankPolo[i].QTOS);
-    graficoRankPoloNome.push(graficoRankPolo[i].NOME + '- QTD:' + graficoRankPolo[i].QTOS +  ' - ' + graficoRankPolo[i].PERCENTUAL +'%');
+let graficoVeiculos = [];
+let graficoVeiculosQTOS = [];
+let graficoVeiculosNome = []
+for(let i = 0; i < arrayEnvio[1].length; i++){
+    graficoVeiculos.push(arrayEnvio[1][i]);
+    graficoVeiculosQTOS.push(graficoVeiculos[i].QTOS);
+    graficoVeiculosNome.push(graficoVeiculos[i].NOME + '- QTD:' + graficoVeiculos[i].QTOS +  ' - ' + graficoVeiculos[i].PERCENTUAL +'%');
 }
 
 
 
-var ctxP  = document.getElementById("labelRankPolo").getContext('2d');
+var ctxP  = document.getElementById("labelVeiculo").getContext('2d');
 var myPieChart  = new Chart(ctxP, {
 type: 'pie',
 data: {
-labels: graficoRankPoloNome,
+labels: graficoVeiculosNome,
 datasets: [{
 label: 'Ranking Unidades',
-data: graficoRankPoloQTOS,
+data: graficoVeiculosQTOS,
 backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","#99CC32","#32CD99","#00FFFF","#FF00FF","#FFFF00","#00FF00","#00FF7F","#A68064","#4F2F4F","#FFB6C1","#E0FFFF","#0000FF","#4B0082","#B0E0E6"],
     }]
   },
@@ -329,7 +188,7 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
       labels: {
         padding: 20,
         boxWidth: 15,
-        fontSize: 13
+        fontSize: 9
       }
     },
     plugins: {
@@ -357,23 +216,8 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
 });
 
 
-  /*ARRAY arrayEnvio[5][?] QUE SERA USADO PRO CABEÇALHO DE INFORMAÇOES
-    [0] - NUMERO MOTORISTAS
-    [1]- NUMERO DE VEICULOS
-    [5] - KM PERCORRIDO
-    [6] - HORAS MOVIMENTO
-    [7] - HORAS PARADO
-    [8] - VELOCIADDE MEDIA
-    [9] - INFRAÇOES (UNICO QUE VEM COMO INTEGER, O RESTO É STRING);
-  */
-
-  document.getElementById("motoristas").innerText = arrayEnvio[5][0];
-  document.getElementById("veiculos").innerText = arrayEnvio[5][1];
-  document.getElementById("kmPercorrido").innerText = arrayEnvio[5][5];
-  document.getElementById("horasMovimento").innerText = arrayEnvio[5][6];
-  document.getElementById("horasParado").innerText = arrayEnvio[5][8];
-  document.getElementById("velocidadeMedia").innerText = arrayEnvio[5][7];
-  document.getElementById("infracoes").innerText = arrayEnvio[5][9];
+  /*ARRAY arrayEnvio[2] QUE SERA USADO PRO CABEÇALHO DE INFORMAÇOES*/
+  document.getElementById("motoristas").innerText = arrayEnvio[2];
 
 
     setTimeout(() => {
@@ -453,8 +297,9 @@ table {
   font-size: 14px;
 }
 
-
-
+.divs-grafico-2 {
+    width: 580px;
+}
 
 
 
@@ -471,18 +316,13 @@ table {
 }
 
 .divs-grafico {
-  max-width: 522px !important;
-  min-width: 522px !important;
-}
-
-.divs2-grafico{
-  max-width: 650px !important;
-  min-width: 650px !important;
+  max-width: 580px !important;
+  min-width: 580px !important;
 }
 
 .div-principal-grafico {
   display: flex;
-  margin-bottom: 50px;
+  margin-bottom: 150px;
 }
 
 .header {
@@ -503,7 +343,6 @@ table {
 
 
 /* parte dos graficos */
-
 .titulo-graficos {
   font-size: 33px;
   margin-bottom: 80px;

@@ -536,6 +536,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Connect Plus | Total Trac</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.1/css/buttons.bootstrap4.min.css">
     
     <link rel="stylesheet" href="adminLTE/bootstrap.css">
     <link rel="stylesheet" href="adminLTE/font-awesome.css">
@@ -599,6 +603,15 @@
       //////////////////////////////////////
       // Criando as variaveis para tables //
       //////////////////////////////////////
+      // Count usado pra montar datatables
+      let countM = 0;
+      // array com todos os dados de visaoGeral
+      let extractArray = [];
+      // array com os dados do cabeçalho(Numeros);
+      let arrayNumerosCabecalho = [];
+      // array para troca entre POLO E UNIDADE
+      let poloUni = 0;
+      let arrayPoloUni = [];
       var ceAnc;
       var ceCanvas;
       var ceContext;
@@ -619,6 +632,8 @@
       // Tb eh usada qdo selecionado filtro por uma unidade                     //
       ////////////////////////////////////////////////////////////////////////////
       function iniciarBi(ibCodUni,ibDesUni,ibCodPol,ibDesPol, ibCodGpo, ibDesGpo){
+        extractArray = [];
+        arrayNumerosCabecalho = [];
         document.getElementById("infracaoCompet").innerHTML="Infrações "+document.getElementById("cbCompetencia").options[document.getElementById("cbCompetencia").selectedIndex].text+" ";
         pubCodUni=ibCodUni;
         pubDesUni=ibDesUni;
@@ -645,6 +660,7 @@
         fncFiltrarTableSimples("bisVeiculoUni"    ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         fncFiltrarTableInfracao("infracao"        ,"tblinf"  ,"divInfracao"  ,"qtosInfracao" ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
         document.getElementById("smllDesUni").innerHTML=ibDesUni;
+        setGrafico();
       };
       //    
       //  
@@ -662,12 +678,13 @@
         fd.append("principal" , clsJs.fim());
         //msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
 				msg     = requestPedido("Trac_BiVeiculos.php",fd); 
-
+        
         retPhp  = JSON.parse(msg);
         if( retPhp[0].retorno == "OK" ){
           document.getElementById(qualSpan).innerHTML=parseInt(retPhp[0]["dados"][0]);
           if(qualSpan=="qtosKm")
             document.getElementById(qualSpan).innerHTML=parseInt(parseFloat(retPhp[0]["dados"][0]));
+            arrayNumerosCabecalho.push(retPhp[0]["dados"][0][0]);
         };  
       };
       //
@@ -676,6 +693,7 @@
       // Somente tabelas com duas colunas //  
       //////////////////////////////////////
       function fncFiltrarTableSimples(qualSelect,qualTbl,qualDiv,qualTot,qualCodUni,qualCodPol,qualLevPes,qualCodGpo){
+        arrayPoloUni = [];
         clsJs   = jsString("lote");  
         clsJs.add("rotina"      , "biSimples"                                     );
         clsJs.add("login"       , jsPub[0].usr_login                              );
@@ -691,6 +709,12 @@
 				msg     = requestPedido("Trac_BiVeiculos.php",fd); 
 
         retPhp  = JSON.parse(msg);
+        extractArray.push(retPhp[0].dados);
+
+
+
+        // Array usado pra troca entre POLO E UNIDADE
+        arrayPoloUni.push(retPhp[0].dados);
         if( retPhp[0].retorno == "OK" ){
           var arrTitulo = ["DESCRITIVO","GRAFICO","%","QTOS"];
           var arrColW  = ["40%","40%","10%","10%"];
@@ -791,6 +815,7 @@
                   ///////////////////////////////
                   totQtos+=retPhp[0]["dados"][linR]["QTOS"];
                   break;
+                  		
                   
               };    
             };  
@@ -804,6 +829,7 @@
             document.getElementById(qualTot).innerHTML=totQtos;
           };
         };
+        setGrafico();
       };
       //
       //  
@@ -825,6 +851,7 @@
         //msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
 				msg     = requestPedido("Trac_BiVeiculos.php",fd); 
         retPhp  = JSON.parse(msg);
+        extractArray.push(retPhp[0].dados);
         if( retPhp[0].retorno == "OK" ){
           var arrTitulo = ["ID"   ,"DESCRITIVO","GRAFICO","%"  ,"QTOS"];
           var arrColW   = ["8%"   ,"35%"       ,"37%"    ,"10%","10%"];
@@ -942,6 +969,7 @@
               };    
             };  
             ceTable.appendChild(ceTr);
+
           };  
           document.getElementById(qualDiv).appendChild(ceTable);
           //////////////////////////////////////////////////////////////////
@@ -949,9 +977,12 @@
           //////////////////////////////////////////////////////////////////
           if(document.getElementById(qualTot) != undefined ){
             document.getElementById(qualTot).innerHTML=totQtos;
-						document.getElementById("qtosInfra").innerHTML=totQtos;						
+						document.getElementById("qtosInfra").innerHTML=totQtos;
+            arrayNumerosCabecalho.push(totQtos);						
           };
           //
+          // JUNTANDO DADOS PARA ENVIAR PRA OUTRA TABELA
+          extractArray.push(arrayNumerosCabecalho);
           var pieChartCanvas = document.getElementById("pieChart").getContext("2d");
           var pieChart       = new Chart(pieChartCanvas);
           var valor          = 0;
@@ -976,6 +1007,9 @@
           // Você pode alternar entre torta e rosca usando o método abaixo.
           pieChart.Doughnut(arrPieData, pieOptions)
         };
+        sessionDados();
+        criandoTabelas();
+        criandoTabelaComparativo();
       };
       ///////////////////////////
       // Buscando competencias //
@@ -1406,20 +1440,331 @@
       function chngMotUP(){
         if( document.getElementById("cbMotUP").value=="UNI" ){
           fncFiltrarTableSimples("bisMotoristaUni" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsHome');
         } else {
           fncFiltrarTableSimples("bisMotoristaPol" ,"tblUniMtr","divUniMtr"    ,"qtosUniMtr"   ,pubCodUni,pubCodPol,"*", pubCodGpo);
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsHome');
         }    
       };
       function chngVeiUP(){
         if( document.getElementById("cbVeiUP").value=="UNI" ){
           fncFiltrarTableSimples("bisVeiculoUni" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsVeiculo');
         } else {
           fncFiltrarTableSimples("bisVeiculoPol" ,"tblPolMtr","divPolMtr"    ,"qtosPolMtr"   ,pubCodUni,pubCodPol,pubLevPes, pubCodGpo);
+          poloUni = 1;
+          sessionDados();
+          criandoTabelas('pillsVeiculo');
         }    
       }; 
       function chngCompetencia(){
         iniciarBi(0,"Todas unidades","*","Todos polos", '*', 'Todos Grupos Operacionais');
       };
+
+
+      let arrayIds = [];
+      arrayIds.push('pillsHome');
+      arrayIds.push('pillsVeiculo');
+      arrayIds.push('pillsInframes');
+      function criandoTabelas(poloOuUni){
+        if(poloUni == 0){
+          for(let i = 0; i <= 2; i++){
+            if(countM == 3){
+                removeElement();
+            }
+            let idTableComHash = '#example' + arrayIds[i];
+            let idTableSemHash = 'example' + arrayIds[i];
+            let idTableWrapper = '#example' + arrayIds[i] + '_wrapper .col-md-6:eq(0)';
+            $(document).ready(function() {
+            var table = $(idTableComHash).DataTable( {
+                lengthChange: false,
+                scrollY:        "200px",
+                scrollCollapse: true,
+                buttons: ['excel', 'pdf' ]
+            } );
+        
+            table.buttons().container()
+                .appendTo( idTableWrapper );
+            } );
+
+              var newArrayInfracaoMes = extractArray[i].map(function(obj) {
+                  return Object.keys(obj).map(function(chave) {
+                      return obj[chave];
+                  });
+              });
+              countM ++;
+              // let tabela = document.getElementById("example");
+              let tabela = document.createElement("table");
+              tabela.id = idTableSemHash;
+              tabela.classList.add('table');
+              tabela.classList.add('table-striped');
+              tabela.classList.add('table-bordered');
+              tabela.classList.add('cabecalhoTable');
+              let corpo = document.createElement("tbody");
+              let cabecalho = document.createElement("thead");
+
+
+
+              // MONTANDO CABEÇALHO ESTATICO PADRAO
+              let tr = document.createElement("tr");
+              let th1 = document.createElement("th");
+              let th2 = document.createElement("th");
+              let th3 = document.createElement("th");
+              let th4 = document.createElement("th");
+
+              th1.innerHTML = 'ID';
+              tr.appendChild(th1);
+
+              th2.innerHTML = 'Nome';
+              tr.appendChild(th2);
+
+              th3.innerHTML = 'QTOS';
+              tr.appendChild(th3);
+
+              th4.innerHTML = 'Percentual';
+              tr.appendChild(th4);
+
+              cabecalho.appendChild(tr);
+            
+              tabela.appendChild(cabecalho);
+              // tabela.appendChild(corpo);
+
+              newArrayInfracaoMes.forEach((item)=> {
+                let tr = document.createElement("tr");
+                let td = document.createElement("td");
+                for(let i = 0; i <= 3; i++){
+                  let tdAux = document.createElement("td");
+                  tdAux.innerHTML = item[i];
+                  tr.appendChild(tdAux);
+                }
+                corpo.appendChild(tr);
+              })
+              tabela.appendChild(corpo);
+              document.getElementById(arrayIds[i]).appendChild(tabela);
+
+            }
+
+        }else {
+            let idTableComHash = '#example' + poloOuUni;
+            let idTableSemHash = 'example' + poloOuUni;
+            let idTableWrapper = '#example' + poloOuUni + '_wrapper .col-md-6:eq(0)';
+            if(poloOuUni == 'pillsHome'){
+              document.getElementById('examplepillsHome_wrapper').remove();
+            }else if(poloOuUni == 'pillsVeiculo'){
+              document.getElementById('examplepillsVeiculo_wrapper').remove();
+            }
+
+            $(document).ready(function() {
+            var table = $(idTableComHash).DataTable( {
+                lengthChange: false,
+                scrollY:        "200px",
+                scrollCollapse: true,
+                buttons: ['excel', 'pdf' ]
+            } );
+        
+            table.buttons().container()
+                .appendTo( idTableWrapper );
+            } );
+
+            // ARRAY CRIADO PRA SER USADO NA CRIAÇAO DE TABELAS, O ID DE CADA DIV QUE TERA UMA TABELA A SER CRIADA DENTRO TEM QUE ESTAR AQUI
+            // let arrayIds = [];
+            // arrayIds.push("pills-home");
+            // arrayIds.push("pills-veiculo");
+            
+
+  
+              var newArrayInfracaoMes = arrayPoloUni[0].map(function(obj) {
+                  return Object.keys(obj).map(function(chave) {
+                      return obj[chave];
+                  });
+              });
+              // let tabela = document.getElementById("example");
+              let tabela = document.createElement("table");
+              tabela.id = idTableSemHash;
+              tabela.classList.add('table');
+              tabela.classList.add('table-striped');
+              tabela.classList.add('table-bordered');
+              tabela.classList.add('cabecalhoTable');
+              let corpo = document.createElement("tbody");
+              let cabecalho = document.createElement("thead");
+
+
+
+              // MONTANDO CABEÇALHO ESTATICO PADRAO
+              let tr = document.createElement("tr");
+              let th1 = document.createElement("th");
+              let th2 = document.createElement("th");
+              let th3 = document.createElement("th");
+              let th4 = document.createElement("th");
+
+              th1.innerHTML = 'ID';
+              tr.appendChild(th1);
+
+              th2.innerHTML = 'Nome';
+              tr.appendChild(th2);
+
+              th3.innerHTML = 'QTOS';
+              tr.appendChild(th3);
+
+              th4.innerHTML = 'Percentual';
+              tr.appendChild(th4);
+
+              cabecalho.appendChild(tr);
+            
+              tabela.appendChild(cabecalho);
+              // tabela.appendChild(corpo);
+              newArrayInfracaoMes.forEach((item)=> {
+                let tr = document.createElement("tr");
+                let td = document.createElement("td");
+                for(let i = 0; i <= 3; i++){
+                  let tdAux = document.createElement("td");
+                  tdAux.innerHTML = item[i];
+                  tr.appendChild(tdAux);
+                }
+                corpo.appendChild(tr);
+
+              })
+              tabela.appendChild(corpo);
+              document.getElementById(poloOuUni).appendChild(tabela);
+              poloUni = 0;
+            }
+
+        }
+
+
+        // ESSA TABLE CRIEI SEPARADA PRO GRAFICO
+        function criandoTabelaComparativo(){
+            if(document.getElementById('examplepillsInframesGraf_wrapper')){
+              document.getElementById('examplepillsInframesGraf_wrapper').remove();
+            }
+            let idTableComHash = '#examplepillsInframesGraf';
+            let idTableSemHash = 'examplepillsInframesGraf';
+            let idTableWrapper = '#examplepillsInframesGraf_wrapper .col-md-6:eq(0)';
+            $(document).ready(function() {
+            var table = $(idTableComHash).DataTable( {
+                lengthChange: false,
+                scrollY:        "200px",
+                scrollCollapse: true,
+                buttons: ['excel', 'pdf' ]
+            } );
+        
+            table.buttons().container()
+                .appendTo( idTableWrapper );
+            } );
+
+            // ARRAY CRIADO PRA SER USADO NA CRIAÇAO DE TABELAS, O ID DE CADA DIV QUE TERA UMA TABELA A SER CRIADA DENTRO TEM QUE ESTAR AQUI
+            // let arrayIds = [];
+            // arrayIds.push("pills-home");
+            // arrayIds.push("pills-veiculo");
+            
+              var newArrayInfracaoMes = extractArray[2].map(function(obj) {
+                  return Object.keys(obj).map(function(chave) {
+                      return obj[chave];
+                  });
+              });
+              // let tabela = document.getElementById("example");
+              let tabela = document.createElement("table");
+              tabela.id = idTableSemHash;
+              tabela.classList.add('table');
+              tabela.classList.add('table-striped');
+              tabela.classList.add('table-bordered');
+              tabela.classList.add('cabecalhoTable');
+              let corpo = document.createElement("tbody");
+              let cabecalho = document.createElement("thead");
+
+
+
+              // MONTANDO CABEÇALHO ESTATICO PADRAO
+              let tr = document.createElement("tr");
+              let th1 = document.createElement("th");
+              let th2 = document.createElement("th");
+              let th3 = document.createElement("th");
+              let th4 = document.createElement("th");
+
+              th1.innerHTML = 'ID';
+              tr.appendChild(th1);
+
+              th2.innerHTML = 'Nome';
+              tr.appendChild(th2);
+
+              th3.innerHTML = 'QTOS';
+              tr.appendChild(th3);
+
+              th4.innerHTML = 'Percentual';
+              tr.appendChild(th4);
+
+              cabecalho.appendChild(tr);
+            
+              tabela.appendChild(cabecalho);
+              // tabela.appendChild(corpo);
+
+              newArrayInfracaoMes.forEach((item)=> {
+                if(item[item.length -1] == 'S'){
+                  let tr = document.createElement("tr");
+                  let td = document.createElement("td");
+                  for(let i = 0; i <= 3; i++){
+                    let tdAux = document.createElement("td");
+                    tdAux.innerHTML = item[i];
+                    tr.appendChild(tdAux);
+                  }
+                  corpo.appendChild(tr);
+                }
+
+              })
+              tabela.appendChild(corpo);
+              document.getElementById('pillsInframesGraf').appendChild(tabela);
+            }
+
+      // REMOVE AS TABELAS PRA CRIAÇAO DE NOVAS COM A NOVA BUSCA
+      function removeElement(){
+              document.getElementById('examplepillsHome_wrapper').remove();
+              document.getElementById('examplepillsVeiculo_wrapper').remove();
+              document.getElementById('examplepillsInframes_wrapper').remove();
+              // document.getElementById('examplepillsInfraUni_wrapper').remove();
+              // document.getElementById('examplepillsInfraPolo_wrapper').remove();
+              countM = 0;
+        }
+
+      // função pra sempre mostar o grafico ao reload de qualquer informção
+      function setGrafico(){
+        let grafic = document.getElementsByClassName("grafic");
+        let liGrafic =  document.getElementsByClassName("liGrafic");
+
+        let noGrafic = document.getElementsByClassName("noGrafic");
+        let liNoGrafic =  document.getElementsByClassName("liNoGrafic");
+        for (let item of grafic) {
+            item.classList.add('active');
+            item.classList.add('in');
+        }
+        for (let item of liGrafic) {
+            item.classList.add('active');
+        }
+
+
+        for (let item of noGrafic) {
+            item.classList.remove('active');
+            item.classList.remove('in');
+        }
+        for (let item of liNoGrafic) {
+            item.classList.remove('active');
+        }
+      }
+
+
+      function adjustTable(id){
+        let idComHash = '#' + id;
+        let table = $(idComHash).DataTable();
+        setTimeout(() => {
+          table.columns.adjust();
+        }, 1000);
+
+      }
      </script> 
   </head>
   <body>
@@ -1517,7 +1862,10 @@
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <span onClick="window.parent.document.getElementById('iframeCorpo').src='';"class="hidden-xs">Fechar</span>
             </a>
-          </li>  
+          </li>
+          <li>
+            <button id="extractTotal" class="btn btn-primary" style="margin-top: 8px; margin-left: 50px;">Extração dos Dados.</button>
+          </li>
           
         </ul>
       </div>
@@ -1621,10 +1969,24 @@
                 </select>
               </div> 
             </div>
-            <div id="divUniMtr" class="box-body" style="height: 250px; overflow-y:auto;">            
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" onClick="adjustTable('examplepillsHome')" id="pills-home-tab" data-toggle="pill" href="#pillsHome" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divUniMtr" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsHome" role="tabpanel" aria-labelledby="pills-home-tab">
+              </div>
+              <div class="grafic tab-pane fade active in" id="divUniMtr" class="box-body" style="height: 250px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">            
             </div>
-          </div>
+            </div>
+
+
         </div>
+      </div>
          
         <div class="col-md-6">
           <div class="box">
@@ -1636,24 +1998,48 @@
                   <option value="UNI" selected="selected">Unidade</option>
                   <option value="POL">Polo</option>
                 </select>
-              </div> 
-              
+              </div>
             </div>
-            <div id="divPolMtr" class="box-body" style="height: 250px; overflow-y:auto;">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" onClick="adjustTable('examplepillsVeiculo')" id="pills-veiculo-tab" data-toggle="pill" href="#pillsVeiculo" role="tab" aria-controls="pills-veiculo" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-veiculo-tabela" data-toggle="pill" href="#divPolMtr" role="tab" aria-controls="divPolMtr" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsVeiculo" role="tabpanel" aria-labelledby="pills-veiculo-tab">
+              </div>
+              <div class="grafic tab-pane fade active in" id="divPolMtr" class="box-body" style="height: 250px; overflow-y:auto;"  role="tabpanel" aria-labelledby="pills-veiculo-tabela">        
+              </div>
+            </div>
             </div>
           </div>
         </div>
-      </div>
 
       <div class="row">
         <div class="col-md-6">
           <div class="box">
             <div class="box-header with-border">
               <h3 id="infracaoCompet" class="box-title">...</h3>
-              <span id="qtosInfracao" class="badge bg-light-blue" style="width:50px;">0</span>
+              <span id="qtosInfracaoN" class="badge bg-light-blue" style="width:50px;">0</span>
             </div>
-            <div id="divInfracao" class="box-body" style="height: 270px; overflow-y:auto;">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item liNoGrafic">
+                <a class="nav-link" onClick="adjustTable('examplepillsInframes')" id="pills-home-tab" data-toggle="pill" href="#pillsInframes" role="tab" aria-controls="pills-home" aria-selected="true">Tabela</a>
+              </li>
+              <li class="nav-item liGrafic active">
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divInfracao" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
+              </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+              <div class="noGrafic tab-pane fade" id="pillsInframes" role="tabpanel" aria-labelledby="pills-home-tab">
+              </div>
+              <div  class="grafic tab-pane fade active in" id="divInfracao" class="box-body" style="height: 270px; overflow-y:auto;" role="tabpanel" aria-labelledby="pills-profile-tab">
             </div>
+            </div>
+
           </div>
         </div>
         
@@ -1668,17 +2054,29 @@
             </div>
             <div class="box-body" style="padding-top:15px;">
               <div class="row">
-                <div class="col-md-8">
-                  <div class="chart-responsive">
-                    <canvas id="pieChart" height="150"></canvas>
+                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                  <li class="nav-item liNoGrafic">
+                    <a class="nav-link" onClick="adjustTable('examplepillsInframesGraf')" id="pills-inframesGraf-tab" data-toggle="pill" href="#pillsInframesGraf" role="tab" aria-controls="pills-inframesGraf" aria-selected="true">Tabela</a>
+                  </li>
+                  <li class="nav-item liGrafic active">
+                    <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#divPieChart" role="tab" aria-controls="divUniMtr" aria-selected="false">Gráfico</a>
+                  </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent">
+                  <div class="noGrafic tab-pane fade" id="pillsInframesGraf" role="tabpanel" aria-labelledby="pills-inframesGraf-tab">
                   </div>
-                </div>
-                <div class="col-md-4">
-                  <ul class="chart-legend clearfix">
-                    <li><i class="fa fa-circle-o text-red"></i> Excesso veloc</li>
-                    <li><i class="fa fa-circle-o text-green"></i> Excesso veloc chuva</li>
-                    <li><i class="fa fa-circle-o text-yellow"></i> Freada brusca</li>
-                  </ul>
+                  <div class="grafic tab-pane fade active in col-md-6" id="divPieChart" class="box-body" role="tabpanel" aria-labelledby="pills-profile-tab">
+                    <div class="col-md-6">
+                      <ul class="chart-legend clearfix">
+                        <li><i class="fa fa-circle-o text-red"></i> Excesso veloc</li>
+                        <li><i class="fa fa-circle-o text-green"></i> Excesso veloc chuva</li>
+                        <li><i class="fa fa-circle-o text-yellow"></i> Freada brusca</li>
+                      </ul>
+                    </div>
+                    <div id="divPieChart" class="chart-responsive ">
+                      <canvas id="pieChart"></canvas>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1799,8 +2197,22 @@
       </div>
 			-->
     </section>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.6.1/js/buttons.colVis.min.js"></script>
+
+
     <div class="control-sidebar-bg"></div>
-    <script src="adminLTE/jquery.js"></script>
+    <!-- <script src="adminLTE/jquery.js"></script> -->
     <script src="adminLTE/bootstrap.js"></script>
     <script src="adminLTE/jquery.slimscroll.js"></script>
     <script src="adminLTE/fastclick.js"></script>
@@ -1808,4 +2220,40 @@
     <script src="adminLTE/demo.js"></script>
     <script src="adminLTE/Chart.js"></script>
   </body>
+  <script>
+       
+       // EXTRAÇÃO TOTAL RICHELMY
+       // window.onload = sessionDados;
+       function sessionDados(){
+         localStorage.removeItem('tituloMes');
+         localStorage.removeItem('chave');
+         mesInfracao = document.getElementById("infracaoCompet").innerHTML;
+         sessionStorage.setItem('tituloMes', mesInfracao);
+         arrayEnvio = JSON.stringify(extractArray);
+         sessionStorage.setItem('chave', arrayEnvio);
+       }
+ 
+       
+       $( "#extractTotal" ).click(function() {
+           window.open('relatorios/Trac_RelatorioVeiculos.php');
+        });
+ 
+   </script>
 </html>
+
+<style>
+
+.table {
+  width: 100% !important;
+}
+
+.dataTables_scrollHead, .dataTables_scrollHeadInner{
+  width : 100% !important;
+}
+
+#pieChart {
+  position: relative;
+  right: -150px;
+  top: -80px;
+}
+</style>
