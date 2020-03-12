@@ -471,8 +471,8 @@ table {
 }
 
 .divs-grafico {
-  max-width: 522px !important;
-  min-width: 522px !important;
+  max-width: 480px !important;
+  min-width: 480px !important;
 }
 
 .divs2-grafico{

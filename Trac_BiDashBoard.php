@@ -98,6 +98,7 @@
 						<li><a href="#" onClick="window.open('Trac_grdInfracaoTempo.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Tempo/Infrações</a></li>
 						<li><a href="#" onClick="window.open('Trac_grdPeriodoIndevido.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Periodo indevido</a></li>
             <li><a href="#" onClick="window.open('Trac_grdClassifMotorista.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Classific motorista</a></li>
+            <li><a href="#" onClick="window.open('Trac_gridTempoScomunicar.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Tempo S/ Comunicar</a></li>
           </ul>
         </li>
         

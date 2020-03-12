@@ -19,6 +19,8 @@
   <link rel="stylesheet" href="../charts/cssCharts/mdb.min.css">
   <!-- Your custom styles (optional) -->
   <link rel="stylesheet" href="../charts/cssCharts/style.css">
+
+  
 </head>
 <body>
   <section class="container">
@@ -52,15 +54,26 @@
             <canvas id="labelComparativo"></canvas>
           </div>
         </div>
-        <div class="div-principal-grafico">
-            <div class="divs-grafico">
-                <h6 class=h6>Média de KM sem Infrações</h6>
-                <canvas id="lineChart"></canvas>
-            </div>
-            <div class="divs-grafico">
-              <h6 class=h6>Comparativo Mensal Infrações Velocidade</h6>
-              <canvas id="barChart"></canvas>
-            </div>
+        <div class="divs2-grafico">
+          <div class="div-lastGraficos">
+            <h6 class=h6>Média de KM sem Infrações</h6>
+            <canvas id="lineChart"></canvas>
+          </div>
+          <div class="div-legendas">
+            <ul id="listaLabelMediaKm"></ul>
+            <ul id="listaLabelMediaKmCol2"></ul>
+          </div>
+            
+        </div>
+        <div class="divs2-grafico">
+          <div class="div-lastGraficos">
+            <h6 class=h6>Comparativo Mensal Infrações Velocidade</h6>
+            <canvas id="barChart"></canvas>
+          </div>
+          <div class="div-legendas">
+            <div><ul id="listaLegendaInfraMensal"></ul></div>
+            <div><ul id="listaLegendaInfraMensalCol2"></ul></div>
+          </div>
         </div>
       </section>
   </section>
@@ -87,6 +100,8 @@
   <script type="text/javascript" src="../charts/jsCharts/mdb.min.js"></script>
   <!-- Your custom scripts (optional) -->
   <script type="text/javascript"></script>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 
 </body>
 
@@ -229,13 +244,33 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
 let dadosGrafLine = arrayEnvio[1];
 let labelsGrafLine = [];
 let dataGrafLine = [];
+let allLegendsKm = [];
+let auxColunas = 0;
 dadosGrafLine.forEach((item) =>{
   labelsGrafLine.push(item.ANOMES);
   dataGrafLine.push(item.MEDIA);
+  allLegendsKm.push(item.ANOMES + '- QTD:' + item.MEDIA);
 })
+
+allLegendsKm.forEach((item) => {
+  if(auxColunas > 15){
+    let ul = document.getElementById('listaLabelMediaKmCol2');
+    let li = document.createElement("li");
+    li.innerHTML = item;
+    ul.appendChild(li);
+  }else {
+    let ul = document.getElementById('listaLabelMediaKm');
+    let li = document.createElement("li");
+    li.innerHTML = item;
+    ul.appendChild(li);
+    auxColunas++;
+  }
+})
+
 
 var ctxL = document.getElementById("lineChart").getContext('2d');
 var myLineChart = new Chart(ctxL, {
+
 type: 'line',
 data: {
 labels: labelsGrafLine,
@@ -253,7 +288,10 @@ borderWidth: 2
 ]
 },
 options: {
-responsive: true
+responsive: true,
+legend: {
+    display: false,
+    },
 }
 });
 
@@ -265,14 +303,37 @@ responsive: true
 
 //GRAFICO Comparativo Mensal Infrações Velocidade
 let dataGrafBarra = [];
+let allLegendsMensal = [];
+let labelsGrafBarra = [];
+let auxColunas2 = 0;
 dadosGrafLine.forEach((item) =>{
   dataGrafBarra.push(item.INFRACAO);
+  labelsGrafBarra.push(item.ANOMES);
+  console.log(item);
+  allLegendsMensal.push(item.ANOMES + '- QTD:' + item.INFRACAO);
 })
+
+allLegendsMensal.forEach((item) => {
+  if(auxColunas2 > 15){
+    let ul = document.getElementById('listaLegendaInfraMensalCol2');
+    let li = document.createElement("li");
+    li.innerHTML = item;
+    ul.appendChild(li);
+  }else {
+    let ul = document.getElementById('listaLegendaInfraMensal');
+    let li = document.createElement("li");
+    li.innerHTML = item;
+    ul.appendChild(li);
+    auxColunas2++;
+  }
+})
+
+
 var ctxB = document.getElementById("barChart").getContext('2d');
 var myBarChart = new Chart(ctxB, {
 type: 'bar',
 data: {
-labels: labelsGrafLine,
+labels: labelsGrafBarra,
 datasets: [{
 label: 'Comparativo Mensal Infrações Velocidade',
 data: dataGrafBarra,
@@ -288,7 +349,10 @@ ticks: {
 beginAtZero: true
 }
 }]
-}
+},
+legend: {
+    display: false,
+},
 }
 });
   /*ARRAY arrayEnvio[5][?] QUE SERA USADO PRO CABEÇALHO DE INFORMAÇOES
@@ -388,7 +452,9 @@ table {
 }
 
 
-
+.div-legendas {
+  display: flex;
+}
 
 
 
@@ -410,9 +476,33 @@ table {
   margin-right: 10px;
 }
 
+.divs2-grafico {
+  max-width: 550px !important;
+  min-width: 550px !important;
+  margin-right: 10px;
+  margin-bottom: 20px;
+  display: flex;
+}
+
+.div-lastGraficos{
+  max-width: 550px !important;
+  min-width: 550px !important;
+  margin-right: 10px;
+}
+
+
+ul {
+  width: 200px !important;
+  padding-top: 35px;
+}
+
+ul li {
+  font-size: 14px;
+}
+
 .div-principal-grafico {
   display: flex;
-  margin-bottom: 150px;
+  margin-bottom: 50px;
 }
 
 .header {
@@ -465,16 +555,6 @@ table {
 .container {
   width: 1200px !important;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

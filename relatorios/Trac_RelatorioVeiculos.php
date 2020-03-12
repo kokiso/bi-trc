@@ -45,7 +45,6 @@
             <li>Motoristas: <span id="motoristas"></span></li>
             <li>Veiculos: <span id="veiculos"></span></li>
             <li>KM Percorrido: <span id="kmPercorrido"></span></li>
-            <li>Infrações: <span id="infracoes"></span></li>
           </ul>
         </div>
       </header>
@@ -235,7 +234,7 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
 });
 
 
-// GRAFICO RANKING UNIDADE
+// GRAFICO RANKING Motoristas
 let graficoRankUni = [];
 let graficoRankUniQTOS = [];
 let graficoRankUniNome = []
@@ -296,7 +295,7 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
 
 
 
-// GRAFICO RANKING UNIDADE
+// GRAFICO RANKING Veiculos
 let graficoRankPolo = [];
 let graficoRankPoloQTOS = [];
 let graficoRankPoloNome = []
@@ -324,9 +323,9 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
     legend: {
       position: 'right',
       labels: {
-        padding: 20,
+        padding: 5,
         boxWidth: 15,
-        fontSize: 7
+        fontSize: 9
       }
     },
     plugins: {
@@ -358,14 +357,13 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
     [0] - NUMERO MOTORISTAS
     [1]- NUMERO DE VEICULOS
     [5] - KM PERCORRIDO
-    [6] - HORAS MOVIMENTO
   */
 
   document.getElementById("motoristas").innerText = arrayEnvio[3][0];
   document.getElementById("veiculos").innerText = arrayEnvio[3][1];
   document.getElementById("kmPercorrido").innerText = arrayEnvio[3][5];
-  document.getElementById("infracoes").innerText = arrayEnvio[3][6];
 
+  console.log(arrayEnvio[3]);
 
     setTimeout(() => {
       window.print();
@@ -463,8 +461,8 @@ table {
 }
 
 .divs-grafico {
-  max-width: 580px !important;
-  min-width: 580px !important;
+  max-width: 480px !important;
+  min-width: 480px !important;
 }
 
 

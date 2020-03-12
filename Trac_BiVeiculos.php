@@ -675,6 +675,8 @@
         clsJs.add("levpes"      , qualLevPes                                      );
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
+        let teste = document.getElementById("cbCompetencia").value;
+        console.log(typeof(teste));
         fd.append("principal" , clsJs.fim());
         //msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
 				msg     = requestPedido("Trac_BiVeiculos.php",fd); 
@@ -1361,6 +1363,7 @@
         clsJs.add("levpes"      , pubLevPes                                       );      
         clsJs.add("compet"      , document.getElementById("cbCompetencia").value  );      
         fd = new FormData();
+
         fd.append("principal" , clsJs.fim());
         //msg     = requestPedido("Trac_BiVisaoGeral.php",fd); 
 				msg     = requestPedido("Trac_BiVeiculos.php",fd); 

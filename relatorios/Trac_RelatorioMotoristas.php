@@ -53,11 +53,12 @@
                 <h6 class=h6>Motoristas</h6>
                 <canvas id="labelMotorista"></canvas>
             </div>
-
-            <div class="divs-grafico">
-                <h6 class=h6>Veiculos</h6>
-                <canvas id="labelVeiculo"></canvas>
-            </div>
+        </div>
+        <div class="div-principal-grafico">
+        <div class="divs-grafico">
+          <h6 class=h6>Veiculos</h6>
+          <canvas id="labelVeiculo"></canvas>
+        </div>
         </div>
       <!-- End your project here-->
       </section>
@@ -126,7 +127,7 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
       labels: {
         padding: 20,
         boxWidth: 15,
-        fontSize: 9,
+        fontSize: 10,
       }
     },
     plugins: {
@@ -188,7 +189,7 @@ backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360","#000","
       labels: {
         padding: 20,
         boxWidth: 15,
-        fontSize: 9
+        fontSize: 10
       }
     },
     plugins: {
@@ -316,8 +317,8 @@ table {
 }
 
 .divs-grafico {
-  max-width: 580px !important;
-  min-width: 580px !important;
+  max-width: 620px !important;
+  min-width: 620px !important;
 }
 
 .div-principal-grafico {

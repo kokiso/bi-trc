@@ -582,7 +582,7 @@
         // CRIANDO UM JSON DA TABLE //
         //////////////////////////////
         clsChecados = objBi.gerarJson();
-        clsChecados.retornarQtos("n");        
+        clsChecados.retornarQtos("n");
         clsChecados.temColChk(false);
         var json  = clsChecados.gerar();
         var tam   = json.length;
