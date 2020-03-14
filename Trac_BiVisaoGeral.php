@@ -105,7 +105,6 @@
         ////////////////
         if( $rotina=="biSimples" ){
           $sql="";
-
           if( $lote[0]->codgpo != '*' ) {
             $gpo = " AND (A.VCL_CODGPO=".$lote[0]->codgpo.")";
           }

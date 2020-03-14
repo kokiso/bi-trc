@@ -16,10 +16,16 @@
         $unidade = "";
         $horaInicial ="";
         $horaSecundaria ="";
-    
+
+        // echo $_SESSION['usr_grupos'];
         
         // BUSCA INICIAL DOS VALORES DO FILTRO DAS UNIDADES
-        $query_unidades = "SELECT DISTINCT UNI_CODIGO, UNI_NOME FROM UNIDADE";
+        $query_unidades = "SELECT DISTINCT UNI_CODIGO, UNI_NOME FROM UNIDADE
+        LEFT JOIN GRUPO GPO ON UNI_CODGRP = GPO.GRP_CODIGO";
+        if($_SESSION['usr_cargo'] != 'ADM'){
+          $query_unidades.= " WHERE GPO.GRP_CODIGO = ".$_SESSION['usr_grupos']."";
+        }
+
 
         $classe->msgSelect(false);
         $resultFiltroUnidades= $classe->select($query_unidades);
@@ -35,7 +41,12 @@
 
 
         // BUSCA INICIAL DOS VALORES DO FILTRO DOS POLOS
-        $query_filtro_polo = "SELECT DISTINCT POL_CODIGO, POL_NOME FROM POLO";
+        $query_filtro_polo = "SELECT DISTINCT POL_CODIGO, POL_NOME FROM POLO
+        LEFT JOIN GRUPO GPO ON POL_CODGRP = GPO.GRP_CODIGO";
+        if($_SESSION['usr_cargo'] != 'ADM'){
+          $query_filtro_polo.= " WHERE GPO.GRP_CODIGO = ".$_SESSION['usr_grupos']."";
+        }
+
         
         $classe->msgSelect(false);
         $resultFiltroPolo= $classe->select($query_filtro_polo);
@@ -65,12 +76,12 @@
 
         // FILTRO POR POLO, UNIDADE, E HORAS
         if($polo != "" && $unidade != "" && $horaInicial != "" && $horaSecundaria != ""){
-          echo "entro aqui";
           $query_all_results_grid = "SELECT CONVERT(varchar, X.MVMF_DATAGPS) AS DATAGPS, X.MVMF_PLACA AS PLACA, X.MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO FROM MOVIMENTOFILTRO X WHERE X.MVMF_CODPOL = '".$polo."'
           AND X.MVMF_CODUNI = '".$unidade."'
           AND X.MVMF_TEMPOSEMCOM BETWEEN '".$horaInicial."' AND '".$horaSecundaria."'
           AND MVMF_DATAGPS = (SELECT MAX(I.MVMF_DATAGPS) FROM MOVIMENTOFILTRO I
           WHERE X.MVMF_CODVEI = I.MVMF_CODVEI AND X.MVMF_PLACA = I.MVMF_PLACA)";
+          
 
           $classe->msgSelect(false);
           $result=$classe->select($query_all_results_grid);
@@ -166,21 +177,25 @@
           }; 
         }else{
           // FILTRA TUDO DA TABELA MOVIMENTOFILTO, ESSA TABELA JA ESTA FILTRADA COM VEICULOS QUE N POSICIONAM A 12H OU MAIS
-          $query_all_results_grid = "SELECT CONVERT(varchar, MVMF_DATAGPS) AS DATAGPS,
-          MVMF_PLACA AS PLACA, MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO FROM MOVIMENTOFILTRO";
-
-          $classe->msgSelect(false);
-          $result=$classe->select($query_all_results_grid);
-            //print_r($result);
-          if( $result['retorno'] != "OK" ){
-            trigger_error("Deu ruim!",  $result['error']);  
-          } else {
-            $arrayGrid = $result['dados'];
-            $json = json_encode($arrayGrid,true);
-            //echo $json;
-          }; 
-
-
+            $query_all_results_grid = "SELECT DISTINCT CONVERT(varchar, MVMF_DATAGPS) AS DATAGPS,
+            MVMF_PLACA AS PLACA, MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO
+            FROM MOVIMENTOFILTRO
+            LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVMF_CODUNI
+            LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
+            LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO";
+            if($_SESSION['usr_cargo'] != 'ADM'){
+              $query_all_results_grid.= " WHERE GPO.GRP_CODIGO = ".$_SESSION['usr_grupos']."";
+            }
+            $classe->msgSelect(false);
+            $result=$classe->select($query_all_results_grid);
+              //print_r($result);
+            if( $result['retorno'] != "OK" ){
+              trigger_error("Deu ruim!",  $result['error']);  
+            } else {
+              $arrayGrid = $result['dados'];
+              $json = json_encode($arrayGrid,true);
+              //echo $json;
+            }; 
         }
     
        } catch(Exception $e){
