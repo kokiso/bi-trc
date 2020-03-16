@@ -7,7 +7,7 @@
         require("classPhp/removeAcento.class.php"); 
         require("classPhp/selectRepetidoTrac.class.php"); 
 
-
+        // print_r($_POST);
         $classe   = new conectaBd();
         $classe->conecta('INTEGRAR'); 
         $vldr       = new validaJson();          
@@ -16,50 +16,102 @@
         $unidade = "";
         $horaInicial ="";
         $horaSecundaria ="";
+        $arrayGrid = [];
+        $arrayFiltroUnidades = [];
+        $arrayFiltroPolo = [];
+        $auxForQuery = 0;
+
 
         // echo $_SESSION['usr_grupos'];
         
         // BUSCA INICIAL DOS VALORES DO FILTRO DAS UNIDADES
+        if($_SESSION['usr_cargo'] != 'ADM'){
+          $grupos = $_SESSION['usr_grupos'];
+          $grupos1 = str_replace('(', "", $grupos);
+          $grupos2 = str_replace(")", "", $grupos1);
+          $arrayGrupos = explode(",", $grupos2);
+          for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
+            $query_unidades = "SELECT DISTINCT UNI_CODIGO, UNI_NOME FROM UNIDADE
+            LEFT JOIN GRUPO GPO ON UNI_CODGRP = GPO.GRP_CODIGO";
+            if($_SESSION['usr_cargo'] != 'ADM'){
+              $query_unidades.= " WHERE GPO.GRP_CODIGO = ".$arrayGrupos[$i]."";
+            }
+
+
+            $classe->msgSelect(false);
+            $resultFiltroUnidades = $classe->select($query_unidades);
+            // print_r($resultFiltroUnidades);
+            if( $resultFiltroUnidades['retorno'] != "OK" ){
+              trigger_error("Deu ruim!",  $resultFiltroUnidades['error']);  
+            } else {
+              array_push($arrayFiltroUnidades, $resultFiltroUnidades['dados']);
+              // print_r($arrayFiltroUnidades);
+              $jsonUnidades = json_encode($arrayFiltroUnidades,true);
+              //echo $json;
+            }; 
+          }
+      }else {
         $query_unidades = "SELECT DISTINCT UNI_CODIGO, UNI_NOME FROM UNIDADE
         LEFT JOIN GRUPO GPO ON UNI_CODGRP = GPO.GRP_CODIGO";
-        if($_SESSION['usr_cargo'] != 'ADM'){
-          $query_unidades.= " WHERE GPO.GRP_CODIGO = ".$_SESSION['usr_grupos']."";
-        }
-
 
         $classe->msgSelect(false);
-        $resultFiltroUnidades= $classe->select($query_unidades);
-        // print_r($resultFiltroUnidades);
-        if( $resultFiltroUnidades['retorno'] != "OK" ){
-          trigger_error("Deu ruim!",  $resultFiltroUnidades['error']);  
+        $resultFiltroUnidades = $classe->select($query_unidades);
+        
+        if ($resultFiltroUnidades['retorno'] != "OK" ) {
+          trigger_error("Deu ruim!",$resultFiltroUnidades ['error']);  
         } else {
-          $arrayFiltroUnidades = $resultFiltroUnidades['dados'];
-          // print_r($arrayFiltroUnidades);
-          $jsonUnidades = json_encode($arrayFiltroUnidades,true);
-          //echo $json;
+          array_push($arrayFiltroUnidades, $resultFiltroUnidades['dados']);
+          // print_r ($ arrayFiltroUnidades);
         }; 
+      }
 
 
         // BUSCA INICIAL DOS VALORES DO FILTRO DOS POLOS
-        $query_filtro_polo = "SELECT DISTINCT POL_CODIGO, POL_NOME FROM POLO
-        LEFT JOIN GRUPO GPO ON POL_CODGRP = GPO.GRP_CODIGO";
         if($_SESSION['usr_cargo'] != 'ADM'){
-          $query_filtro_polo.= " WHERE GPO.GRP_CODIGO = ".$_SESSION['usr_grupos']."";
+          $grupos = $_SESSION['usr_grupos'];
+          $grupos1 = str_replace('(', "", $grupos);
+          $grupos2 = str_replace(")", "", $grupos1);
+          $arrayGrupos = explode(",", $grupos2);
+          for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
+            $query_filtro_polo = "SELECT DISTINCT POL_CODIGO, POL_NOME FROM POLO
+            LEFT JOIN GRUPO GPO ON POL_CODGRP = GPO.GRP_CODIGO";
+            if($_SESSION['usr_cargo'] != 'ADM'){
+              $query_filtro_polo.= " WHERE GPO.GRP_CODIGO = ".$arrayGrupos[$i]."";
+            }
+
+            
+            $classe->msgSelect(false);
+            $resultFiltroPolo= $classe->select($query_filtro_polo);
+            // print_r($resultFiltroPolo);
+            if( $resultFiltroPolo['retorno'] != "OK" ){
+              trigger_error("Deu ruim!",  $resultFiltroPolo['error']);  
+            } else {
+              array_push($arrayFiltroPolo,$resultFiltroPolo['dados']);
+              // print_r($arrayFiltroPolo);
+              $jsonPolo = json_encode($arrayFiltroPolo,true);
+            //   echo $json;
+            }; 
+          }
+      }else {
+        $query_filtro_polo = "SELECT DISTINCT POL_CODIGO, POL_NOME FROM POLO
+        LEFT OUTER JOIN GRUPO GPO ON POL_CODGRP = GPO.GRP_CODIGO";
+        if ($_SESSION[ 'usr_cargo'] != 'ADM' ) {
+          $query_filtro_polo.= "WHERE GPO.GRP_CODIGO=".$_SESSION['usr_grupos']."" ;
         }
 
         
         $classe->msgSelect(false);
-        $resultFiltroPolo= $classe->select($query_filtro_polo);
-        // print_r($resultFiltroPolo);
-        if( $resultFiltroPolo['retorno'] != "OK" ){
-          trigger_error("Deu ruim!",  $resultFiltroPolo['error']);  
-        } else {
-          $arrayFiltroPolo = $resultFiltroPolo['dados'];
-          // print_r($arrayFiltroPolo);
-          $jsonPolo = json_encode($arrayFiltroPolo,true);
-        //   echo $json;
+        $resultFiltroPolo = $classe->select($query_filtro_polo);
+        // print_r ($ resultFiltroPolo);
+        if ($resultFiltroPolo['retorno'] != "OK") {
+          trigger_error("Deu ruim!",$resultFiltroPolo['error']);  
+        }else{
+          array_push($arrayFiltroPolo,$resultFiltroPolo['dados']);
+          // print_r ($ arrayFiltroPolo);
+          $jsonPolo = json_encode ($arrayFiltroPolo, true);
+        // echo $ json;
         }; 
-
+      }
 
         // PEGA OS DADOS DO POST
         if(sizeof($_POST) > 0){
@@ -88,7 +140,7 @@
           if( $result['retorno'] != "OK" ){
             trigger_error("Deu ruim!",  $result['error']);  
           } else {
-            $arrayGrid = $result['dados'];
+            array_push($arrayGrid,$result['dados']);
             $json = json_encode($arrayGrid,true);
           }; 
 
@@ -104,7 +156,7 @@
           if( $result['retorno'] != "OK" ){
             trigger_error("Deu ruim!",  $result['error']);  
           } else {
-            $arrayGrid = $result['dados'];
+            array_push($arrayGrid,$result['dados']);
             $json = json_encode($arrayGrid,true);
           }; 
 
@@ -120,7 +172,7 @@
           if( $result['retorno'] != "OK" ){
             trigger_error("Deu ruim!",  $result['error']);  
           } else {
-            $arrayGrid = $result['dados'];
+            array_push($arrayGrid,$result['dados']);
             $json = json_encode($arrayGrid,true);
           }; 
         // FILTRA POR POLO
@@ -134,16 +186,26 @@
           if( $result['retorno'] != "OK" ){
             trigger_error("Deu ruim!",  $result['error']);  
           } else {
-            $arrayGrid = $result['dados'];
+            array_push($arrayGrid,$result['dados']);
             $json = json_encode($arrayGrid,true);
           }; 
-
+          
         // FILTRO POR UNIDADE E TAMBEM POR HORAS
         }elseif($unidade != "" && $horaSecundaria != ""){
+          
           $query_all_results_grid = "SELECT CONVERT(varchar, X.MVMF_DATAGPS) AS DATAGPS, X.MVMF_PLACA AS PLACA, X.MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO FROM MOVIMENTOFILTRO X WHERE X.MVMF_CODUNI = '".$unidade."'
           AND X.MVMF_TEMPOSEMCOM BETWEEN '".$horaInicial."' AND '".$horaSecundaria."'
           AND MVMF_DATAGPS = (SELECT MAX(I.MVMF_DATAGPS) FROM MOVIMENTOFILTRO I
           WHERE X.MVMF_CODVEI = I.MVMF_CODVEI AND X.MVMF_PLACA = I.MVMF_PLACA)";
+          $classe->msgSelect(false);
+          $result=$classe->select($query_all_results_grid);
+          // print_r($result);
+          if( $result['retorno'] != "OK" ){
+            trigger_error("Deu ruim!",  $result['error']);  
+          } else {
+            array_push($arrayGrid,$result['dados']);
+            $json = json_encode($arrayGrid,true);
+          }; 
 
         // FILTRA POR UNIDADE
         }elseif($unidade != "") {
@@ -157,35 +219,118 @@
           if( $result['retorno'] != "OK" ){
             trigger_error("Deu ruim!",  $result['error']);  
           } else {
-            $arrayGrid = $result['dados'];
+            array_push($arrayGrid,$result['dados']);
             $json = json_encode($arrayGrid,true);
           }; 
         }elseif($horaInicial != "" && $horaSecundaria != ""){
-          $query_all_results_grid = "SELECT CONVERT(varchar, MVMF_DATAGPS) AS DATAGPS,
-          MVMF_PLACA AS PLACA, MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO FROM MOVIMENTOFILTRO
-          WHERE MVMF_TEMPOSEMCOM BETWEEN '".$horaInicial."' AND '".$horaSecundaria."'";
+          if($_SESSION['usr_cargo'] != 'ADM'){
+            $grupos = $_SESSION['usr_grupos'];
+            $grupos1 = str_replace('(', "", $grupos);
+            $grupos2 = str_replace(")", "", $grupos1);
+            $arrayGrupos = explode(",", $grupos2);
+            for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
+            $query_all_results_grid = "SELECT DISTINCT CONVERT(varchar, MVMF_DATAGPS) AS DATAGPS,
+            MVMF_PLACA AS PLACA, MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO
+            FROM MOVIMENTOFILTRO
+            LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVMF_CODUNI
+            LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
+            LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO WHERE GPO.GRP_CODIGO = '".$arrayGrupos[$i]."'
+            AND MVMF_TEMPOSEMCOM BETWEEN '".$horaInicial."' AND '".$horaSecundaria."'";
 
-          $classe->msgSelect(false);
-          $result=$classe->select($query_all_results_grid);
-            //print_r($result);
-          if( $result['retorno'] != "OK" ){
-            trigger_error("Deu ruim!",  $result['error']);  
-          } else {
-            $arrayGrid = $result['dados'];
-            $json = json_encode($arrayGrid,true);
-            //echo $json;
-          }; 
+            $classe->msgSelect(false);
+            $result=$classe->select($query_all_results_grid);
+            if( $result['retorno'] != "OK" ){
+              trigger_error("Deu ruim!",  $result['error']);  
+            } else {
+              if($auxForQuery <= 0){
+                $auxForQuery ++;
+                array_push($arrayGrid, $result['dados']);
+                $json = json_encode($arrayGrid,true);
+                // print_r($arrayGrid);
+              }else {
+                if(sizeof($result['dados']) > 0){
+                array_push($arrayGrid, $result['dados'][0]);
+                // echo $query_all_results_grid;
+                $json = json_encode($arrayGrid,true);
+                //echo $json;
+              }
+            }
+              
+            };
+          }
+        }else {
+          $query_all_results_grid = "SELECT DISTINCT CONVERT(varchar, MVMF_DATAGPS) AS DATAGPS,
+            MVMF_PLACA AS PLACA, MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO
+            FROM MOVIMENTOFILTRO
+            LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVMF_CODUNI
+            LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
+            LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO
+            WHERE MVMF_TEMPOSEMCOM BETWEEN '".$horaInicial."' AND '".$horaSecundaria."'";
+
+
+            $classe->msgSelect(false);
+            $result=$classe->select($query_all_results_grid);
+              // print_r($result);
+            if( $result['retorno'] != "OK" ){
+              trigger_error("Deu ruim!",  $result['error']);  
+            } else {
+              array_push($arrayGrid, $result['dados']);
+              $json = json_encode($arrayGrid,true);
+              //echo $json;
+              }
+
+          }
+          
         }else{
           // FILTRA TUDO DA TABELA MOVIMENTOFILTO, ESSA TABELA JA ESTA FILTRADA COM VEICULOS QUE N POSICIONAM A 12H OU MAIS
+          if($_SESSION['usr_cargo'] != 'ADM'){
+            $grupos = $_SESSION['usr_grupos'];
+            $grupos1 = str_replace('(', "", $grupos);
+            $grupos2 = str_replace(")", "", $grupos1);
+            $arrayGrupos = explode(",", $grupos2);
+            for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
             $query_all_results_grid = "SELECT DISTINCT CONVERT(varchar, MVMF_DATAGPS) AS DATAGPS,
             MVMF_PLACA AS PLACA, MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO
             FROM MOVIMENTOFILTRO
             LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVMF_CODUNI
             LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
             LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO";
-            if($_SESSION['usr_cargo'] != 'ADM'){
-              $query_all_results_grid.= " WHERE GPO.GRP_CODIGO = ".$_SESSION['usr_grupos']."";
+
+            $query_all_results_grid.= " WHERE GPO.GRP_CODIGO = ".$arrayGrupos[$i]."";
+            // 
+            // echo $query_all_results_grid;
+            $classe->msgSelect(false);
+            $result=$classe->select($query_all_results_grid);
+              //print_r($result);
+            if( $result['retorno'] != "OK" ){
+              trigger_error("Deu ruim!",  $result['error']);  
+            } else {
+              if($auxForQuery <= 0){
+                $auxForQuery ++;
+                array_push($arrayGrid, $result['dados']);
+                // print_r($arrayGrid);
+                // print_r($result['dados'][0]);
+                $json = json_encode($arrayGrid,true);
+                //echo $json;
+              }else {
+                if(sizeof($result['dados']) > 0){
+                array_push($arrayGrid, $result['dados'][0]);
+                // echo $query_all_results_grid;
+                $json = json_encode($arrayGrid,true);
+                //echo $json;
+              }
             }
+            };
+          }
+        }else {
+          $query_all_results_grid = "SELECT DISTINCT CONVERT(varchar, MVMF_DATAGPS) AS DATAGPS,
+            MVMF_PLACA AS PLACA, MVMF_CODPOL AS POL, MVMF_NOMEUNI AS UNI, MVMF_CODVEI AS VEI, MVMF_TEMPOSEMCOM AS TEMPOSEM, MVMF_LOCALIZACAO AS LOCALIZACAO
+            FROM MOVIMENTOFILTRO
+            LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVMF_CODUNI
+            LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
+            LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO";
+
+
             $classe->msgSelect(false);
             $result=$classe->select($query_all_results_grid);
               //print_r($result);
@@ -195,9 +340,11 @@
               $arrayGrid = $result['dados'];
               $json = json_encode($arrayGrid,true);
               //echo $json;
-            }; 
+              }
+
+          }
         }
-    
+        
        } catch(Exception $e){
       } 
       
@@ -261,8 +408,10 @@
                       <select class=" btn mdb-select md-form colorful-select" name="poloFiltro" id="polofiltro" for="polofiltro">
                         <option selected value=""></option>
                         <?php  foreach($arrayFiltroPolo as $options) {?>
-                          <option value="<?= $options[0] ?>" name="<?= $options[1] ?>"  id="<?= $options[0] ?>"><?= $options[1] ?></option>
-                        <?php   } ?>
+                        <?php foreach($options as $value) { ?>
+                          <option value="<?= $value[0] ?>" name="<?= $value[1] ?>"  id="<?= $value[0] ?>"><?= $value[1] ?></option>
+                        <?php  } ?>
+                        <?php }?>
                       </select>
                     </div>
                     <div>
@@ -270,8 +419,10 @@
                       <select class=" btn mdb-select md-form colorful-select" name="unidadeFiltro" id="unidadeFiltro" for="unidadeFiltro">
                         <option selected value=""></option>
                         <?php  foreach($arrayFiltroUnidades as $options) {?>
-                          <option value="<?= $options[0] ?>" name="<?= $options[1] ?>"  id="<?= $options[0] ?>"><?= $options[1] ?></option>
-                        <?php   } ?>
+                          <?php foreach($options as $value){ ?>
+                          <option value="<?= $value[0] ?>" name="<?= $value[1] ?>"  id="<?= $value[0] ?>"><?= $value[1] ?></option>
+                          <?php  } ?>
+                        <?php } ?>
                       </select>
                     </div>
                     <div>
@@ -283,12 +434,12 @@
                     <div>
                     <label style="margin-left: 20px;">Até: </label>
                       <select class=" btn mdb-select md-form colorful-select" name="horaSecundaria" id="horaSecundaria" for="horaSecundaria">
-                        <option selected value=""></option>
+                          <option value="12" name="horaSecundaria"  id="horaSecundaria">12h</option>
                           <option value="24" name="horaSecundaria"  id="horaSecundaria">24h</option>
                           <option value="48" name="horaSecundaria"  id="horaSecundaria">48h</option>
                           <option value="72" name="horaSecundaria"  id="horaSecundaria">72h</option>
                           <option value="168" name="horaSecundaria"  id="horaSecundaria">168h</option>
-                          <option value="730" name="horaSecundaria"  id="horaSecundaria">730h</option>
+                          <option selected value="730" name="horaSecundaria"  id="horaSecundaria">730h</option>
                       </select>
                     </div>
                     <button class="btn btn-dark" input="submit"><i class="fa fa-check"></i></button>
@@ -311,13 +462,42 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($arrayGrid as $indices) {  ?>
-                    <tr>
-                    <?php foreach ($indices as $valor => $key) { ?>
-                        <td><?= $key; ?></td>
+            <?php if(sizeof($_POST) <= 0 ) { ?>
+              <?php if($_SESSION['usr_cargo'] != 'ADM') { ?>
+                  <?php foreach ($arrayGrid as $indices) {  ?>
+                      <?php foreach ($indices as $valor => $key) { ?>
+                          <?php if(is_array($key)){?>
+                            <tr>
+                            <?php foreach ($key as $result) { ?>
+                              <td><?= $result ?></td>
+                            <?php } ?>
+                          <?php } ?>
+                        </tr>
+                      <?php } ?>
+                  <?php } ?>
+                <?php }else {?>
+                          <?php foreach ($arrayGrid as $result) { ?>
+                            <tr>
+                            <?php foreach ($result as $key) { ?>
+                              <td><?= $key ?></td>
+                            <?php } ?>
+                            </tr>
+                      <?php } ?>
                     <?php } ?>
-                    </tr>
+                <?php }else { ?>
+                  
+                  <?php foreach ( $arrayGrid as $índices ) { ?>
+                    <?php foreach ( $índices as $valor => $key ) { ?>
+                      <?php if(is_array($key)){?>
+                      <tr>
+                      <?php foreach($key as $value1) { ?>
+                        <td> <?=  $value1; ?> </td>
+                      <?php } ?>
+                      </tr>
+                    <?php } ?>
+                  <?php } ?>
                 <?php } ?>
+              <?php } ?>
             </tbody>
         </table>
     
