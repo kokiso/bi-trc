@@ -6,7 +6,7 @@
         require("classPhp/validaJson.class.php"); 
         require("classPhp/removeAcento.class.php"); 
         require("classPhp/selectRepetidoTrac.class.php"); 
-        print_r($_POST);
+        // print_r($_POST);
         $classe   = new conectaBd();
         $classe->conecta('INTEGRAR'); 
         $vldr       = new validaJson();          
@@ -49,6 +49,7 @@
               //echo $json;
             }; 
           }
+          // SE FOR ADM BUSCA TUDO
       }else {
         $query_unidades = "SELECT DISTINCT UNI_CODIGO, UNI_NOME FROM UNIDADE
         LEFT JOIN GRUPO GPO ON UNI_CODGRP = GPO.GRP_CODIGO";
@@ -91,6 +92,7 @@
             //   echo $json;
             }; 
           }
+          // SE FOR ADM BUSCA TUDO
       }else {
         $query_filtro_polo = "SELECT DISTINCT POL_CODIGO, POL_NOME FROM POLO
         LEFT OUTER JOIN GRUPO GPO ON POL_CODGRP = GPO.GRP_CODIGO";
@@ -126,7 +128,7 @@
 
 
 
-        // FILTRO POR POLO, UNIDADE, E HORAS
+        // FILTRO POR POLO, UNIDADE, E EVENTO E DATA
         if($polo != "" && $unidade != "" && $codEvento != "" && $dataIni != "" && $dataFim != ""){
           $grupos = $_SESSION['usr_grupos'];
           $grupos1 = str_replace('(', "", $grupos);
@@ -147,7 +149,7 @@
               AND CONVERT(varchar, MVM_DATAGPS, 23) BETWEEN '".$dataIni."' AND '".$dataFim."'";
               
 
-              echo $query_all_results_grid;
+              // echo $query_all_results_grid;
               $classe->msgSelect(false);
               $result=$classe->select($query_all_results_grid);
               if( $result['retorno'] != "OK" ){
@@ -157,7 +159,7 @@
                   $json = json_encode($arrayGrid,true);
                 }             
             }
-        // FILTRA POR POLO E TAMBEM UNIDADE
+        // FILTRA POR POLO, UNIDADE E DATA
         }elseif($polo != "" && $unidade != "" && $dataIni != "" && $dataFim != ""){
           $grupos = $_SESSION['usr_grupos'];
           $grupos1 = str_replace('(', "", $grupos);
@@ -189,7 +191,7 @@
                 }             
             }
           }
-        // FILTRO POR POLO E HORA
+        // FILTRO POR POLO, EVENTO E DATA
         }elseif($polo != "" && $codEvento != "" && $dataIni != "" && $dataFim != ""){
           $grupos = $_SESSION['usr_grupos'];
           $grupos1 = str_replace('(', "", $grupos);
@@ -217,7 +219,7 @@
                   $json = json_encode($arrayGrid,true);
                 }             
             }
-        // FILTRA POR POLO
+        // FILTRA POR POLO E DATA
         }elseif($polo != "" && $dataIni != "" && $dataFim != "") {
           $grupos = $_SESSION['usr_grupos'];
           $grupos1 = str_replace('(', "", $grupos);
@@ -250,7 +252,7 @@
                 }
               }              
           
-        // FILTRO POR UNIDADE E TAMBEM POR HORAS
+        // FILTRO POR UNIDADE, EVENTO E DATA
         }elseif($unidade != "" && $codEvento != "" && $dataIni != "" && $dataFim != ""){
           $grupos = $_SESSION['usr_grupos'];
           $grupos1 = str_replace('(', "", $grupos);
@@ -269,7 +271,7 @@
               AND MVM_CODEVE = ".$codEvento." AND GPO.GRP_CODIGO = '".$arrayGrupos[$i]."'
               AND CONVERT(varchar, MVM_DATAGPS, 23) BETWEEN '".$dataIni."' AND '".$dataFim."'";
 
-              echo  $query_all_results_grid;
+              // echo  $query_all_results_grid;
               $classe->msgSelect(false);
               $result=$classe->select($query_all_results_grid);
               if( $result['retorno'] != "OK" ){
@@ -279,7 +281,7 @@
                   $json = json_encode($arrayGrid,true);
                 }             
             }
-        // FILTRA POR UNIDADE
+        // FILTRA POR UNIDADE E DATA
         }elseif($unidade != "" && $dataIni != "" && $dataFim != "") {
           $grupos = $_SESSION['usr_grupos'];
           $grupos1 = str_replace('(', "", $grupos);
@@ -310,47 +312,50 @@
                   
                 }
                 }
-              }              
-            }elseif($codEvento != "" && $dataIni != "" && $dataFim != ""){
-          if($_SESSION['usr_cargo'] != 'ADM'){
-            $grupos = $_SESSION['usr_grupos'];
-            $grupos1 = str_replace('(', "", $grupos);
-            $grupos2 = str_replace(")", "", $grupos1);
-            $arrayGrupos = explode(",", $grupos2);
-            for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
-            $query_all_results_grid = "SELECT DISTINCT EVE_NOME AS NOME, CONVERT(varchar, MVM_DATAGPS) AS DATAGPS,
-            MVM_PLACA AS PLACA, MVM_CODPOL AS POL, U.UNI_NOME AS UNI, MVM_LOCALIZACAO AS LOCALIZACAO
-            FROM MOVIMENTO
-            LEFT JOIN EVENTO E ON E.EVE_CODIGO = MVM_CODEVE
-            LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVM_CODUNI
-            LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
-            LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO 
-            WHERE GPO.GRP_CODIGO = '".$arrayGrupos[$i]."'
-            AND MVM_CODEVE = '".$codEvento."'
-            AND CONVERT(varchar, MVM_DATAGPS, 23) BETWEEN '".$dataIni."' AND '".$dataFim."'";
-
-            // echo $query_all_results_grid;
-            $classe->msgSelect(false);
-            $result=$classe->select($query_all_results_grid);
-            if( $result['retorno'] != "OK" ){
-              trigger_error("Deu ruim!",  $result['error']);  
-            } else {
-              if($auxForQuery <= 0){
-                $auxForQuery ++;
-                array_push($arrayGrid, $result['dados']);
-                $json = json_encode($arrayGrid,true);
-                // print_r($arrayGrid);
-              }else {
-                if(sizeof($result['dados']) > 0){
-                array_push($arrayGrid, $result['dados'][0]);
-                // echo $query_all_results_grid;
-                $json = json_encode($arrayGrid,true);
-                //echo $json;
               }
-            }
-              
-            };
-          }
+              // FILTA POR EVENTO E DATA
+            }elseif($codEvento != "" && $dataIni != "" && $dataFim != ""){
+              // VERIFICA SE É ADM OU NAO
+                if($_SESSION['usr_cargo'] != 'ADM'){
+                  $grupos = $_SESSION['usr_grupos'];
+                  $grupos1 = str_replace('(', "", $grupos);
+                  $grupos2 = str_replace(")", "", $grupos1);
+                  $arrayGrupos = explode(",", $grupos2);
+                  for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
+                    $query_all_results_grid = "SELECT DISTINCT EVE_NOME AS NOME, CONVERT(varchar, MVM_DATAGPS) AS DATAGPS,
+                    MVM_PLACA AS PLACA, MVM_CODPOL AS POL, U.UNI_NOME AS UNI, MVM_LOCALIZACAO AS LOCALIZACAO
+                    FROM MOVIMENTO
+                    LEFT JOIN EVENTO E ON E.EVE_CODIGO = MVM_CODEVE
+                    LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVM_CODUNI
+                    LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
+                    LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO 
+                    WHERE GPO.GRP_CODIGO = '".$arrayGrupos[$i]."'
+                    AND MVM_CODEVE = '".$codEvento."'
+                    AND CONVERT(varchar, MVM_DATAGPS, 23) BETWEEN '".$dataIni."' AND '".$dataFim."'";
+
+                    // echo $query_all_results_grid;
+                    $classe->msgSelect(false);
+                    $result=$classe->select($query_all_results_grid);
+                    if( $result['retorno'] != "OK" ){
+                      trigger_error("Deu ruim!",  $result['error']);  
+                    } else {
+                      if($auxForQuery <= 0){
+                        $auxForQuery ++;
+                        array_push($arrayGrid, $result['dados']);
+                        $json = json_encode($arrayGrid,true);
+                        // print_r($arrayGrid);
+                      }else {
+                        if(sizeof($result['dados']) > 0){
+                        array_push($arrayGrid, $result['dados'][0]);
+                        // echo $query_all_results_grid;
+                        $json = json_encode($arrayGrid,true);
+                        //echo $json;
+                      }
+                    }
+                      
+                    };
+                }
+        // SE FOR ADM BUSCA TUDO 
         }else {
           $query_all_results_grid = "SELECT DISTINCT E.EVE_NOME, CONVERT(varchar, MVM_DATAGPS) AS DATAGPS,
           MVM_PLACA AS PLACA, MVM_CODPOL AS POL, U.UNI_NOME AS UNI,
@@ -376,52 +381,54 @@
 
           }
           
-        }else{
+        }
+        // ESSE CODIGO BUSCAVA TUDO AO ENTRAR NA PAGINA E AO BUSCAR SEM NADA NOS FILTROS, POREM RETIRADO POR CONTA DO MAL DESEMPENHO
+        // else{
           // FILTRA TUDO DA TABELA MOVIMENTOFILTO, ESSA TABELA JA ESTA FILTRADA COM VEICULOS QUE N POSICIONAM A 12H OU MAIS
-          if($_SESSION['usr_cargo'] != 'ADM'){
-            $grupos = $_SESSION['usr_grupos'];
-            $grupos1 = str_replace('(', "", $grupos);
-            $grupos2 = str_replace(")", "", $grupos1);
-            $arrayGrupos = explode(",", $grupos2);
-            for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
-              for($j = 0; $j <= (sizeof($arrayEventos) -1); $j ++){
-                $query_all_results_grid="SELECT DISTINCT E.EVE_NOME, CONVERT(varchar, MVM_DATAGPS) AS DATAGPS,
-                MVM_PLACA AS PLACA, MVM_CODPOL AS POL, U.UNI_NOME AS UNI,
-                MVM_LOCALIZACAO AS LOCALIZACAO
-                FROM MOVIMENTO
-                LEFT JOIN EVENTO E ON E.EVE_CODIGO = MVM_CODEVE
-                LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVM_CODUNI
-                LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
-                LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO
-                WHERE GPO.GRP_CODIGO = ".$arrayGrupos[$i]." AND MVM_CODEVE = '".$arrayEventos[$j]."'
-                AND CONVERT(varchar, MVM_DATAGPS, 23) BETWEEN '".$dataIni."' AND '".$dataFim."'";
+          // if($_SESSION['usr_cargo'] != 'ADM'){
+          //   $grupos = $_SESSION['usr_grupos'];
+          //   $grupos1 = str_replace('(', "", $grupos);
+          //   $grupos2 = str_replace(")", "", $grupos1);
+          //   $arrayGrupos = explode(",", $grupos2);
+            // for($i = 0; $i <= (sizeof($arrayGrupos) - 1); $i ++ ){
+            //   for($j = 0; $j <= (sizeof($arrayEventos) -1); $j ++){
+            //     $query_all_results_grid="SELECT DISTINCT E.EVE_NOME, CONVERT(varchar, MVM_DATAGPS) AS DATAGPS,
+            //     MVM_PLACA AS PLACA, MVM_CODPOL AS POL, U.UNI_NOME AS UNI,
+            //     MVM_LOCALIZACAO AS LOCALIZACAO
+            //     FROM MOVIMENTO
+            //     LEFT JOIN EVENTO E ON E.EVE_CODIGO = MVM_CODEVE
+            //     LEFT JOIN USUARIOUNIDADE UU ON UU.UU_CODUNI = MVM_CODUNI
+            //     LEFT JOIN UNIDADE U ON U.UNI_CODIGO = UU.UU_CODUNI
+            //     LEFT JOIN GRUPO GPO ON U.UNI_CODGRP = GPO.GRP_CODIGO
+            //     WHERE GPO.GRP_CODIGO = ".$arrayGrupos[$i]." AND MVM_CODEVE = '".$arrayEventos[$j]."'
+            //     AND CONVERT(varchar, MVM_DATAGPS, 23) BETWEEN '".$dataIni."' AND '".$dataFim."'";
 
                 // echo $query_all_results_grid;
-                $classe->msgSelect(false);
-                $result=$classe->select($query_all_results_grid);
+                // $classe->msgSelect(false);
+                // $result=$classe->select($query_all_results_grid);
                   //print_r($result);
-                if( $result['retorno'] != "OK" ){
-                  trigger_error("Deu ruim!",  $result['error']);  
-                } else {
-                  if($auxForQuery <= 0){
-                    $auxForQuery ++;
-                    array_push($arrayGrid, $result['dados']);
+                // if( $result['retorno'] != "OK" ){
+                  // trigger_error("Deu ruim!",  $result['error']);  
+                // } else {
+                  // if($auxForQuery <= 0){
+                    // $auxForQuery ++;
+                    // array_push($arrayGrid, $result['dados']);
                     // print_r($arrayGrid);
                     // print_r($result['dados'][0]);
-                    $json = json_encode($arrayGrid,true);
+                    // $json = json_encode($arrayGrid,true);
                     //echo $json;
-                  }else {
-                    if(sizeof($result['dados']) > 0){
-                    array_push($arrayGrid, $result['dados']);
-                    // echo $query_all_results_grid;
-                    $json = json_encode($arrayGrid,true);
-                    //echo $json;
-                  }
-                }
-              }
-            };
-          }
-        }else {
+            //       }else {
+            //         if(sizeof($result['dados']) > 0){
+            //         array_push($arrayGrid, $result['dados']);
+            //         // echo $query_all_results_grid;
+            //         $json = json_encode($arrayGrid,true);
+            //         //echo $json;
+            //       }
+            //     }
+            //   }
+            // };
+          // }
+        // }else {
           // $query_all_results_grid = "	SELECT DISTINCT E.EVE_NOME, CONVERT(varchar, MVM_DATAGPS) AS DATAGPS,
           // MVM_PLACA AS PLACA, MVM_CODPOL AS POL, U.UNI_NOME AS UNI,
           // MVM_LOCALIZACAO AS LOCALIZACAO
@@ -444,8 +451,8 @@
           //     //echo $json;
           //   }
 
-          }
-        }
+          // }
+        // }
         
        } catch(Exception $e){
       } 
@@ -589,36 +596,6 @@
         <!-- <a Data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo" name="faturar" id="faturar" value="editar" class="btn btn-info active">Detalhes<i class="fa fa-edit"></i></a> -->
     </div>
     
-    <!-- MODAL CONFIRMAR DIA DE VENCIMENTO -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Detalhes do Veiculo</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="form-group">
-                <label for="recipient-name" class="col-form-label">Dia:</label>
-                <p><?php  print_r($_SESSION); ?></p>
-              </div>
-            </form>
-            <div class="modal-footer">
-              <button id="enviaDia" class="btn btn-primary">Salvar</button>
-          </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    
-    
-    
-    
-    
     <script>
         $(document).ready(function() {
         var table = $('#example').DataTable({
@@ -632,41 +609,8 @@
         $('#example tbody').on( 'click', 'tr', function () {
             $(this).toggleClass('selected');
         } );
-     
-        // $('#button').click( function () {
-        //     // alert( table.rows('.selected') +' row(s) selected' );
-        //     for(let i = 0; i <= table.rows('.selected').data().length; i ++){
-        //         // console.log(table.rows('.selected').data()[i]);
-        //     }
-        // } );
     
-        $('#faturar').click(function() {
-          // if(table.rows('.selected').data()[0].length > 0){
-          //   console.log(table.rows('.selected').data()[0][1]);
-          //   alert("Selecione apena uma linha da tabela");
-          //   }else {
-            
-            placa = table.rows('.selected').data()[0][1];
-            let url1 = 'Trac_DetalhesVeiculoSelecionado.php';
-            $.ajax({
-                data: {placa: placa},
-                method: "get",
-                url: url1
-            })
-            .done(function(data){
-              console.log(data);
-              // alert('Faturado com sucesso!');
-            });
-          // }
-        })
     } );
-    
-    // RELACIONADO AO MODAL DO DIA DE VENCIMENTO
-    $('#exampleModal').on('show.bs.modal', function (event) {
-      var button = $(event.relatedTarget)
-      var recipient = button.data('whatever') 
-      var modal = $(this)
-    })
     
 
     </script>
