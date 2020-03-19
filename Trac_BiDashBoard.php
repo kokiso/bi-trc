@@ -99,6 +99,7 @@
 						<li><a href="#" onClick="window.open('Trac_grdPeriodoIndevido.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Periodo indevido</a></li>
             <li><a href="#" onClick="window.open('Trac_grdClassifMotorista.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Classific motorista</a></li>
             <li><a href="#" onClick="window.open('Trac_gridTempoScomunicar.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Tempo S/ Comunicar</a></li>
+            <li><a href="#" onClick="window.open('Trac_gridEventos.php','iframeCorpo');"><i class="fa fa-circle-o text-red"></i> Eventos</a></li>
           </ul>
         </li>
         
